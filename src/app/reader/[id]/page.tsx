@@ -20,15 +20,12 @@ export default async function ReaderPage(props: { params: Promise<{ id: string }
   // Get current user
   const { data: { user } } = await supabase.auth.getUser()
 
+  let isSample = false;
+
   if (!user) {
-    // If not logged in, they can only read if it's free
+    // If not logged in, they can only read full if it's free, otherwise it's a sample
     if (book.price > 0) {
-      return (
-        <div className="container" style={{ padding: '4rem', textAlign: 'center' }}>
-          <h2>Este libro requiere compra.</h2>
-          <p>Inicia sesión y compra el libro para leerlo.</p>
-        </div>
-      )
+      isSample = true;
     }
   } else {
     // If logged in, check if author, free, or purchased
@@ -44,12 +41,7 @@ export default async function ReaderPage(props: { params: Promise<{ id: string }
         .single();
 
       if (!purchase) {
-        return (
-          <div className="container" style={{ padding: '4rem', textAlign: 'center' }}>
-            <h2>Este libro requiere compra.</h2>
-            <p>Debes comprar este libro antes de poder leerlo.</p>
-          </div>
-        )
+        isSample = true;
       }
     }
   }
@@ -80,7 +72,8 @@ export default async function ReaderPage(props: { params: Promise<{ id: string }
     <EpubViewer 
       bookId={book.id} 
       bookTitle={book.title} 
-      epubUrl={epubSignedUrl} 
+      epubUrl={epubSignedUrl}
+      isSample={isSample}
     />
   )
 }

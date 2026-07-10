@@ -17,6 +17,25 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
     notFound()
   }
 
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  let hasPurchased = false;
+  if (user) {
+    if (book.author_id === user.id || book.price === 0) {
+      hasPurchased = true;
+    } else {
+      const { data: purchase } = await supabase
+        .from('purchases')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('book_id', book.id)
+        .single();
+      if (purchase) hasPurchased = true;
+    }
+  } else if (book.price === 0) {
+    hasPurchased = true;
+  }
+
   const defaultCover = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop"
 
   return (
@@ -49,12 +68,22 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
             {book.description || 'Sin descripción disponible.'}
           </p>
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto' }}>
-            <Link href={`/reader/${book.id}`} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center' }}>
-              Leer Ahora
-            </Link>
-            {book.price > 0 && (
-              <BuyButton bookId={book.id} price={book.price} />
+          <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', flexWrap: 'wrap' }}>
+            {hasPurchased ? (
+              <Link href={`/reader/${book.id}`} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center' }}>
+                📖 Continuar Leyendo
+              </Link>
+            ) : (
+              <>
+                <Link href={`/reader/${book.id}`} className="btn btn-secondary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid var(--border-color)' }}>
+                  <span>👀 Leer Muestra Gratis</span>
+                </Link>
+                {book.price > 0 && (
+                  <div style={{ flex: 1 }}>
+                    <BuyButton bookId={book.id} price={book.price} />
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

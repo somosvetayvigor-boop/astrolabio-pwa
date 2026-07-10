@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import ePub, { Book, Rendition } from 'epubjs'
 
-export default function EpubViewer({ bookId, bookTitle, epubUrl }: { bookId: string, bookTitle: string, epubUrl: string }) {
+export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = false }: { bookId: string, bookTitle: string, epubUrl: string, isSample?: boolean }) {
   const viewerRef = useRef<HTMLDivElement>(null)
   const [book, setBook] = useState<Book | null>(null)
   const [rendition, setRendition] = useState<Rendition | null>(null)
   const [progress, setProgress] = useState(0)
+  const [sampleEnded, setSampleEnded] = useState(false)
+  const visitedLocations = useRef<Set<string>>(new Set())
 
   useEffect(() => {
     if (!viewerRef.current || !epubUrl) return
@@ -47,7 +49,13 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl }: { bookId: str
         const percentage = newBook.locations.percentageFromCfi(location.start.cfi)
         setProgress(Math.round(percentage * 100))
         
-        // TODO: Send this progress back to Supabase to calculate KENPC payouts
+        if (isSample) {
+          visitedLocations.current.add(location.start.cfi)
+          // 1 for the cover, plus 5 reading pages = 6
+          if (visitedLocations.current.size > 6) {
+            setSampleEnded(true)
+          }
+        }
       })
     })
 
@@ -82,12 +90,41 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl }: { bookId: str
         </button>
 
         {/* ePub content renders here */}
-        <div ref={viewerRef} style={{ width: '100%', height: '100%', padding: '2rem 50px' }}></div>
+        <div ref={viewerRef} style={{ width: '100%', height: '100%', padding: '2rem 50px', filter: sampleEnded ? 'blur(4px)' : 'none', transition: 'filter 0.3s' }}></div>
         
         {/* Next Page Button */}
-        <button onClick={next} style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50px', zIndex: 10, backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'var(--text-tertiary)', cursor: 'pointer' }}>
+        <button onClick={next} disabled={sampleEnded} style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50px', zIndex: 10, backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'var(--text-tertiary)', cursor: sampleEnded ? 'not-allowed' : 'pointer' }}>
           ›
         </button>
+
+        {/* Sample Ended Overlay */}
+        {sampleEnded && (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundColor: 'rgba(253, 251, 247, 0.85)',
+            zIndex: 20,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '2rem',
+            textAlign: 'center'
+          }}>
+            <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '1rem', color: '#111a28' }}>
+              Fin de la muestra gratis
+            </h2>
+            <p style={{ fontSize: '1.125rem', marginBottom: '2rem', color: '#111a28', maxWidth: '400px' }}>
+              Esperamos que te esté gustando la historia. ¡Compra el libro completo para seguir navegando!
+            </p>
+            <Link href={`/book/${bookId}`} className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }}>
+              Ver detalles y Comprar
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Progress Bar */}
