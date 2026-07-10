@@ -3,19 +3,18 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { headers } from 'next/headers';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-06-20' as any,
-});
-
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
-
-// We use the service role key to bypass RLS and insert the purchase record
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-  process.env.SUPABASE_SERVICE_ROLE_KEY as string
-);
-
 export async function POST(request: Request) {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+    apiVersion: '2024-06-20' as any,
+  });
+
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
+
+  // We use the service role key to bypass RLS and insert the purchase record
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+    process.env.SUPABASE_SERVICE_ROLE_KEY as string
+  );
   const body = await request.text();
   const headersList = await headers();
   const sig = headersList.get('stripe-signature');

@@ -2,12 +2,11 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@/utils/supabase/server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-06-20' as any,
-});
-
 export async function POST(request: Request) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+      apiVersion: '2024-06-20' as any,
+    });
     const supabase = await createClient();
     
     // Check authentication
