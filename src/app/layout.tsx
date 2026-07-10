@@ -1,13 +1,23 @@
-import type { Metadata } from "next";
+
 import { Inter } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
+import type { Metadata, Viewport } from "next";
+
+export const viewport: Viewport = {
+  themeColor: "#0d1117",
+};
+
 export const metadata: Metadata = {
   title: "Astrolabio | Navegando por historias",
   description: "Lee y vende libros. Apoya a escritores independientes.",
-  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "Astrolabio",
+    statusBarStyle: "default",
+  },
 };
 
 import { createClient } from '@/utils/supabase/server';
