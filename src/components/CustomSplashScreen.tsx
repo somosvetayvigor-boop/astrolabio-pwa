@@ -70,8 +70,8 @@ export default function CustomSplashScreen() {
       }}></div>
 
       <div style={{
-        width: '200px',
-        height: '200px',
+        width: '250px',
+        height: '250px',
         position: 'relative',
         animation: 'pulse 2s infinite ease-in-out',
         filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.5))',

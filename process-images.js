@@ -2,7 +2,7 @@ const sharp = require('sharp');
 const fs = require('fs');
 const path = require('path');
 
-const inputPath = 'C:\\Users\\grd_a\\Downloads\\logo_nuevo.jpg.jpeg';
+const inputPath = 'C:\\Users\\grd_a\\Downloads\\f.jpeg';
 const outputDir = path.join(__dirname, 'public');
 
 async function processImages() {
