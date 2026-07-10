@@ -2,7 +2,8 @@ import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import EpubViewer from './EpubViewer'
 
-export default async function ReaderPage({ params }: { params: { id: string } }) {
+export default async function ReaderPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const supabase = await createClient()
 
   // Fetch book details

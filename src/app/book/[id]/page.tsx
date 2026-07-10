@@ -3,7 +3,8 @@ import { createClient } from '@/utils/supabase/server'
 import { notFound } from "next/navigation";
 import BuyButton from '@/components/BuyButton';
 
-export default async function BookDetail({ params }: { params: { id: string } }) {
+export default async function BookDetail(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const supabase = await createClient()
 
   const { data: book, error } = await supabase
