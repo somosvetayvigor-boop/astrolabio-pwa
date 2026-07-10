@@ -54,7 +54,8 @@ export async function uploadBook(formData: FormData) {
     .upload(epubFileName, epubFile)
 
   if (epubError) {
-    throw new Error('Error uploading ePub file')
+    console.error('Supabase upload error:', epubError)
+    redirect(`/dashboard/upload?error=${encodeURIComponent('Error al subir archivo a Supabase: Verifica que creaste los buckets "epubs" y "book-covers" en Storage.')}`)
   }
 
   // The epubUrl is the path inside the bucket. We keep it as a path because the bucket is private.
@@ -74,7 +75,8 @@ export async function uploadBook(formData: FormData) {
     })
 
   if (dbError) {
-    throw new Error('Error saving book metadata')
+    console.error('Database insert error:', dbError)
+    redirect(`/dashboard/upload?error=${encodeURIComponent('Error de base de datos: Verifica que corriste el script de SQL para crear las tablas.')}`)
   }
 
   revalidatePath('/dashboard')
