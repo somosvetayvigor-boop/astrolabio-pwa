@@ -23,6 +23,8 @@ export const metadata: Metadata = {
 import { createClient } from '@/utils/supabase/server';
 import { logout } from '@/app/login/actions';
 
+import PWAProvider from '@/components/PWAProvider';
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -33,6 +35,7 @@ export default async function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.variable}`}>
+        <PWAProvider />
         <nav className="navbar">
           <div className="container navbar-container">
             <a href="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
