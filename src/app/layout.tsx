@@ -24,6 +24,7 @@ import { createClient } from '@/utils/supabase/server';
 import { logout } from '@/app/login/actions';
 
 import PWAProvider from '@/components/PWAProvider';
+import InstallPWA from '@/components/InstallPWA';
 
 export default async function RootLayout({
   children,
@@ -43,6 +44,7 @@ export default async function RootLayout({
               Astrolabio
             </a>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <InstallPWA />
               <a href="/#catalogo" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Catálogo</a>
               {user ? (
                 <>
