@@ -1,12 +1,21 @@
 import { login, signup } from './actions'
 
-export default function LoginPage() {
+export default async function LoginPage(props: { searchParams: Promise<{ error?: string }> }) {
+  const searchParams = await props.searchParams;
+  const errorMsg = searchParams?.error;
+
   return (
     <div className="container" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="glass" style={{ width: '100%', maxWidth: '400px', padding: '2.5rem', borderRadius: 'var(--radius-lg)' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, textAlign: 'center', marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, textAlign: 'center', marginBottom: '1rem' }}>
           Bienvenido a <span style={{ color: 'var(--brand-primary)' }}>Astrolabio</span>
         </h1>
+        
+        {errorMsg && (
+          <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.875rem', fontWeight: '500' }}>
+            {errorMsg === 'true' ? 'Ocurrió un error. Verifica tus datos.' : errorMsg}
+          </div>
+        )}
         
         <form style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>

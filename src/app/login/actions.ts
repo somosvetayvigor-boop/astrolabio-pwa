@@ -5,17 +5,21 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 
 export async function login(formData: FormData) {
-  const supabase = await createClient()
-
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  let errorMessage = ''
+  try {
+    const supabase = await createClient()
+    const data = {
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
+    }
+    const { error } = await supabase.auth.signInWithPassword(data)
+    if (error) errorMessage = error.message
+  } catch (err: any) {
+    errorMessage = err.message || 'Error de servidor'
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
-
-  if (error) {
-    redirect('/login?error=true')
+  if (errorMessage) {
+    redirect(`/login?error=${encodeURIComponent(errorMessage)}`)
   }
 
   revalidatePath('/', 'layout')
@@ -23,17 +27,21 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
-  const supabase = await createClient()
-
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
+  let errorMessage = ''
+  try {
+    const supabase = await createClient()
+    const data = {
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
+    }
+    const { error } = await supabase.auth.signUp(data)
+    if (error) errorMessage = error.message
+  } catch (err: any) {
+    errorMessage = err.message || 'Error de servidor'
   }
 
-  const { error } = await supabase.auth.signUp(data)
-
-  if (error) {
-    redirect('/login?error=true')
+  if (errorMessage) {
+    redirect(`/login?error=${encodeURIComponent(errorMessage)}`)
   }
 
   revalidatePath('/', 'layout')
