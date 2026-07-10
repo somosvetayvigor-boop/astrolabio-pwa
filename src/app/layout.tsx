@@ -30,7 +30,7 @@ export default async function RootLayout({
               Astrolabio
             </a>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <a href="/catalog" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Catálogo</a>
+              <a href="/#catalogo" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Catálogo</a>
               {user ? (
                 <>
                   <a href="/dashboard" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Panel de Autor</a>
