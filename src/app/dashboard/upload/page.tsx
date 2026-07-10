@@ -5,11 +5,16 @@ import { useState } from 'react'
 
 export default function UploadBookPage() {
   const [isUploading, setIsUploading] = useState(false)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     // Form is submitted via Server Action by default in Next.js 14/15,
     // but we can set a loading state here if we manually handle it or just use useFormStatus.
     // For simplicity, we'll just set loading on submit.
+    if (!agreedToTerms) {
+      e.preventDefault();
+      return;
+    }
     setIsUploading(true)
   }
 
@@ -84,11 +89,26 @@ export default function UploadBookPage() {
             />
           </div>
 
+          <div style={{ backgroundColor: 'rgba(212, 175, 55, 0.05)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(212, 175, 55, 0.2)', marginTop: '0.5rem' }}>
+            <label style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', cursor: 'pointer' }}>
+              <input 
+                type="checkbox" 
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                required
+                style={{ marginTop: '0.25rem', width: '1.2rem', height: '1.2rem', accentColor: 'var(--brand-primary)' }}
+              />
+              <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                <strong style={{ color: 'var(--text-primary)' }}>Declaración de Derechos de Autor:</strong> Declaro bajo pena de perjurio que soy el autor original de esta obra o poseo los derechos legales para su venta y distribución. Acepto que cualquier infracción de derechos de autor resultará en la eliminación de mi cuenta y la retención de mis ganancias.
+              </span>
+            </label>
+          </div>
+
           <button 
             type="submit" 
             className="btn btn-primary" 
-            disabled={isUploading}
-            style={{ width: '100%', padding: '1rem', marginTop: '1rem', fontSize: '1.125rem' }}
+            disabled={isUploading || !agreedToTerms}
+            style={{ width: '100%', padding: '1rem', marginTop: '0.5rem', fontSize: '1.125rem', opacity: (!agreedToTerms || isUploading) ? 0.5 : 1 }}
           >
             {isUploading ? 'Subiendo y procesando...' : 'Publicar Libro'}
           </button>
