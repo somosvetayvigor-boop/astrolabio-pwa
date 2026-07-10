@@ -1,18 +1,31 @@
 import Link from "next/link";
+import { createClient } from '@/utils/supabase/server';
+import { deleteBook } from './actions';
+import DeleteButton from './DeleteButton';
+import { redirect } from 'next/navigation';
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const supabase = await createClient();
+  
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    redirect('/login');
+  }
+
+  // Fetch real books for the user
+  const { data: myBooks } = await supabase
+    .from('books')
+    .select('*')
+    .eq('author_id', user.id)
+    .order('created_at', { ascending: false });
+
+  // Dummy stats for now
   const authorStats = {
-    totalSales: "$1,240.50",
-    pagesRead: "45,230",
-    royalties: "$345.80",
-    booksPublished: 3
+    totalSales: "$0.00",
+    pagesRead: "0",
+    royalties: "$0.00",
+    booksPublished: myBooks?.length || 0
   };
-
-  const myBooks = [
-    { id: 1, title: "El Eco del Tiempo", sales: 120, pagesRead: 15400, price: "$4.99" },
-    { id: 2, title: "Sombras en la Ciudad", sales: 85, pagesRead: 9200, price: "$3.50" },
-    { id: 3, title: "Más Allá del Sol", sales: 230, pagesRead: 20630, price: "$5.99" },
-  ];
 
   return (
     <div className="container" style={{ padding: '2rem 1.5rem' }}>
@@ -32,8 +45,8 @@ export default function Dashboard() {
           <p style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)' }}>{authorStats.pagesRead}</p>
         </div>
         <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Regalías Estimadas</p>
-          <p style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--brand-primary)' }}>{authorStats.royalties}</p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Libros Publicados</p>
+          <p style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--brand-primary)' }}>{authorStats.booksPublished}</p>
         </div>
       </div>
 
@@ -45,24 +58,31 @@ export default function Dashboard() {
             <tr style={{ borderBottom: '1px solid var(--border-color)', backgroundColor: 'var(--bg-tertiary)' }}>
               <th style={{ padding: '1rem', fontWeight: 600 }}>Título</th>
               <th style={{ padding: '1rem', fontWeight: 600 }}>Precio</th>
-              <th style={{ padding: '1rem', fontWeight: 600 }}>Ventas</th>
-              <th style={{ padding: '1rem', fontWeight: 600 }}>Págs. Leídas</th>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Fecha</th>
               <th style={{ padding: '1rem', fontWeight: 600 }}>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {myBooks.map((book) => (
-              <tr key={book.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <td style={{ padding: '1rem', fontWeight: 500 }}>{book.title}</td>
-                <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{book.price}</td>
-                <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{book.sales}</td>
-                <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{book.pagesRead}</td>
-                <td style={{ padding: '1rem' }}>
-                  <Link href={`/book/${book.id}`} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', marginRight: '0.5rem' }}>Ver</Link>
-                  <button className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', color: 'var(--brand-accent)' }}>Editar</button>
+            {!myBooks || myBooks.length === 0 ? (
+              <tr>
+                <td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  Aún no has publicado ningún libro.
                 </td>
               </tr>
-            ))}
+            ) : (
+              myBooks.map((book) => (
+                <tr key={book.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '1rem', fontWeight: 500 }}>{book.title}</td>
+                  <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>${book.price}</td>
+                  <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{new Date(book.created_at).toLocaleDateString()}</td>
+                  <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
+                    <Link href={`/book/${book.id}`} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem' }}>Ver</Link>
+                    <Link href={`/dashboard/edit/${book.id}`} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.875rem', color: 'var(--brand-primary)' }}>Editar</Link>
+                    <DeleteButton bookId={book.id} deleteAction={deleteBook} />
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
