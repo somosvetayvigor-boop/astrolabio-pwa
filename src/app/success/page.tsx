@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
-export default function SuccessPage({ searchParams }: { searchParams: { book_id?: string } }) {
+export default async function SuccessPage(props: { searchParams: Promise<{ book_id?: string }> }) {
+  const searchParams = await props.searchParams;
   const bookId = searchParams.book_id;
 
   return (
