@@ -43,29 +43,69 @@ export default function InstallPWA() {
   if (!isInstallable) return null;
 
   return (
-    <button 
-      onClick={handleInstallClick}
-      style={{
-        backgroundColor: 'var(--brand-primary)',
-        color: '#000',
-        border: 'none',
-        borderRadius: 'var(--radius-full)',
-        padding: '0.4rem 1rem',
-        fontSize: '0.875rem',
-        fontWeight: 600,
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        boxShadow: '0 4px 10px rgba(212, 175, 55, 0.3)'
-      }}
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
-      Instalar App
-    </button>
+    <div style={{
+      position: 'fixed',
+      bottom: '2rem',
+      left: '50%',
+      transform: 'translateX(-50%)',
+      backgroundColor: 'var(--bg-secondary)',
+      border: '1px solid var(--border-color)',
+      borderRadius: 'var(--radius-lg)',
+      padding: '1.5rem',
+      boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+      zIndex: 9999,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      gap: '1rem',
+      width: '90%',
+      maxWidth: '400px',
+      textAlign: 'center'
+    }}>
+      <div>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.25rem' }}>Instala Astrolabio</h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Agrega la aplicación a tu pantalla de inicio para un acceso rápido y lectura sin interrupciones.</p>
+      </div>
+      <button 
+        onClick={handleInstallClick}
+        style={{
+          backgroundColor: 'var(--brand-primary)',
+          color: '#000',
+          border: 'none',
+          borderRadius: 'var(--radius-md)',
+          padding: '1rem 2rem',
+          fontSize: '1.125rem',
+          fontWeight: 700,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.75rem',
+          width: '100%',
+          boxShadow: '0 4px 15px rgba(212, 175, 55, 0.4)',
+          transition: 'transform 0.2s ease'
+        }}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        INSTALAR APP
+      </button>
+      <button 
+        onClick={() => setIsInstallable(false)}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: 'var(--text-tertiary)',
+          fontSize: '0.875rem',
+          cursor: 'pointer',
+          textDecoration: 'underline'
+        }}
+      >
+        Quizás más tarde
+      </button>
+    </div>
   );
 }
