@@ -25,6 +25,7 @@ import { logout } from '@/app/login/actions';
 
 import PWAProvider from '@/components/PWAProvider';
 import InstallPWA from '@/components/InstallPWA';
+import CustomSplashScreen from '@/components/CustomSplashScreen';
 
 export default async function RootLayout({
   children,
@@ -36,6 +37,7 @@ export default async function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.variable}`}>
+        <CustomSplashScreen />
         <PWAProvider />
         <nav className="navbar">
           <div className="container navbar-container">
