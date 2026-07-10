@@ -12,11 +12,16 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
-export default function RootLayout({
+import { createClient } from '@/utils/supabase/server';
+import { logout } from '@/app/login/actions';
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
   return (
     <html lang="es">
       <body className={`${inter.variable}`}>
@@ -28,8 +33,16 @@ export default function RootLayout({
             </a>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <a href="/catalog" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Catálogo</a>
-              <a href="/dashboard" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Panel de Autor</a>
-              <a href="/login" className="btn btn-primary">Iniciar Sesión</a>
+              {user ? (
+                <>
+                  <a href="/dashboard" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Panel de Autor</a>
+                  <form action={logout}>
+                    <button type="submit" className="btn btn-secondary" style={{ padding: '0.5rem 1rem' }}>Cerrar Sesión</button>
+                  </form>
+                </>
+              ) : (
+                <a href="/login" className="btn btn-primary">Iniciar Sesión</a>
+              )}
             </div>
           </div>
         </nav>
