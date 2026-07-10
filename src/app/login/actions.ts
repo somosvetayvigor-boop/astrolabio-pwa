@@ -32,6 +32,24 @@ export async function signup(formData: FormData) {
   let errorMessage = ''
   try {
     const supabase = await createClient()
+    const username = formData.get('username') as string
+
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    
+    const { data: existingProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('username')
+      .eq('username', username)
+      .single()
+
+    if (existingProfile) {
+      redirect(`/login?error=${encodeURIComponent('Ese nombre de usuario ya está ocupado. Por favor elige otro.')}`)
+    }
+
+    // 2. Create Auth User
     const data = {
       email: formData.get('email') as string,
       password: formData.get('password') as string,
@@ -41,15 +59,11 @@ export async function signup(formData: FormData) {
     if (error) {
       errorMessage = error.message
     } else if (authData?.user) {
-      const supabaseAdmin = createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      )
-
+      // 3. Save profile data
       const profileData = {
         id: authData.user.id,
         full_name: formData.get('full_name') as string,
-        username: formData.get('username') as string,
+        username,
         display_preference: formData.get('display_preference') as string,
       }
 
@@ -59,7 +73,6 @@ export async function signup(formData: FormData) {
         
       if (profileError) {
         console.error('Error saving profile:', profileError)
-        // We don't block the login, but log the error
       }
     }
   } catch (err: any) {
