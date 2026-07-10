@@ -16,6 +16,43 @@ export default async function ReaderPage({ params }: { params: { id: string } })
     notFound()
   }
 
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    // If not logged in, they can only read if it's free
+    if (book.price > 0) {
+      return (
+        <div className="container" style={{ padding: '4rem', textAlign: 'center' }}>
+          <h2>Este libro requiere compra.</h2>
+          <p>Inicia sesión y compra el libro para leerlo.</p>
+        </div>
+      )
+    }
+  } else {
+    // If logged in, check if author, free, or purchased
+    const isAuthor = book.author_id === user.id;
+    const isFree = book.price === 0;
+
+    if (!isAuthor && !isFree) {
+      const { data: purchase } = await supabase
+        .from('purchases')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('book_id', book.id)
+        .single();
+
+      if (!purchase) {
+        return (
+          <div className="container" style={{ padding: '4rem', textAlign: 'center' }}>
+            <h2>Este libro requiere compra.</h2>
+            <p>Debes comprar este libro antes de poder leerlo.</p>
+          </div>
+        )
+      }
+    }
+  }
+
   let epubSignedUrl = ''
 
   // If the book has an epub file, generate a temporary signed URL to download it securely

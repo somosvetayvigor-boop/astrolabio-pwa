@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from "next/navigation";
+import BuyButton from '@/components/BuyButton';
 
 export default async function BookDetail({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -48,13 +49,11 @@ export default async function BookDetail({ params }: { params: { id: string } })
           </p>
 
           <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto' }}>
-            <Link href={`/reader/${book.id}`} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1 }}>
-              Leer Ahora (KENPC)
+            <Link href={`/reader/${book.id}`} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center' }}>
+              Leer Ahora
             </Link>
             {book.price > 0 && (
-              <button className="btn btn-secondary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1 }}>
-                Comprar por ${book.price}
-              </button>
+              <BuyButton bookId={book.id} price={book.price} />
             )}
           </div>
         </div>
