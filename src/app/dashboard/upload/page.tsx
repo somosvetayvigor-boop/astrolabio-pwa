@@ -87,6 +87,20 @@ export default function UploadBookPage() {
               required
               style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)' }} 
             />
+            <div style={{ marginTop: '0.75rem', padding: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)', border: '1px dashed rgba(255,255,255,0.2)' }}>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                💡 <strong>Nota:</strong> Astrolabio solo acepta formato <code>.epub</code> para garantizar la mejor experiencia de lectura interactiva. <br/>
+                Si tienes tu libro en Word o PDF, te recomendamos convertirlo primero usando esta herramienta gratuita:
+              </p>
+              <a 
+                href="https://convertio.co/es/document-epub/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ display: 'inline-block', marginTop: '0.5rem', color: 'var(--brand-primary)', fontSize: '0.875rem', textDecoration: 'underline', fontWeight: 600 }}
+              >
+                Convertir a EPUB gratis en Convertio ↗
+              </a>
+            </div>
           </div>
 
           <div style={{ backgroundColor: 'rgba(212, 175, 55, 0.05)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(212, 175, 55, 0.2)', marginTop: '0.5rem' }}>
