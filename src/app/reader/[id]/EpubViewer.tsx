@@ -52,21 +52,13 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
     // Inject CSS to fix image overflow in fixed-layout or poorly formatted epubs
     newRendition.hooks.content.register((contents: any) => {
       contents.addStylesheetRules({
-        "body, html": {
-          "max-width": "100% !important",
-          "overflow-x": "hidden !important"
-        },
-        "div, p, span, figure": {
-          "max-width": "100% !important", /* Prevents Google Docs fixed-width wrappers from bleeding into next column */
-          "height": "auto !important" /* Prevents fixed-height wrappers from pushing text out of bounds */
-        },
         "img, video, audio, object, svg": {
           "max-width": "100% !important",
-          "height": "auto !important",
-          "max-height": "60vh !important", /* Guarantees image fits in one column, leaving space for text */
-          "object-fit": "contain !important",
-          "display": "block !important",
-          "margin": "0 auto !important"
+          "max-height": "100% !important",
+          "object-fit": "contain !important"
+        },
+        "div, p, span, figure": {
+          "max-width": "100% !important"
         }
       });
     });
