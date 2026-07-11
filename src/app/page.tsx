@@ -81,22 +81,27 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
         ) : (
           <div className="book-grid">
             {featuredBooks.map((book) => (
-              <Link href={`/book/${book.id}`} key={book.id}>
-                <div className="book-card">
+              <div className="book-card" key={book.id}>
+                <Link href={`/book/${book.id}`} style={{ display: 'block', textDecoration: 'none' }}>
                   <div className="book-cover" style={{ backgroundImage: `url(${book.cover_url || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop'})`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
-                  <div className="book-info">
-                    {book.category && <span style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{book.category}</span>}
+                </Link>
+                <div className="book-info">
+                  {book.category && <span style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{book.category}</span>}
+                  
+                  <Link href={`/book/${book.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     <h3 className="book-title" style={{ marginTop: '0.25rem' }}>{book.title}</h3>
-                    <Link href={`/author/${book.author_id}`} onClick={(e) => e.stopPropagation()} style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textDecoration: 'none' }}>
-                      <p className="book-author" style={{ margin: 0 }}>{book.profiles?.full_name || 'Autor Desconocido'}</p>
-                    </Link>
-                    <div className="book-footer">
-                      <span className="book-price">${book.price}</span>
-                      <button className="btn btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}>Leer</button>
-                    </div>
+                  </Link>
+
+                  <Link href={`/author/${book.author_id}`} style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textDecoration: 'none' }}>
+                    <p className="book-author" style={{ margin: 0 }}>{book.profiles?.full_name || 'Autor Desconocido'}</p>
+                  </Link>
+                  
+                  <div className="book-footer">
+                    <span className="book-price">${book.price}</span>
+                    <Link href={`/book/${book.id}`} className="btn btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', textDecoration: 'none' }}>Leer</Link>
                   </div>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
         )}
