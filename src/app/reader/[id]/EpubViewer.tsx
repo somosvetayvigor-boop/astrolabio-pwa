@@ -11,6 +11,17 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
   const [progress, setProgress] = useState(0)
   const [sampleEnded, setSampleEnded] = useState(false)
   const visitedLocations = useRef<Set<string>>(new Set())
+  const [theme, setTheme] = useState<'light' | 'dark' | 'sepia'>('light')
+  const [fontSize, setFontSize] = useState(100)
+  const [showSettings, setShowSettings] = useState(false)
+
+  // Load preferences
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('reader_theme') as 'light' | 'dark' | 'sepia'
+    const savedFontSize = localStorage.getItem('reader_fontSize')
+    if (savedTheme) setTheme(savedTheme)
+    if (savedFontSize) setFontSize(parseInt(savedFontSize))
+  }, [])
 
   useEffect(() => {
     if (!viewerRef.current || !epubUrl) return
@@ -26,16 +37,19 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       spread: 'none', // Better for mobile/single column reading
     })
     
-    // Apply basic styling matching Astrolabio
-    newRendition.themes.default({
-      'body': {
-        'font-family': 'Georgia, serif',
-        'color': '#111a28',
-        'background': '#fdfbf7',
-        'line-height': '1.8',
-        'font-size': '1.125rem'
-      }
+    // Register themes
+    newRendition.themes.register('light', {
+      body: { background: '#fdfbf7', color: '#111a28', 'font-family': 'Georgia, serif', 'line-height': '1.8' }
     })
+    newRendition.themes.register('dark', {
+      body: { background: '#111a28', color: '#fdfbf7', 'font-family': 'Georgia, serif', 'line-height': '1.8' }
+    })
+    newRendition.themes.register('sepia', {
+      body: { background: '#f4ecd8', color: '#433422', 'font-family': 'Georgia, serif', 'line-height': '1.8' }
+    })
+
+    newRendition.themes.select(theme)
+    newRendition.themes.fontSize(`${fontSize}%`)
 
     setRendition(newRendition)
     newRendition.display()
@@ -64,6 +78,16 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
     }
   }, [epubUrl])
 
+  // Apply theme and font size when they change
+  useEffect(() => {
+    if (rendition) {
+      rendition.themes.select(theme)
+      rendition.themes.fontSize(`${fontSize}%`)
+      localStorage.setItem('reader_theme', theme)
+      localStorage.setItem('reader_fontSize', fontSize.toString())
+    }
+  }, [theme, fontSize, rendition])
+
   const next = () => {
     if (rendition) rendition.next()
   }
@@ -72,14 +96,63 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
     if (rendition) rendition.prev()
   }
 
+  // Theme colors for the UI wrapper
+  const wrapperBg = theme === 'light' ? '#fdfbf7' : theme === 'dark' ? '#111a28' : '#f4ecd8';
+  const wrapperText = theme === 'light' ? '#111a28' : theme === 'dark' ? '#fdfbf7' : '#433422';
+
   return (
-    <div style={{ backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ backgroundColor: wrapperBg, color: wrapperText, height: '100vh', display: 'flex', flexDirection: 'column', transition: 'background-color 0.3s' }}>
       
       {/* Reader Toolbar */}
-      <div style={{ padding: '1rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ padding: '1rem', borderBottom: '1px solid rgba(128,128,128,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
         <Link href={`/book/${bookId}`} style={{ fontWeight: 600, color: 'var(--brand-primary)' }}>← Volver</Link>
-        <div style={{ fontWeight: 600 }}>{bookTitle}</div>
-        <div style={{ fontWeight: 600, color: 'var(--text-secondary)' }}>{progress}% Leído</div>
+        <div style={{ fontWeight: 600, opacity: 0.8 }}>{bookTitle}</div>
+        
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ fontWeight: 600, opacity: 0.5 }}>{progress}% Leído</div>
+          <button 
+            onClick={() => setShowSettings(!showSettings)}
+            style={{ background: 'none', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer', opacity: 0.8 }}
+          >
+            Aa
+          </button>
+        </div>
+
+        {/* Settings Dropdown */}
+        {showSettings && (
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            right: '1rem',
+            marginTop: '0.5rem',
+            backgroundColor: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--shadow-lg)',
+            padding: '1rem',
+            zIndex: 50,
+            minWidth: '200px',
+            border: '1px solid var(--border-color)'
+          }}>
+            <div style={{ marginBottom: '1rem' }}>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', fontWeight: 600 }}>Tamaño de Letra</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <button onClick={() => setFontSize(f => Math.max(80, f - 10))} style={{ padding: '0.25rem 0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', cursor: 'pointer' }}>A-</button>
+                <span style={{ fontSize: '0.875rem', flex: 1, textAlign: 'center' }}>{fontSize}%</span>
+                <button onClick={() => setFontSize(f => Math.min(200, f + 10))} style={{ padding: '0.25rem 0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', cursor: 'pointer' }}>A+</button>
+              </div>
+            </div>
+            
+            <div>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', fontWeight: 600 }}>Color de Fondo</p>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button onClick={() => setTheme('light')} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: theme === 'light' ? '2px solid var(--brand-primary)' : '1px solid #ddd', background: '#fdfbf7', color: '#111a28', cursor: 'pointer' }}>Día</button>
+                <button onClick={() => setTheme('sepia')} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: theme === 'sepia' ? '2px solid var(--brand-primary)' : '1px solid #ddd', background: '#f4ecd8', color: '#433422', cursor: 'pointer' }}>Sepia</button>
+                <button onClick={() => setTheme('dark')} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: theme === 'dark' ? '2px solid var(--brand-primary)' : '1px solid #444', background: '#111a28', color: '#fdfbf7', cursor: 'pointer' }}>Noche</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Reader Area */}
