@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import ePub, { Book, Rendition } from 'epubjs'
+import { saveProgress, getProgress } from './actions'
 
 export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = false }: { bookId: string, bookTitle: string, epubUrl: string, isSample?: boolean }) {
   const viewerRef = useRef<HTMLDivElement>(null)
@@ -52,7 +53,20 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
     newRendition.themes.fontSize(`${fontSize}%`)
 
     setRendition(newRendition)
-    newRendition.display()
+
+    if (!isSample) {
+      getProgress(bookId).then(res => {
+        if (res.success && res.data) {
+          newRendition.display(res.data)
+        } else {
+          newRendition.display()
+        }
+      })
+    } else {
+      newRendition.display()
+    }
+
+    let saveTimeout: NodeJS.Timeout
 
     // Setup locations for progress tracking (calculates total pages)
     newBook.ready.then(() => {
@@ -69,6 +83,11 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
           if (visitedLocations.current.size > 6) {
             setSampleEnded(true)
           }
+        } else {
+          clearTimeout(saveTimeout)
+          saveTimeout = setTimeout(() => {
+            saveProgress(bookId, location.start.cfi)
+          }, 2000)
         }
       })
     })
