@@ -26,6 +26,7 @@ import { logout } from '@/app/login/actions';
 import PWAProvider from '@/components/PWAProvider';
 import InstallPWA from '@/components/InstallPWA';
 import CustomSplashScreen from '@/components/CustomSplashScreen';
+import Navbar from '@/components/Navbar';
 
 export default async function RootLayout({
   children,
@@ -39,28 +40,7 @@ export default async function RootLayout({
       <body className={`${inter.variable}`}>
         <CustomSplashScreen />
         <PWAProvider />
-        <nav className="navbar">
-          <div className="container navbar-container">
-            <a href="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <img src="/logo.jpeg" alt="Astrolabio Logo" className="logo-pulse" style={{ height: '50px', width: 'auto', borderRadius: '50%' }} />
-              Astrolabio
-            </a>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-              <InstallPWA />
-              <a href="/#catalogo" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Catálogo</a>
-              {user ? (
-                <>
-                  <a href="/dashboard" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Panel de Autor</a>
-                  <form action={logout}>
-                    <button type="submit" className="btn btn-secondary" style={{ padding: '0.5rem 1rem' }}>Cerrar Sesión</button>
-                  </form>
-                </>
-              ) : (
-                <a href="/login" className="btn btn-primary">Iniciar Sesión</a>
-              )}
-            </div>
-          </div>
-        </nav>
+        <Navbar user={user} />
         <main>
           {children}
         </main>

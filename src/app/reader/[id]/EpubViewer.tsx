@@ -48,6 +48,22 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       height: '100%',
       spread: 'none', // Better for mobile/single column reading
     })
+
+    // Inject CSS to fix image overflow in fixed-layout or poorly formatted epubs
+    newRendition.hooks.content.register((contents: any) => {
+      contents.addStylesheetRules({
+        "body": {
+          "padding": "0 !important",
+          "max-width": "100% !important",
+          "overflow-x": "hidden !important"
+        },
+        "img": {
+          "max-width": "100% !important",
+          "height": "auto !important",
+          "object-fit": "contain !important"
+        }
+      });
+    });
     
     // Register themes
     newRendition.themes.register('light', {
@@ -139,11 +155,11 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
     <div style={{ backgroundColor: wrapperBg, color: wrapperText, height: '100vh', display: 'flex', flexDirection: 'column', transition: 'background-color 0.3s' }}>
       
       {/* Reader Toolbar */}
-      <div style={{ padding: '1rem', borderBottom: '1px solid rgba(128,128,128,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-        <Link href={`/book/${bookId}`} style={{ fontWeight: 600, color: 'var(--brand-primary)' }}>← Volver</Link>
-        <div style={{ fontWeight: 600, opacity: 0.8 }}>{bookTitle}</div>
+      <div style={{ padding: '0.75rem', borderBottom: '1px solid rgba(128,128,128,0.2)', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
+        <Link href={`/book/${bookId}`} style={{ fontWeight: 600, color: 'var(--brand-primary)', whiteSpace: 'nowrap' }}>← Volver</Link>
+        <div style={{ fontWeight: 600, opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '35%' }}>{bookTitle}</div>
         
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
           <div style={{ fontWeight: 600, opacity: 0.5 }}>{progress}% Leído</div>
           
           <button 
