@@ -6,24 +6,37 @@ import { useState } from 'react'
 export default function UploadBookPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    // Form is submitted via Server Action by default in Next.js 14/15,
-    // but we can set a loading state here if we manually handle it or just use useFormStatus.
-    // For simplicity, we'll just set loading on submit.
-    if (!agreedToTerms) {
-      e.preventDefault();
-      return;
-    }
+    e.preventDefault();
+    if (!agreedToTerms) return;
+    
     setIsUploading(true)
+    setErrorMessage(null)
+
+    const formData = new FormData(e.currentTarget)
+    const result = await uploadBook(formData)
+    
+    if (result && result.error) {
+      setErrorMessage(result.error)
+      setIsUploading(false)
+    }
+    // If no error, the action will redirect, so we keep isUploading true
   }
 
   return (
     <div className="container" style={{ padding: '4rem 1.5rem', maxWidth: '800px' }}>
       <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '2rem' }}>Subir Nuevo Libro</h1>
       
+      {errorMessage && (
+        <div style={{ backgroundColor: 'rgba(255,0,0,0.1)', border: '1px solid red', color: 'red', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
+          {errorMessage}
+        </div>
+      )}
+
       <div className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
-        <form action={uploadBook} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
           <div>
             <label htmlFor="title" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Título del Libro *</label>
