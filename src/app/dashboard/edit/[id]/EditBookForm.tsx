@@ -97,6 +97,9 @@ export default function EditBookForm({ book }: { book: any }) {
       }
 
     } catch (error: any) {
+      if (error.message && error.message.includes('NEXT_REDIRECT')) {
+        return;
+      }
       console.error(error)
       setErrorMessage(error.message || 'Error desconocido.')
       setIsUploading(false)

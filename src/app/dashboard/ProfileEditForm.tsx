@@ -6,6 +6,15 @@ import { getAvatarSignedUrl, updateProfileData } from './actions'
 export default function ProfileEditForm({ initialBio, initialAvatarUrl }: { initialBio?: string, initialAvatarUrl?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(initialAvatarUrl || null)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const objectUrl = URL.createObjectURL(file)
+      setPreviewUrl(objectUrl)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,6 +56,9 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl }: { init
       if (dbResult && dbResult.error) throw new Error(dbResult.error)
 
     } catch (error: any) {
+      if (error.message && error.message.includes('NEXT_REDIRECT')) {
+        return;
+      }
       console.error(error)
       setErrorMessage(error.message)
       setIsSubmitting(false)
@@ -65,8 +77,8 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl }: { init
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-          {initialAvatarUrl ? (
-            <img src={initialAvatarUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} />
+          {previewUrl ? (
+            <img src={previewUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} />
           ) : (
             <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-tertiary)' }}>
               👤
@@ -74,7 +86,7 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl }: { init
           )}
           <div style={{ flex: 1 }}>
             <label htmlFor="avatarFile" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Foto de Perfil</label>
-            <input type="file" id="avatarFile" name="avatarFile" accept="image/*" style={{ width: '100%' }} />
+            <input type="file" id="avatarFile" name="avatarFile" accept="image/*" onChange={handleFileChange} style={{ width: '100%' }} />
           </div>
         </div>
 
