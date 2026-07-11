@@ -54,13 +54,26 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       contents.addStylesheetRules({
         "body": {
           "padding": "0 !important",
+          "margin": "0 !important",
           "max-width": "100% !important",
           "overflow-x": "hidden !important"
         },
-        "img": {
+        "img, video, audio, object, svg": {
           "max-width": "100% !important",
           "height": "auto !important",
-          "object-fit": "contain !important"
+          "max-height": "95vh !important",
+          "object-fit": "contain !important",
+          "page-break-inside": "avoid !important",
+          "break-inside": "avoid !important",
+          "display": "block !important",
+          "margin": "0 auto !important"
+        },
+        "div, p, span, figure, h1, h2, h3, h4, h5, h6": {
+          "max-width": "100% !important",
+          "word-wrap": "break-word !important"
+        },
+        "*": {
+          "max-width": "100% !important"
         }
       });
     });
@@ -229,7 +242,7 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         </button>
 
         {/* ePub content renders here */}
-        <div ref={viewerRef} style={{ width: '100%', height: '100%', padding: '2rem 50px', filter: sampleEnded ? 'blur(4px)' : 'none', transition: 'filter 0.3s' }}></div>
+        <div ref={viewerRef} style={{ width: '100%', height: '100%', padding: '1rem 40px', filter: sampleEnded ? 'blur(4px)' : 'none', transition: 'filter 0.3s', overflow: 'hidden' }}></div>
         
         {/* Next Page Button */}
         <button onClick={next} disabled={sampleEnded} style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50px', zIndex: 10, backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'var(--text-tertiary)', cursor: sampleEnded ? 'not-allowed' : 'pointer' }}>
