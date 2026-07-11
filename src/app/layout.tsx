@@ -45,7 +45,7 @@ export default async function RootLayout({
               <img src="/logo.jpeg" alt="Astrolabio Logo" style={{ height: '50px', width: 'auto', borderRadius: '50%' }} />
               Astrolabio
             </a>
-            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <InstallPWA />
               <a href="/#catalogo" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Catálogo</a>
               {user ? (
