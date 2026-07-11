@@ -25,6 +25,7 @@ export default function Navbar({ user }: { user: any }) {
           <Link href="/#catalogo" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Catálogo</Link>
           {user ? (
             <>
+              <Link href="/library" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Mi Biblioteca</Link>
               <Link href="/dashboard" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Panel de Autor</Link>
               <form action={logout}>
                 <button type="submit" className="btn btn-secondary" style={{ padding: '0.5rem 1rem' }}>Cerrar Sesión</button>
