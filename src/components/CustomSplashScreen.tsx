@@ -69,23 +69,25 @@ export default function CustomSplashScreen() {
         zIndex: -1
       }}></div>
 
-      <div style={{
-        width: '250px',
-        height: '250px',
-        position: 'relative',
-        animation: 'pulse 2s infinite ease-in-out',
-        filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.5))',
-        borderRadius: '50%',
-        overflow: 'hidden',
-        border: '4px solid rgba(212, 175, 55, 0.5)',
-      }}>
-        <Image 
-          src="/logo.jpeg" 
-          alt="Astrolabio Logo" 
-          fill
-          style={{ objectFit: 'cover' }}
-          priority
-        />
+      <div style={{ marginTop: '-20vh' }}>
+        <div style={{
+          width: '250px',
+          height: '250px',
+          position: 'relative',
+          animation: 'pulse 2s infinite ease-in-out',
+          filter: 'drop-shadow(0px 10px 20px rgba(0,0,0,0.5))',
+          borderRadius: '50%',
+          overflow: 'hidden',
+          border: '4px solid rgba(212, 175, 55, 0.5)',
+        }}>
+          <Image 
+            src="/logo.jpeg" 
+            alt="Astrolabio Logo" 
+            fill
+            style={{ objectFit: 'cover' }}
+            priority
+          />
+        </div>
       </div>
       
       <style dangerouslySetInnerHTML={{__html: `
