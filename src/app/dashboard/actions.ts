@@ -131,52 +131,61 @@ export async function editBook(formData: FormData) {
   redirect('/dashboard')
 }
 
-export async function updateProfile(formData: FormData) {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    redirect('/login')
-  }
+export async function getAvatarSignedUrl(avatarFilename: string) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) return { error: 'No estás autenticado.' }
 
-  const bio = formData.get('bio') as string
-  const avatarFile = formData.get('avatarFile') as File | null
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
-  const supabaseAdmin = createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-
-  let avatarUrl = undefined
-
-  if (avatarFile && avatarFile.size > 0) {
-    const fileExt = avatarFile.name.split('.').pop()
-    const fileName = `${user.id}-${Date.now()}.${fileExt}`
+    const cleanName = avatarFilename.split('.').pop()
+    const avatarPath = `${user.id}-${Date.now()}.${cleanName}`
     
-    const { data: uploadData, error: uploadError } = await supabaseAdmin
-      .storage
+    const { data, error } = await supabaseAdmin.storage
       .from('avatars')
-      .upload(fileName, avatarFile)
+      .createSignedUploadUrl(avatarPath)
       
-    if (!uploadError && uploadData) {
-      const { data: { publicUrl } } = supabaseAdmin.storage.from('avatars').getPublicUrl(fileName)
-      avatarUrl = publicUrl
+    if (error || !data) {
+      console.error('Error avatar url:', error)
+      return { error: 'Verifica que el bucket "avatars" exista en Storage.' }
     }
+
+    return { signedUrl: data.signedUrl, path: avatarPath }
+  } catch (err: any) {
+    return { error: err.message }
   }
+}
 
-  const updates: any = { bio }
-  if (avatarUrl) {
-    updates.avatar_url = avatarUrl
-  }
+export async function updateProfileData(data: { bio: string, avatarPath: string | null }) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) return { error: 'No estás autenticado.' }
 
-  const { error } = await supabaseAdmin
-    .from('profiles')
-    .update(updates)
-    .eq('id', user.id)
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
-  if (error) {
-    console.error('Error updating profile:', error)
-    throw new Error('Could not update profile')
+    const updates: any = { bio: data.bio }
+    if (data.avatarPath) {
+      const { data: publicUrlData } = supabaseAdmin.storage.from('avatars').getPublicUrl(data.avatarPath)
+      updates.avatar_url = publicUrlData.publicUrl
+    }
+
+    const { error } = await supabaseAdmin
+      .from('profiles')
+      .update(updates)
+      .eq('id', user.id)
+
+    if (error) throw new Error('Could not update profile')
+  } catch (err: any) {
+    console.error(err)
+    return { error: err.message }
   }
 
   revalidatePath('/dashboard')

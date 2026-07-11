@@ -38,7 +38,7 @@ export default function BuyButton({ bookId, price }: { bookId: string, price: nu
       className="btn btn-secondary" 
       style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, opacity: loading ? 0.7 : 1 }}
     >
-      {loading ? 'Procesando...' : `Comprar por $${price}`}
+      {loading ? 'Procesando...' : `Comprar por $${price} MXN`}
     </button>
   );
 }

@@ -1,12 +1,13 @@
 "use client"
 
-import { uploadBook } from './actions'
+import { getSignedUrls, insertBookData } from './actions'
 import { useState } from 'react'
 
 export default function UploadBookPage() {
   const [isUploading, setIsUploading] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [progressText, setProgressText] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -14,15 +15,81 @@ export default function UploadBookPage() {
     
     setIsUploading(true)
     setErrorMessage(null)
+    setProgressText('Preparando archivos...')
 
-    const formData = new FormData(e.currentTarget)
-    const result = await uploadBook(formData)
-    
-    if (result && result.error) {
-      setErrorMessage(result.error)
+    try {
+      const formData = new FormData(e.currentTarget)
+      const title = formData.get('title') as string
+      const description = formData.get('description') as string
+      const category = formData.get('category') as string
+      const price = parseFloat(formData.get('price') as string)
+      const epubFile = formData.get('epubFile') as File
+      const coverFile = formData.get('coverFile') as File
+
+      if (!epubFile || !title) {
+        throw new Error('El título y el archivo ePub son requeridos.')
+      }
+
+      // 1. Obtener URLs de subida directa
+      setProgressText('Generando rutas seguras de subida...')
+      const urlsResult = await getSignedUrls(epubFile.name, coverFile && coverFile.size > 0 ? coverFile.name : null)
+      
+      if (urlsResult.error) {
+        throw new Error(urlsResult.error)
+      }
+
+      const { epub, cover } = urlsResult as any
+
+      // 2. Subir ePub directamente a Supabase
+      setProgressText('Subiendo libro (esto puede tardar unos minutos si es muy pesado, no cierres la ventana)...')
+      const epubUpload = await fetch(epub.signedUrl, {
+        method: 'PUT',
+        body: epubFile,
+        headers: { 'Content-Type': epubFile.type }
+      })
+
+      if (!epubUpload.ok) {
+        throw new Error('Falló la subida del archivo ePub directo a Supabase.')
+      }
+
+      // 3. Subir portada directamente (si hay)
+      let finalCoverPath = null
+      if (cover && coverFile && coverFile.size > 0) {
+        setProgressText('Subiendo portada...')
+        const coverUpload = await fetch(cover.signedUrl, {
+          method: 'PUT',
+          body: coverFile,
+          headers: { 'Content-Type': coverFile.type }
+        })
+        if (!coverUpload.ok) {
+          throw new Error('Falló la subida de la portada directo a Supabase.')
+        }
+        finalCoverPath = cover.path
+      }
+
+      // 4. Guardar datos en la base de datos
+      setProgressText('Guardando información del libro...')
+      const dbResult = await insertBookData({
+        title,
+        description,
+        category,
+        price,
+        epubPath: epub.path,
+        coverPath: finalCoverPath
+      })
+
+      if (dbResult && dbResult.error) {
+        throw new Error(dbResult.error)
+      }
+
+      // Redirección manejada por el Server Action o éxito silencioso
+
+    } catch (error: any) {
+      console.error(error)
+      setErrorMessage(error.message || 'Error desconocido al subir el libro.')
       setIsUploading(false)
+      setProgressText(null)
     }
-    // If no error, the action will redirect, so we keep isUploading true
   }
 
   return (
@@ -32,6 +99,12 @@ export default function UploadBookPage() {
       {errorMessage && (
         <div style={{ backgroundColor: 'rgba(255,0,0,0.1)', border: '1px solid red', color: 'red', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
           {errorMessage}
+        </div>
+      )}
+
+      {progressText && (
+        <div style={{ backgroundColor: 'rgba(212, 175, 55, 0.1)', border: '1px solid var(--brand-primary)', color: 'var(--brand-primary)', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem', fontWeight: 600 }}>
+          ⏳ {progressText}
         </div>
       )}
 
@@ -86,7 +159,7 @@ export default function UploadBookPage() {
           </div>
 
           <div>
-            <label htmlFor="price" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Precio de Venta Directa ($ USD)</label>
+            <label htmlFor="price" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Precio de Venta Directa ($ MXN)</label>
             <input 
               type="number" 
               id="price" 

@@ -79,7 +79,7 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
           <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', paddingBottom: '2rem', borderBottom: '1px solid var(--border-color)' }}>
             <div>
               <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>Precio</p>
-              <p style={{ fontWeight: 600 }}>${book.price}</p>
+              <p style={{ fontWeight: 600 }}>${book.price} MXN</p>
             </div>
             <div>
               <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>Publicación</p>

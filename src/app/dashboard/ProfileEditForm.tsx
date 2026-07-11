@@ -1,20 +1,63 @@
 'use client'
 
 import { useState } from 'react'
-import { updateProfile } from './actions'
+import { getAvatarSignedUrl, updateProfileData } from './actions'
 
 export default function ProfileEditForm({ initialBio, initialAvatarUrl }: { initialBio?: string, initialAvatarUrl?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const handleSubmit = () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsSubmitting(true)
+    setErrorMessage(null)
+
+    try {
+      const formData = new FormData(e.currentTarget)
+      const bio = formData.get('bio') as string
+      const avatarFile = formData.get('avatarFile') as File
+
+      let finalAvatarPath = null
+
+      if (avatarFile && avatarFile.size > 0) {
+        // 1. Get signed url
+        const urlsResult = await getAvatarSignedUrl(avatarFile.name)
+        if (urlsResult.error) throw new Error(urlsResult.error)
+        
+        // 2. Upload to Supabase
+        const uploadRes = await fetch(urlsResult.signedUrl!, {
+          method: 'PUT',
+          body: avatarFile,
+          headers: { 'Content-Type': avatarFile.type }
+        })
+
+        if (!uploadRes.ok) throw new Error('Error al subir la foto directo a Supabase.')
+        
+        finalAvatarPath = urlsResult.path!
+      }
+
+      // 3. Update Profile DB
+      const dbResult = await updateProfileData({ bio, avatarPath: finalAvatarPath })
+      if (dbResult && dbResult.error) throw new Error(dbResult.error)
+
+    } catch (error: any) {
+      console.error(error)
+      setErrorMessage(error.message)
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <div className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)', marginBottom: '3rem' }}>
       <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Mi Perfil de Autor</h2>
       
-      <form action={updateProfile} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {errorMessage && (
+        <div style={{ backgroundColor: 'rgba(255,0,0,0.1)', border: '1px solid red', color: 'red', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1rem' }}>
+          {errorMessage}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
           {initialAvatarUrl ? (
             <img src={initialAvatarUrl} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' }} />

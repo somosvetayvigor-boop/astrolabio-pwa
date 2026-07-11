@@ -5,86 +5,98 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-
-export async function uploadBook(formData: FormData) {
+export async function getSignedUrls(epubFilename: string, coverFilename: string | null) {
   try {
     const supabase = await createClient()
-
-    // 1. Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    if (authError || !user) {
-      return { error: 'No estás autenticado.' }
-    }
-
-    // 2. Extract form data
-    const title = formData.get('title') as string
-    const description = formData.get('description') as string
-    const category = formData.get('category') as string
-    const price = parseFloat(formData.get('price') as string)
-    const epubFile = formData.get('epubFile') as File
-    const coverFile = formData.get('coverFile') as File
-
-    if (!epubFile || !title) {
-      return { error: 'El título y el archivo ePub son requeridos.' }
-    }
+    if (authError || !user) return { error: 'No estás autenticado.' }
 
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return { error: 'Falta configurar la variable SUPABASE_SERVICE_ROLE_KEY en Vercel. Ve a Vercel > Settings > Environment Variables y agrégala.' }
     }
 
-    // Generate unique filenames to prevent collisions
-    const fileExtEpub = epubFile.name.split('.').pop()
-    const epubFileName = `${user.id}-${Date.now()}.${fileExtEpub}`
-    
-    let coverUrl = null
-    let epubUrl = null
-
-    // Create an admin client to bypass RLS for MVP since we haven't set up Storage/DB policies
     const supabaseAdmin = createSupabaseClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // 3. Upload Cover Image (if provided)
-    if (coverFile && coverFile.size > 0) {
-      const fileExtCover = coverFile.name.split('.').pop()
-      const coverFileName = `${user.id}-${Date.now()}.${fileExtCover}`
-      
-      const { data: coverData, error: coverError } = await supabaseAdmin
-        .storage
-        .from('book-covers')
-        .upload(coverFileName, coverFile)
-        
-      if (!coverError && coverData) {
-        const { data: { publicUrl } } = supabaseAdmin.storage.from('book-covers').getPublicUrl(coverFileName)
-        coverUrl = publicUrl
-      }
-    }
+    const timestamp = Date.now()
+    const cleanEpubName = epubFilename.split('.').pop()
+    const epubPath = `${user.id}-${timestamp}.${cleanEpubName}`
+    
+    let coverPath = null
+    let coverSignedUrl = null
 
-    // 4. Upload ePub File
-    const { data: epubData, error: epubError } = await supabaseAdmin
-      .storage
+    // 1. Generate Signed URL for ePub
+    const { data: epubData, error: epubError } = await supabaseAdmin.storage
       .from('epubs')
-      .upload(epubFileName, epubFile)
+      .createSignedUploadUrl(epubPath)
 
-    if (epubError) {
-      console.error('Supabase upload error:', epubError)
-      return { error: 'Error al subir archivo a Supabase: Verifica que creaste los buckets "epubs" y "book-covers" en Storage.' }
+    if (epubError || !epubData) {
+      console.error('Error generando URL para epub:', epubError)
+      return { error: 'Error al generar enlace seguro para el archivo ePub.' }
     }
 
-    epubUrl = epubData.path
+    // 2. Generate Signed URL for Cover (if present)
+    if (coverFilename) {
+      const cleanCoverName = coverFilename.split('.').pop()
+      coverPath = `${user.id}-${timestamp}.${cleanCoverName}`
+      const { data: coverData, error: coverError } = await supabaseAdmin.storage
+        .from('book-covers')
+        .createSignedUploadUrl(coverPath)
 
-    // 5. Insert Book Record in Database
+      if (coverError || !coverData) {
+        console.error('Error generando URL para portada:', coverError)
+        return { error: 'Error al generar enlace seguro para la portada.' }
+      }
+      coverSignedUrl = coverData.signedUrl
+    }
+
+    return {
+      epub: { signedUrl: epubData.signedUrl, path: epubPath },
+      cover: coverPath ? { signedUrl: coverSignedUrl, path: coverPath } : null
+    }
+
+  } catch (err: any) {
+    console.error('getSignedUrls error:', err)
+    return { error: err.message || 'Error desconocido del servidor.' }
+  }
+}
+
+export async function insertBookData(data: {
+  title: string,
+  description: string,
+  category: string,
+  price: number,
+  epubPath: string,
+  coverPath: string | null
+}) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) return { error: 'No estás autenticado.' }
+
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    let coverUrl = null
+    if (data.coverPath) {
+      const { data: publicUrlData } = supabaseAdmin.storage.from('book-covers').getPublicUrl(data.coverPath)
+      coverUrl = publicUrlData.publicUrl
+    }
+
     const { error: dbError } = await supabaseAdmin
       .from('books')
       .insert({
         author_id: user.id,
-        title,
-        description,
-        category,
-        price,
+        title: data.title,
+        description: data.description,
+        category: data.category,
+        price: data.price,
         cover_url: coverUrl,
-        epub_file_url: epubUrl,
+        epub_file_url: data.epubPath, // Keep path for private bucket
         total_pages: 0
       })
 
@@ -92,10 +104,9 @@ export async function uploadBook(formData: FormData) {
       console.error('Database insert error:', dbError)
       return { error: 'Error de base de datos al guardar el libro.' }
     }
-
   } catch (err: any) {
-    console.error('Upload exception:', err)
-    return { error: err.message || 'Error desconocido del servidor.' }
+    console.error('insertBookData error:', err)
+    return { error: err.message || 'Error interno al guardar datos del libro.' }
   }
 
   revalidatePath('/dashboard')
