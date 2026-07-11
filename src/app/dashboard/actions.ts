@@ -137,7 +137,7 @@ export async function getAvatarSignedUrl(avatarFilename: string) {
   }
 }
 
-export async function updateProfileData(data: { bio: string, fullName?: string, avatarPath: string | null }) {
+export async function updateProfileData(data: { bio: string, fullName?: string, username?: string, displayPreference?: string, avatarPath: string | null }) {
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -149,8 +149,22 @@ export async function updateProfileData(data: { bio: string, fullName?: string, 
     )
 
     const updates: any = { bio: data.bio }
-    if (data.fullName) {
-      updates.full_name = data.fullName
+    if (data.fullName) updates.full_name = data.fullName
+    if (data.displayPreference) updates.display_preference = data.displayPreference
+    
+    if (data.username) {
+      // Check if username is already taken by another user
+      const { data: existingProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('username')
+        .eq('username', data.username)
+        .neq('id', user.id) // Exclude current user
+        .single()
+
+      if (existingProfile) {
+        return { error: 'Ese nombre de usuario ya está ocupado. Por favor elige otro.' }
+      }
+      updates.username = data.username
     }
     if (data.avatarPath) {
       const { data: publicUrlData } = supabaseAdmin.storage.from('avatars').getPublicUrl(data.avatarPath)

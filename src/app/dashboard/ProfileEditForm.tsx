@@ -3,10 +3,11 @@
 import { useState } from 'react'
 import { getAvatarSignedUrl, updateProfileData } from './actions'
 
-export default function ProfileEditForm({ initialBio, initialAvatarUrl, initialFullName }: { initialBio?: string, initialAvatarUrl?: string, initialFullName?: string }) {
+export default function ProfileEditForm({ initialBio, initialAvatarUrl, initialFullName, initialUsername, initialDisplayPref }: { initialBio?: string, initialAvatarUrl?: string, initialFullName?: string, initialUsername?: string, initialDisplayPref?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialAvatarUrl || null)
+  const [username, setUsername] = useState(initialUsername || '')
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -14,6 +15,11 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl, initialF
       const objectUrl = URL.createObjectURL(file)
       setPreviewUrl(objectUrl)
     }
+  }
+
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')
+    setUsername(val)
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -25,6 +31,8 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl, initialF
       const formData = new FormData(e.currentTarget)
       const bio = formData.get('bio') as string
       const fullName = formData.get('full_name') as string
+      const usernameVal = formData.get('username') as string
+      const displayPreference = formData.get('display_preference') as string
       const avatarFile = formData.get('avatarFile') as File | null
 
       let finalAvatarPath = null
@@ -53,7 +61,7 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl, initialF
       }
 
       // 3. Update Profile DB
-      const dbResult = await updateProfileData({ bio, fullName, avatarPath: finalAvatarPath })
+      const dbResult = await updateProfileData({ bio, fullName, username: usernameVal, displayPreference, avatarPath: finalAvatarPath })
       if (dbResult && dbResult.error) throw new Error(dbResult.error)
 
     } catch (error: any) {
@@ -102,6 +110,37 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl, initialF
             style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} 
             placeholder="Ej. Juan Pérez o tu pseudónimo"
           />
+        </div>
+
+        <div>
+          <label htmlFor="username" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Nombre de Usuario Único</label>
+          <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+            <span style={{ padding: '0.75rem', color: 'var(--text-tertiary)', borderRight: '1px solid var(--border-color)' }}>@</span>
+            <input 
+              type="text" 
+              id="username" 
+              name="username" 
+              required 
+              value={username}
+              onChange={handleUsernameChange}
+              style={{ width: '100%', padding: '0.75rem', border: 'none', backgroundColor: 'transparent', color: 'var(--text-primary)', outline: 'none' }} 
+              placeholder="juanperez"
+            />
+          </div>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>Solo minúsculas, números y guiones bajos (_)</p>
+        </div>
+
+        <div>
+          <label htmlFor="display_preference" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Preferencia de Visualización</label>
+          <select 
+            id="display_preference" 
+            name="display_preference" 
+            defaultValue={initialDisplayPref || "full_name"}
+            style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+          >
+            <option value="full_name">Mostrar mi Nombre Completo</option>
+            <option value="username">Mostrar mi Nombre de Usuario (Anónimo)</option>
+          </select>
         </div>
 
         <div>

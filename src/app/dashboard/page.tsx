@@ -51,6 +51,8 @@ export default async function Dashboard() {
           initialBio={profile?.bio || ''} 
           initialAvatarUrl={profile?.avatar_url || null}
           initialFullName={profile?.full_name || ''}
+          initialUsername={profile?.username || ''}
+          initialDisplayPref={profile?.display_preference || 'full_name'}
         />
       </section>
 
