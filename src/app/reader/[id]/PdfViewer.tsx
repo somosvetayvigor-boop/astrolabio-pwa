@@ -56,6 +56,34 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
 
   const sampleEnded = isSample && pageNumber >= numPages;
 
+  // Swipe gesture handling
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
+  const minSwipeDistance = 50
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    const isLeftSwipe = distance > minSwipeDistance
+    const isRightSwipe = distance < -minSwipeDistance
+
+    if (isLeftSwipe && !sampleEnded) {
+      next() // Swipe left means go forward
+    }
+    if (isRightSwipe) {
+      prev() // Swipe right means go backward
+    }
+  }
+
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', display: 'flex', flexDirection: 'column', zIndex: 9999 }}>
       
@@ -73,13 +101,13 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
       </div>
 
       {/* Reader Area */}
-      <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div 
+        style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
         
-        {/* Previous Page Button */}
-        <button onClick={prev} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '50px', zIndex: 10, backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'var(--text-tertiary)', cursor: pageNumber > 1 ? 'pointer' : 'default', opacity: pageNumber > 1 ? 1 : 0.3, border: 'none' }}>
-          ‹
-        </button>
-
         {/* PDF Document Area */}
         <div 
           style={{ 
@@ -106,11 +134,6 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
             />
           </Document>
         </div>
-        
-        {/* Next Page Button */}
-        <button onClick={next} disabled={sampleEnded} style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50px', zIndex: 10, backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'var(--text-tertiary)', cursor: sampleEnded ? 'not-allowed' : 'pointer', border: 'none' }}>
-          ›
-        </button>
 
       </div>
 
