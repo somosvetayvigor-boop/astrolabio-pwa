@@ -50,7 +50,9 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
         {/* Book Info */}
         <div style={{ flex: '2 1 400px', display: 'flex', flexDirection: 'column' }}>
           <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem', lineHeight: 1.1 }}>{book.title}</h1>
-          <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>por <span style={{ color: 'var(--brand-primary)', fontWeight: 600 }}>{book.profiles?.full_name || 'Autor Desconocido'}</span></p>
+          <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+            por <Link href={`/author/${book.author_id}`} style={{ color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>{book.profiles?.full_name || 'Autor Desconocido'}</Link>
+          </p>
           
           <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', paddingBottom: '2rem', borderBottom: '1px solid var(--border-color)' }}>
             <div>

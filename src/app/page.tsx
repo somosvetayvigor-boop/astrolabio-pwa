@@ -87,7 +87,9 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
                   <div className="book-info">
                     {book.category && <span style={{ fontSize: '0.75rem', color: 'var(--brand-primary)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{book.category}</span>}
                     <h3 className="book-title" style={{ marginTop: '0.25rem' }}>{book.title}</h3>
-                    <p className="book-author">{book.profiles?.full_name || 'Autor Desconocido'}</p>
+                    <Link href={`/author/${book.author_id}`} onClick={(e) => e.stopPropagation()} style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textDecoration: 'none' }}>
+                      <p className="book-author" style={{ margin: 0 }}>{book.profiles?.full_name || 'Autor Desconocido'}</p>
+                    </Link>
                     <div className="book-footer">
                       <span className="book-price">${book.price}</span>
                       <button className="btn btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}>Leer</button>

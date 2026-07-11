@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from '@/utils/supabase/server';
 import { deleteBook } from './actions';
 import DeleteButton from './DeleteButton';
+import ProfileEditForm from './ProfileEditForm';
 import { redirect } from 'next/navigation';
 
 export default async function Dashboard() {
@@ -11,6 +12,13 @@ export default async function Dashboard() {
   if (!user) {
     redirect('/login');
   }
+
+  // Fetch author profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
 
   // Fetch real books for the user
   const { data: myBooks } = await supabase
@@ -33,6 +41,8 @@ export default async function Dashboard() {
         <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Panel de Autor</h1>
         <Link href="/dashboard/upload" className="btn btn-primary">+ Subir Nuevo Libro (ePub)</Link>
       </div>
+
+      <ProfileEditForm initialBio={profile?.bio} initialAvatarUrl={profile?.avatar_url} />
 
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>

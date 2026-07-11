@@ -130,3 +130,55 @@ export async function editBook(formData: FormData) {
   revalidatePath('/')
   redirect('/dashboard')
 }
+
+export async function updateProfile(formData: FormData) {
+  const supabase = await createClient()
+  
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    redirect('/login')
+  }
+
+  const bio = formData.get('bio') as string
+  const avatarFile = formData.get('avatarFile') as File | null
+
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  let avatarUrl = undefined
+
+  if (avatarFile && avatarFile.size > 0) {
+    const fileExt = avatarFile.name.split('.').pop()
+    const fileName = `${user.id}-${Date.now()}.${fileExt}`
+    
+    const { data: uploadData, error: uploadError } = await supabaseAdmin
+      .storage
+      .from('avatars')
+      .upload(fileName, avatarFile)
+      
+    if (!uploadError && uploadData) {
+      const { data: { publicUrl } } = supabaseAdmin.storage.from('avatars').getPublicUrl(fileName)
+      avatarUrl = publicUrl
+    }
+  }
+
+  const updates: any = { bio }
+  if (avatarUrl) {
+    updates.avatar_url = avatarUrl
+  }
+
+  const { error } = await supabaseAdmin
+    .from('profiles')
+    .update(updates)
+    .eq('id', user.id)
+
+  if (error) {
+    console.error('Error updating profile:', error)
+    throw new Error('Could not update profile')
+  }
+
+  revalidatePath('/dashboard')
+  redirect('/dashboard')
+}
