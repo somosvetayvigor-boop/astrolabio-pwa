@@ -196,19 +196,19 @@ export default function UploadBookPage() {
           </div>
 
           <div>
-            <label htmlFor="epubFile" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Archivo del Libro (.epub) *</label>
+            <label htmlFor="epubFile" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Archivo del Libro (.epub o .pdf) *</label>
             <input 
               type="file" 
               id="epubFile" 
               name="epubFile" 
-              accept=".epub"
+              accept=".epub,.pdf"
               required
               style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)' }} 
             />
             <div style={{ marginTop: '0.75rem', padding: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)', border: '1px dashed rgba(255,255,255,0.2)' }}>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                💡 <strong>Nota:</strong> Astrolabio solo acepta formato <code>.epub</code> para garantizar la mejor experiencia de lectura interactiva. <br/>
-                Si tienes tu libro en Word o PDF, te recomendamos convertirlo primero usando esta herramienta gratuita:
+                💡 <strong>Consejo de formato:</strong> Sube archivos <code>.epub</code> para novelas de puro texto. Sube archivos <code>.pdf</code> si tu libro es un cuento infantil ilustrado o cómic (para que las páginas no se muevan de lugar). <br/>
+                Si tienes tu libro en Word, te recomendamos convertirlo primero usando esta herramienta gratuita:
               </p>
               <a 
                 href="https://convertio.co/es/document-epub/" 
@@ -216,7 +216,7 @@ export default function UploadBookPage() {
                 rel="noopener noreferrer"
                 style={{ display: 'inline-block', marginTop: '0.5rem', color: 'var(--brand-primary)', fontSize: '0.875rem', textDecoration: 'underline', fontWeight: 600 }}
               >
-                Convertir a EPUB gratis en Convertio ↗
+                Convertir a EPUB o PDF gratis en Convertio ↗
               </a>
             </div>
           </div>

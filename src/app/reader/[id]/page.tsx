@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from 'next/navigation'
 import EpubViewer from './EpubViewer'
+import PdfViewer from './PdfViewer'
 
 export default async function ReaderPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -73,6 +74,21 @@ export default async function ReaderPage(props: { params: Promise<{ id: string }
       <div className="container" style={{ padding: '4rem', textAlign: 'center' }}>
         <h2>Error: No se pudo cargar el archivo del libro.</h2>
       </div>
+    )
+  }
+
+  // Decide which viewer to use based on the file extension
+  // In the database, epub_file_url might be "uuid-timestamp.pdf" or "uuid-timestamp.epub"
+  const isPdf = book.epub_file_url && book.epub_file_url.toLowerCase().endsWith('.pdf');
+
+  if (isPdf) {
+    return (
+      <PdfViewer 
+        bookId={book.id} 
+        bookTitle={book.title} 
+        epubUrl={epubSignedUrl}
+        isSample={isSample}
+      />
     )
   }
 
