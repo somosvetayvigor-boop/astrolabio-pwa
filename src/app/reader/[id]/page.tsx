@@ -50,13 +50,21 @@ export default async function ReaderPage(props: { params: Promise<{ id: string }
 
   // If the book has an epub file, generate a temporary signed URL to download it securely
   if (book.epub_file_url) {
-    const { data: signedData, error: signedError } = await supabase
+    const { createClient: createSupabaseClient } = await import('@supabase/supabase-js')
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const { data: signedData, error: signedError } = await supabaseAdmin
       .storage
       .from('epubs')
       .createSignedUrl(book.epub_file_url, 60 * 60) // valid for 1 hour
 
     if (!signedError && signedData) {
       epubSignedUrl = signedData.signedUrl
+    } else {
+      console.error('Error generating signed URL:', signedError)
     }
   }
 
