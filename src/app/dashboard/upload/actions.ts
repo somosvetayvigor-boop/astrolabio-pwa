@@ -18,6 +18,7 @@ export async function uploadBook(formData: FormData) {
   // 2. Extract form data
   const title = formData.get('title') as string
   const description = formData.get('description') as string
+  const category = formData.get('category') as string
   const price = parseFloat(formData.get('price') as string)
   const epubFile = formData.get('epubFile') as File
   const coverFile = formData.get('coverFile') as File
@@ -76,6 +77,7 @@ export async function uploadBook(formData: FormData) {
       author_id: user.id,
       title,
       description,
+      category,
       price,
       cover_url: coverUrl,
       epub_file_url: epubUrl,

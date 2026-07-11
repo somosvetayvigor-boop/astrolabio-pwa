@@ -49,6 +49,30 @@ export default function UploadBookPage() {
           </div>
 
           <div>
+            <label htmlFor="category" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Categoría / Género *</label>
+            <select 
+              id="category" 
+              name="category" 
+              required 
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+            >
+              <option value="">Selecciona una categoría...</option>
+              <option value="Romance">Romance</option>
+              <option value="Ciencia Ficción">Ciencia Ficción</option>
+              <option value="Fantasía">Fantasía</option>
+              <option value="Terror / Suspenso">Terror / Suspenso</option>
+              <option value="Desarrollo Personal">Desarrollo Personal</option>
+              <option value="Artículos Científicos">Artículos Científicos</option>
+              <option value="Infantil (0-5 años)">Infantil (0-5 años)</option>
+              <option value="Infantil (6-9 años)">Infantil (6-9 años)</option>
+              <option value="Infantil (10-12 años)">Infantil (10-12 años)</option>
+              <option value="Poesía">Poesía</option>
+              <option value="Biografía">Biografía</option>
+              <option value="Otro">Otro</option>
+            </select>
+          </div>
+
+          <div>
             <label htmlFor="price" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Precio de Venta Directa ($ USD)</label>
             <input 
               type="number" 
