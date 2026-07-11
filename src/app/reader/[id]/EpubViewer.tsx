@@ -46,8 +46,7 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         const newRendition = newBook.renderTo(viewerRef.current, {
       width: '100%',
       height: '100%',
-      manager: 'continuous',
-      flow: 'scrolled',
+      spread: 'none', // Use paginated layout (Kindle style)
     })
 
     // Inject CSS to fix image overflow in fixed-layout or poorly formatted epubs
@@ -62,19 +61,22 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         "img, video, audio, object, svg": {
           "max-width": "100% !important",
           "height": "auto !important",
-          "max-height": "95vh !important",
+          "max-height": "70vh !important", /* Strictly smaller than screen to prevent column breaking */
           "object-fit": "contain !important",
           "page-break-inside": "avoid !important",
           "break-inside": "avoid !important",
           "display": "block !important",
-          "margin": "0 auto !important"
+          "margin": "1rem auto !important"
         },
         "div, p, span, figure, h1, h2, h3, h4, h5, h6": {
           "max-width": "100% !important",
-          "word-wrap": "break-word !important"
+          "word-wrap": "break-word !important",
+          "line-height": "1.6 !important"
         },
         "*": {
-          "max-width": "100% !important"
+          "max-width": "100% !important",
+          "position": "static !important", /* Strip absolute positioning from Google Docs */
+          "box-sizing": "border-box !important"
         }
       });
     });
