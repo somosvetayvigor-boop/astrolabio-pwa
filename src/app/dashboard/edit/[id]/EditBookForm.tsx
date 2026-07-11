@@ -1,23 +1,124 @@
 "use client"
 
 import { useState } from 'react'
-import { editBook } from '../../actions'
+import { updateBookData } from '../../actions'
+import { getSignedUrls } from '../../upload/actions'
 
 export default function EditBookForm({ book }: { book: any }) {
   const [isUploading, setIsUploading] = useState(false)
   const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [progressText, setProgressText] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    if (!agreedToTerms) {
-      e.preventDefault();
-      return;
-    }
+    e.preventDefault();
+    if (!agreedToTerms) return;
+    
     setIsUploading(true)
+    setErrorMessage(null)
+    setProgressText('Preparando archivos...')
+
+    try {
+      const formData = new FormData(e.currentTarget)
+      const bookId = formData.get('bookId') as string
+      const title = formData.get('title') as string
+      const description = formData.get('description') as string
+      const price = parseFloat(formData.get('price') as string)
+      
+      const coverFile = formData.get('coverFile') as File | null
+      const epubFile = formData.get('epubFile') as File | null
+
+      let finalEpubPath = null
+      let finalCoverPath = null
+
+      const hasEpub = epubFile && epubFile.size > 0
+      const hasCover = coverFile && coverFile.size > 0
+
+      if (hasEpub || hasCover) {
+        // 1. Obtain signed URLs
+        setProgressText('Generando enlaces de subida seguros...')
+        const urlsResult = await getSignedUrls(
+          hasEpub ? epubFile.name : 'dummy.epub',
+          hasCover ? coverFile.name : null
+        )
+
+        if (urlsResult.error) throw new Error(urlsResult.error)
+        
+        const { createClient } = await import('@/utils/supabase/client')
+        const supabase = createClient()
+
+        // 2. Upload ePub
+        if (hasEpub && urlsResult.epub) {
+          setProgressText('Subiendo libro (esto puede tardar unos minutos si es muy pesado, no cierres la ventana)...')
+          
+          const epubToken = new URL(urlsResult.epub.signedUrl).searchParams.get('token')
+          if (!epubToken) throw new Error('Error al extraer token ePub.')
+          
+          const { error: epubUploadError } = await supabase.storage
+            .from('epubs')
+            .uploadToSignedUrl(urlsResult.epub.path, epubToken, epubFile)
+
+          if (epubUploadError) {
+            throw new Error('Falló la subida del archivo ePub directo a Supabase: ' + epubUploadError.message)
+          }
+          finalEpubPath = urlsResult.epub.path
+        }
+
+        // 3. Upload Cover
+        if (hasCover && urlsResult.cover) {
+          setProgressText('Subiendo nueva portada...')
+          const coverToken = new URL(urlsResult.cover.signedUrl).searchParams.get('token')
+          if (!coverToken) throw new Error('Error al extraer token de portada.')
+
+          const { error: coverUploadError } = await supabase.storage
+            .from('book-covers')
+            .uploadToSignedUrl(urlsResult.cover.path, coverToken, coverFile)
+            
+          if (coverUploadError) {
+            throw new Error('Falló la subida de la portada directo a Supabase: ' + coverUploadError.message)
+          }
+          finalCoverPath = urlsResult.cover.path
+        }
+      }
+
+      // 4. Update Database Record
+      setProgressText('Actualizando datos en la base de datos...')
+      const dbResult = await updateBookData({
+        bookId,
+        title,
+        description,
+        price,
+        epubPath: finalEpubPath,
+        coverPath: finalCoverPath
+      })
+
+      if (dbResult && dbResult.error) {
+        throw new Error(dbResult.error)
+      }
+
+    } catch (error: any) {
+      console.error(error)
+      setErrorMessage(error.message || 'Error desconocido.')
+      setIsUploading(false)
+      setProgressText(null)
+    }
   }
 
   return (
     <div className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
-      <form action={editBook} onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {errorMessage && (
+        <div style={{ backgroundColor: 'rgba(255,0,0,0.1)', border: '1px solid red', color: 'red', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem' }}>
+          <strong>Error:</strong> {errorMessage}
+        </div>
+      )}
+
+      {progressText && (
+        <div style={{ backgroundColor: 'rgba(212, 175, 55, 0.1)', border: '1px solid var(--brand-primary)', color: 'var(--brand-primary)', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontWeight: 600 }}>
+          ⏳ {progressText}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         
         <input type="hidden" name="bookId" value={book.id} />
 
@@ -45,7 +146,7 @@ export default function EditBookForm({ book }: { book: any }) {
         </div>
 
         <div>
-          <label htmlFor="price" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Precio de Venta Directa ($ USD)</label>
+          <label htmlFor="price" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Precio de Venta Directa ($ MXN)</label>
           <input 
             type="number" 
             id="price" 

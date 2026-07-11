@@ -42,91 +42,68 @@ export async function deleteBook(formData: FormData) {
   revalidatePath('/')
 }
 
-export async function editBook(formData: FormData) {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    redirect('/login')
-  }
+export async function updateBookData(data: {
+  bookId: string,
+  title: string,
+  description: string,
+  price: number,
+  epubPath: string | null,
+  coverPath: string | null
+}) {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) return { error: 'No estás autenticado.' }
 
-  const bookId = formData.get('bookId') as string
-  const title = formData.get('title') as string
-  const description = formData.get('description') as string
-  const price = parseFloat(formData.get('price') as string)
-  
-  const coverFile = formData.get('coverFile') as File | null
-  const epubFile = formData.get('epubFile') as File | null
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
 
-  const supabaseAdmin = createSupabaseClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+    // Verify ownership
+    const { data: book } = await supabaseAdmin
+      .from('books')
+      .select('*')
+      .eq('id', data.bookId)
+      .single()
 
-  // Verify ownership
-  const { data: book } = await supabaseAdmin
-    .from('books')
-    .select('*')
-    .eq('id', bookId)
-    .single()
-
-  if (!book || book.author_id !== user.id) {
-    throw new Error('Unauthorized')
-  }
-
-  let coverUrl = book.cover_url
-  let epubUrl = book.epub_file_url
-
-  // Upload new cover if provided
-  if (coverFile && coverFile.size > 0) {
-    const fileExtCover = coverFile.name.split('.').pop()
-    const coverFileName = `${user.id}-${Date.now()}.${fileExtCover}`
-    
-    const { data: coverData, error: coverError } = await supabaseAdmin
-      .storage
-      .from('book-covers')
-      .upload(coverFileName, coverFile)
-      
-    if (!coverError && coverData) {
-      const { data: { publicUrl } } = supabaseAdmin.storage.from('book-covers').getPublicUrl(coverFileName)
-      coverUrl = publicUrl
+    if (!book || book.author_id !== user.id) {
+      return { error: 'No autorizado' }
     }
-  }
 
-  // Upload new epub if provided
-  if (epubFile && epubFile.size > 0) {
-    const fileExtEpub = epubFile.name.split('.').pop()
-    const epubFileName = `${user.id}-${Date.now()}.${fileExtEpub}`
-    
-    const { data: epubData, error: epubError } = await supabaseAdmin
-      .storage
-      .from('epubs')
-      .upload(epubFileName, epubFile)
-      
-    if (!epubError && epubData) {
-      epubUrl = epubData.path
+    let coverUrl = book.cover_url
+    let epubUrl = book.epub_file_url
+
+    if (data.coverPath) {
+      const { data: publicUrlData } = supabaseAdmin.storage.from('book-covers').getPublicUrl(data.coverPath)
+      coverUrl = publicUrlData.publicUrl
     }
-  }
 
-  // Update record
-  const { error: updateError } = await supabaseAdmin
-    .from('books')
-    .update({
-      title,
-      description,
-      price,
-      cover_url: coverUrl,
-      epub_file_url: epubUrl
-    })
-    .eq('id', bookId)
+    if (data.epubPath) {
+      epubUrl = data.epubPath
+    }
 
-  if (updateError) {
-    console.error('Error updating book:', updateError)
-    throw new Error('Could not update book')
+    const { error: updateError } = await supabaseAdmin
+      .from('books')
+      .update({
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        cover_url: coverUrl,
+        epub_file_url: epubUrl
+      })
+      .eq('id', data.bookId)
+
+    if (updateError) {
+      console.error('Error updating book:', updateError)
+      return { error: 'Could not update book' }
+    }
+  } catch (err: any) {
+    return { error: err.message }
   }
 
   revalidatePath('/dashboard')
-  revalidatePath(`/book/${bookId}`)
+  revalidatePath(`/book/${data.bookId}`)
   revalidatePath('/')
   redirect('/dashboard')
 }
