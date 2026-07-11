@@ -24,14 +24,20 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl }: { init
         const urlsResult = await getAvatarSignedUrl(avatarFile.name)
         if (urlsResult.error) throw new Error(urlsResult.error)
         
-        // 2. Upload to Supabase
-        const uploadRes = await fetch(urlsResult.signedUrl!, {
-          method: 'PUT',
-          body: avatarFile,
-          headers: { 'Content-Type': avatarFile.type }
-        })
+        // 2. Upload to Supabase using client SDK
+        const { createClient } = await import('@/utils/supabase/client')
+        const supabase = createClient()
+        const token = new URL(urlsResult.signedUrl!).searchParams.get('token')
+        
+        if (!token) throw new Error('Token inválido generado por el servidor.')
 
-        if (!uploadRes.ok) throw new Error('Error al subir la foto directo a Supabase.')
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .uploadToSignedUrl(urlsResult.path!, token, avatarFile)
+
+        if (uploadError) {
+          throw new Error('Error al subir foto: ' + uploadError.message)
+        }
         
         finalAvatarPath = urlsResult.path!
       }

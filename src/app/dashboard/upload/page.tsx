@@ -42,27 +42,35 @@ export default function UploadBookPage() {
 
       // 2. Subir ePub directamente a Supabase
       setProgressText('Subiendo libro (esto puede tardar unos minutos si es muy pesado, no cierres la ventana)...')
-      const epubUpload = await fetch(epub.signedUrl, {
-        method: 'PUT',
-        body: epubFile,
-        headers: { 'Content-Type': epubFile.type }
-      })
+      
+      const { createClient } = await import('@/utils/supabase/client')
+      const supabase = createClient()
+      
+      const epubToken = new URL(epub.signedUrl).searchParams.get('token')
+      if (!epubToken) throw new Error('Error al extraer token ePub.')
+      
+      const { error: epubUploadError } = await supabase.storage
+        .from('epubs')
+        .uploadToSignedUrl(epub.path, epubToken, epubFile)
 
-      if (!epubUpload.ok) {
-        throw new Error('Falló la subida del archivo ePub directo a Supabase.')
+      if (epubUploadError) {
+        throw new Error('Falló la subida del archivo ePub directo a Supabase: ' + epubUploadError.message)
       }
 
       // 3. Subir portada directamente (si hay)
       let finalCoverPath = null
       if (cover && coverFile && coverFile.size > 0) {
         setProgressText('Subiendo portada...')
-        const coverUpload = await fetch(cover.signedUrl, {
-          method: 'PUT',
-          body: coverFile,
-          headers: { 'Content-Type': coverFile.type }
-        })
-        if (!coverUpload.ok) {
-          throw new Error('Falló la subida de la portada directo a Supabase.')
+        
+        const coverToken = new URL(cover.signedUrl).searchParams.get('token')
+        if (!coverToken) throw new Error('Error al extraer token de portada.')
+
+        const { error: coverUploadError } = await supabase.storage
+          .from('book-covers')
+          .uploadToSignedUrl(cover.path, coverToken, coverFile)
+          
+        if (coverUploadError) {
+          throw new Error('Falló la subida de la portada directo a Supabase: ' + coverUploadError.message)
         }
         finalCoverPath = cover.path
       }
