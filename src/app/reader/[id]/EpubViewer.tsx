@@ -46,7 +46,8 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         const newRendition = newBook.renderTo(viewerRef.current, {
       width: '100%',
       height: '100%',
-      spread: 'none', // Better for mobile/single column reading
+      manager: 'continuous',
+      flow: 'scrolled',
     })
 
     // Inject CSS to fix image overflow in fixed-layout or poorly formatted epubs
