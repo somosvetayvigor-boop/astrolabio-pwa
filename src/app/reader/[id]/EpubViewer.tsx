@@ -61,14 +61,23 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         "img, video, audio, object, svg": {
           "max-width": "100% !important",
           "height": "auto !important",
-          "max-height": "70vh !important", /* Strictly smaller than screen to prevent column breaking */
+          "max-height": "55vh !important", /* Leaves 45vh for text to prevent separation */
           "object-fit": "contain !important",
           "page-break-inside": "avoid !important",
           "break-inside": "avoid !important",
+          "page-break-after": "avoid !important",
+          "break-after": "avoid !important",
           "display": "block !important",
           "margin": "1rem auto !important"
         },
-        "div, p, span, figure, h1, h2, h3, h4, h5, h6": {
+        "p:has(img), div:has(img), figure": {
+          "page-break-after": "avoid !important",
+          "break-after": "avoid !important",
+          "page-break-inside": "avoid !important",
+          "break-inside": "avoid !important",
+          "margin-bottom": "0 !important"
+        },
+        "div, p, span, h1, h2, h3, h4, h5, h6": {
           "max-width": "100% !important",
           "word-wrap": "break-word !important",
           "line-height": "1.6 !important"
