@@ -80,12 +80,12 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
     let saveTimeout: NodeJS.Timeout
 
     // Setup locations for progress tracking (calculates total pages)
-    newBook.ready.then(() => {
-      return newBook.locations.generate(1600) // 1600 characters per "page"
+    newBook!.ready.then(() => {
+      return newBook!.locations.generate(1600) // 1600 characters per "page"
     }).then((locations) => {
       // Listen for page turns
       newRendition.on('relocated', (location: any) => {
-        const percentage = newBook.locations.percentageFromCfi(location.start.cfi)
+        const percentage = newBook!.locations.percentageFromCfi(location.start.cfi)
         setProgress(Math.round(percentage * 100))
         
         if (isSample) {
