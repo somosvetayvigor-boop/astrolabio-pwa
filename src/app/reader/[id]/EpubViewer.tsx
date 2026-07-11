@@ -46,47 +46,27 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         const newRendition = newBook.renderTo(viewerRef.current, {
       width: '100%',
       height: '100%',
-      manager: 'continuous',
-      flow: 'scrolled',
+      spread: 'none', // Use paginated layout (Kindle style)
     })
 
     // Inject CSS to fix image overflow in fixed-layout or poorly formatted epubs
     newRendition.hooks.content.register((contents: any) => {
       contents.addStylesheetRules({
-        "body": {
-          "padding": "0 !important",
-          "margin": "0 !important",
+        "body, html": {
           "max-width": "100% !important",
           "overflow-x": "hidden !important"
+        },
+        "div, p, span, figure": {
+          "max-width": "100% !important", /* Prevents Google Docs fixed-width wrappers from bleeding into next column */
+          "height": "auto !important" /* Prevents fixed-height wrappers from pushing text out of bounds */
         },
         "img, video, audio, object, svg": {
           "max-width": "100% !important",
           "height": "auto !important",
-          "max-height": "55vh !important", /* Leaves 45vh for text to prevent separation */
+          "max-height": "60vh !important", /* Guarantees image fits in one column, leaving space for text */
           "object-fit": "contain !important",
-          "page-break-inside": "avoid !important",
-          "break-inside": "avoid !important",
-          "page-break-after": "avoid !important",
-          "break-after": "avoid !important",
           "display": "block !important",
-          "margin": "1rem auto !important"
-        },
-        "p:has(img), div:has(img), figure": {
-          "page-break-after": "avoid !important",
-          "break-after": "avoid !important",
-          "page-break-inside": "avoid !important",
-          "break-inside": "avoid !important",
-          "margin-bottom": "0 !important"
-        },
-        "div, p, span, h1, h2, h3, h4, h5, h6": {
-          "max-width": "100% !important",
-          "word-wrap": "break-word !important",
-          "line-height": "1.6 !important"
-        },
-        "*": {
-          "max-width": "100% !important",
-          "position": "static !important", /* Strip absolute positioning from Google Docs */
-          "box-sizing": "border-box !important"
+          "margin": "0 auto !important"
         }
       });
     });
