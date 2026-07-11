@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from '@/utils/supabase/server'
 import { notFound } from "next/navigation";
 import BuyButton from '@/components/BuyButton';
+import ReviewForm from '@/components/ReviewForm';
 
 export default async function BookDetail(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -16,6 +17,17 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
   if (error || !book) {
     notFound()
   }
+
+  // Fetch Reviews
+  const { data: reviews } = await supabase
+    .from('reviews')
+    .select('*, profiles(full_name, avatar_url)')
+    .eq('book_id', book.id)
+    .order('created_at', { ascending: false });
+
+  const averageRating = reviews?.length 
+    ? (reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length).toFixed(1)
+    : 0;
 
   const { data: { user } } = await supabase.auth.getUser()
   
@@ -36,11 +48,12 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
     hasPurchased = true;
   }
 
+  const hasReviewed = user && reviews?.some(r => r.user_id === user.id);
   const defaultCover = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop"
 
   return (
-    <div className="container" style={{ padding: '4rem 1.5rem' }}>
-      <div style={{ display: 'flex', gap: '4rem', flexDirection: 'row', flexWrap: 'wrap' }}>
+    <div className="container" style={{ padding: '4rem 1.5rem', maxWidth: '1200px' }}>
+      <div style={{ display: 'flex', gap: '4rem', flexDirection: 'row', flexWrap: 'wrap', marginBottom: '4rem' }}>
         
         {/* Book Cover */}
         <div style={{ flex: '1 1 300px', maxWidth: '400px' }}>
@@ -50,9 +63,18 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
         {/* Book Info */}
         <div style={{ flex: '2 1 400px', display: 'flex', flexDirection: 'column' }}>
           <h1 style={{ fontSize: '3rem', fontWeight: 800, marginBottom: '0.5rem', lineHeight: 1.1 }}>{book.title}</h1>
-          <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+          <p style={{ fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
             por <Link href={`/author/${book.author_id}`} style={{ color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>{book.profiles?.full_name || 'Autor Desconocido'}</Link>
           </p>
+
+          {/* Average Rating */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' }}>
+            <span style={{ color: '#f59e0b', fontSize: '1.25rem' }}>
+              {Number(averageRating) > 0 ? '★'.repeat(Math.round(Number(averageRating))) + '☆'.repeat(5 - Math.round(Number(averageRating))) : '☆☆☆☆☆'}
+            </span>
+            <span style={{ fontWeight: 600 }}>{Number(averageRating) > 0 ? averageRating : 'Sin reseñas'}</span>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>({reviews?.length || 0} valoraciones)</span>
+          </div>
           
           <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', paddingBottom: '2rem', borderBottom: '1px solid var(--border-color)' }}>
             <div>
@@ -88,6 +110,58 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
               </>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '4rem' }}>
+        <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '2rem' }}>Reseñas de los lectores</h2>
+        
+        <div style={{ display: 'flex', gap: '4rem', flexWrap: 'wrap-reverse' }}>
+          
+          <div style={{ flex: '2 1 400px' }}>
+            {!reviews || reviews.length === 0 ? (
+              <div style={{ padding: '3rem', textAlign: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
+                <p style={{ color: 'var(--text-secondary)' }}>Aún no hay reseñas para este libro.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                {reviews.map((review: any) => (
+                  <div key={review.id} style={{ paddingBottom: '2rem', borderBottom: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                      {review.profiles?.avatar_url ? (
+                        <img src={review.profiles.avatar_url} alt={review.profiles.full_name} style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                      ) : (
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>👤</div>
+                      )}
+                      <div>
+                        <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.1rem' }}>{review.profiles?.full_name || 'Lector'}</p>
+                        <p style={{ color: '#f59e0b', fontSize: '0.875rem' }}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</p>
+                      </div>
+                      <span style={{ marginLeft: 'auto', fontSize: '0.875rem', color: 'var(--text-tertiary)' }}>
+                        {new Date(review.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {review.comment && (
+                      <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{review.comment}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ flex: '1 1 300px' }}>
+            {hasPurchased && !hasReviewed && (
+              <ReviewForm bookId={book.id} />
+            )}
+            {!hasPurchased && (
+              <div style={{ padding: '1.5rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', textAlign: 'center' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Debes comprar este libro para dejar una reseña.</p>
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
     </div>
