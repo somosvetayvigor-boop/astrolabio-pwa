@@ -65,7 +65,7 @@ export default function EditBookForm({ book }: { book: any }) {
         }
 
         // 3. Upload Cover
-        if (hasCover && urlsResult.cover) {
+        if (hasCover && urlsResult.cover && urlsResult.cover.signedUrl) {
           setProgressText('Subiendo nueva portada...')
           const coverToken = new URL(urlsResult.cover.signedUrl).searchParams.get('token')
           if (!coverToken) throw new Error('Error al extraer token de portada.')
