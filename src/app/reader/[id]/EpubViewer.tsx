@@ -27,12 +27,23 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
   useEffect(() => {
     if (!viewerRef.current || !epubUrl) return
 
-    // Initialize the ePub book
-    const newBook = ePub(epubUrl)
-    setBook(newBook)
+    let newBook: Book | null = null
 
-    // Render it to the DOM
-    const newRendition = newBook.renderTo(viewerRef.current, {
+    // Fetch the EPUB file as an ArrayBuffer to avoid URL extension parsing bugs in epub.js
+    fetch(epubUrl)
+      .then(res => {
+        if (!res.ok) throw new Error('Error downloading epub')
+        return res.arrayBuffer()
+      })
+      .then(buffer => {
+        if (!viewerRef.current) return
+        
+        // Initialize the ePub book with the ArrayBuffer
+        newBook = ePub(buffer)
+        setBook(newBook)
+
+        // Render it to the DOM
+        const newRendition = newBook.renderTo(viewerRef.current, {
       width: '100%',
       height: '100%',
       spread: 'none', // Better for mobile/single column reading
@@ -92,8 +103,13 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       })
     })
 
+    }) // End of .then(buffer => { ... })
+    .catch(err => {
+      console.error('Error loading epub:', err)
+    })
+
     return () => {
-      newBook.destroy()
+      if (newBook) newBook.destroy()
     }
   }, [epubUrl])
 

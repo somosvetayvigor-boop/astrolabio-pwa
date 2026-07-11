@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { getAvatarSignedUrl, updateProfileData } from './actions'
 
-export default function ProfileEditForm({ initialBio, initialAvatarUrl }: { initialBio?: string, initialAvatarUrl?: string }) {
+export default function ProfileEditForm({ initialBio, initialAvatarUrl, initialFullName }: { initialBio?: string, initialAvatarUrl?: string, initialFullName?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialAvatarUrl || null)
@@ -24,7 +24,8 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl }: { init
     try {
       const formData = new FormData(e.currentTarget)
       const bio = formData.get('bio') as string
-      const avatarFile = formData.get('avatarFile') as File
+      const fullName = formData.get('full_name') as string
+      const avatarFile = formData.get('avatarFile') as File | null
 
       let finalAvatarPath = null
 
@@ -52,7 +53,7 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl }: { init
       }
 
       // 3. Update Profile DB
-      const dbResult = await updateProfileData({ bio, avatarPath: finalAvatarPath })
+      const dbResult = await updateProfileData({ bio, fullName, avatarPath: finalAvatarPath })
       if (dbResult && dbResult.error) throw new Error(dbResult.error)
 
     } catch (error: any) {
@@ -88,6 +89,19 @@ export default function ProfileEditForm({ initialBio, initialAvatarUrl }: { init
             <label htmlFor="avatarFile" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Foto de Perfil</label>
             <input type="file" id="avatarFile" name="avatarFile" accept="image/*" onChange={handleFileChange} style={{ width: '100%' }} />
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="full_name" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Nombre Completo (Público)</label>
+          <input 
+            type="text" 
+            id="full_name" 
+            name="full_name" 
+            required
+            defaultValue={initialFullName}
+            style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} 
+            placeholder="Ej. Juan Pérez o tu pseudónimo"
+          />
         </div>
 
         <div>

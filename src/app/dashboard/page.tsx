@@ -42,7 +42,17 @@ export default async function Dashboard() {
         <Link href="/dashboard/upload" className="btn btn-primary">+ Subir Nuevo Libro (ePub)</Link>
       </div>
 
-      <ProfileEditForm initialBio={profile?.bio} initialAvatarUrl={profile?.avatar_url} />
+      <section style={{ marginBottom: '3rem' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span>Mi Perfil de Autor</span>
+        </h2>
+        
+        <ProfileEditForm 
+          initialBio={profile?.bio || ''} 
+          initialAvatarUrl={profile?.avatar_url || null}
+          initialFullName={profile?.full_name || ''}
+        />
+      </section>
 
       {/* Stats Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>

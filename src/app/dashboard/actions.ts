@@ -137,7 +137,7 @@ export async function getAvatarSignedUrl(avatarFilename: string) {
   }
 }
 
-export async function updateProfileData(data: { bio: string, avatarPath: string | null }) {
+export async function updateProfileData(data: { bio: string, fullName?: string, avatarPath: string | null }) {
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -149,6 +149,9 @@ export async function updateProfileData(data: { bio: string, avatarPath: string 
     )
 
     const updates: any = { bio: data.bio }
+    if (data.fullName) {
+      updates.full_name = data.fullName
+    }
     if (data.avatarPath) {
       const { data: publicUrlData } = supabaseAdmin.storage.from('avatars').getPublicUrl(data.avatarPath)
       updates.avatar_url = publicUrlData.publicUrl
