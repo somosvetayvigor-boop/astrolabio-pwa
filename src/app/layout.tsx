@@ -42,7 +42,7 @@ export default async function RootLayout({
         <nav className="navbar">
           <div className="container navbar-container">
             <a href="/" className="logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <img src="/logo.jpeg" alt="Astrolabio Logo" style={{ height: '50px', width: 'auto', borderRadius: '50%' }} />
+              <img src="/logo.jpeg" alt="Astrolabio Logo" className="logo-pulse" style={{ height: '50px', width: 'auto', borderRadius: '50%' }} />
               Astrolabio
             </a>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
