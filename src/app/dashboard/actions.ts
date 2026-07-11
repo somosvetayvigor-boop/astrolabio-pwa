@@ -183,5 +183,5 @@ export async function updateProfileData(data: { bio: string, fullName?: string, 
   }
 
   revalidatePath('/dashboard')
-  redirect('/dashboard')
+  return { success: true }
 }
