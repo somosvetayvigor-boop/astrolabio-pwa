@@ -191,17 +191,21 @@ export default function EditBookForm({ book }: { book: any }) {
           </p>
           <div style={{ marginTop: '0.75rem', padding: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)', border: '1px dashed rgba(255,255,255,0.2)' }}>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-              💡 <strong>Consejo de formato:</strong> Sube archivos <code>.epub</code> para novelas de puro texto. Sube archivos <code>.pdf</code> si tu libro es un cuento infantil ilustrado o cómic (para que las páginas no se muevan de lugar). <br/>
-              Si tienes tu libro en Word, te recomendamos convertirlo primero usando esta herramienta gratuita:
+              💡 <strong>Regla de oro de formatos:</strong> <br/>
+              - <strong>PDF:</strong> Para libros con imágenes en cada página (cuentos, cómics) donde la imagen y el texto tienen que estar estrictamente juntos.<br/>
+              - <strong>EPUB:</strong> Para libros de solo texto o con imágenes sin correlación estricta con el texto (novelas, artículos).
             </p>
-            <a 
-              href="https://convertio.co/es/document-epub/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{ display: 'inline-block', marginTop: '0.5rem', color: 'var(--brand-primary)', fontSize: '0.875rem', textDecoration: 'underline', fontWeight: 600 }}
-            >
-              Convertir a EPUB o PDF gratis en Convertio ↗
-            </a>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-tertiary)', margin: '0.5rem 0 0 0' }}>
+              Si tienes tu libro en Word, conviértelo gratis usando: 
+              <a 
+                href="https://convertio.co/es/document-epub/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ marginLeft: '0.25rem', color: 'var(--brand-primary)', textDecoration: 'underline', fontWeight: 600 }}
+              >
+                Convertio ↗
+              </a>
+            </p>
           </div>
         </div>
 

@@ -22,6 +22,7 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
   const [pageNumber, setPageNumber] = useState<number>(1)
   const [isReady, setIsReady] = useState(false)
   const [windowWidth, setWindowWidth] = useState(0)
+  const [sepia, setSepia] = useState(false)
   
   const router = useRouter()
 
@@ -95,8 +96,27 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
         <div style={{ fontWeight: 600, fontSize: '1rem', flex: 1, textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 1rem' }}>
           {bookTitle}
         </div>
-        <div style={{ fontSize: '0.875rem', color: 'var(--text-tertiary)' }}>
-          {isReady ? `${Math.round((pageNumber / numPages) * 100)}%` : 'Cargando...'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button 
+            onClick={() => setSepia(!sepia)}
+            style={{ 
+              backgroundColor: sepia ? 'rgba(212, 175, 55, 0.2)' : 'transparent',
+              border: `1px solid ${sepia ? 'var(--brand-primary)' : 'var(--border-color)'}`,
+              color: sepia ? 'var(--brand-primary)' : 'var(--text-secondary)',
+              borderRadius: 'var(--radius-sm)',
+              padding: '0.25rem 0.5rem',
+              cursor: 'pointer',
+              fontSize: '0.875rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem'
+            }}
+          >
+            ☕ Sepia
+          </button>
+          <div style={{ fontSize: '0.875rem', color: 'var(--text-tertiary)' }}>
+            {isReady ? `${Math.round((pageNumber / numPages) * 100)}%` : 'Cargando...'}
+          </div>
         </div>
       </div>
 
@@ -116,7 +136,7 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'center', 
-            filter: sampleEnded ? 'blur(4px)' : 'none', 
+            filter: sampleEnded ? 'blur(4px)' : (sepia ? 'sepia(0.6) brightness(0.9)' : 'none'), 
             transition: 'filter 0.3s' 
           }}
         >
