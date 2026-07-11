@@ -40,8 +40,17 @@ export async function POST(request: Request) {
                     (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 
                     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'));
 
+    // Fetch author's Stripe Account ID
+    const { data: authorProfile } = await supabase
+      .from('profiles')
+      .select('stripe_account_id')
+      .eq('id', book.author_id)
+      .single();
+
+    const authorStripeId = authorProfile?.stripe_account_id;
+
     // Create Stripe Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ['card'],
       line_items: [
         {
@@ -65,7 +74,23 @@ export async function POST(request: Request) {
         bookId: book.id,
         userId: user.id,
       },
-    });
+    };
+
+    // If author has a connected account, split the payment
+    if (authorStripeId) {
+      // Platform fee (e.g., 30%)
+      const platformFeePercent = 0.30;
+      const applicationFeeAmount = Math.round((book.price * 100) * platformFeePercent);
+
+      sessionConfig.payment_intent_data = {
+        application_fee_amount: applicationFeeAmount,
+        transfer_data: {
+          destination: authorStripeId,
+        },
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     return NextResponse.json({ sessionId: session.id, url: session.url });
   } catch (error: any) {

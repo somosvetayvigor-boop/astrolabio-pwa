@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { deleteBook } from './actions';
 import DeleteButton from './DeleteButton';
 import ProfileEditForm from './ProfileEditForm';
+import StripeConnectButton from './StripeConnectButton';
 import { redirect } from 'next/navigation';
 
 export default async function Dashboard() {
@@ -19,6 +20,8 @@ export default async function Dashboard() {
     .select('*')
     .eq('id', user.id)
     .single();
+
+  const isStripeConnected = !!profile?.stripe_account_id;
 
   // Fetch real books for the user
   const { data: myBooks } = await supabase
@@ -39,8 +42,12 @@ export default async function Dashboard() {
     <div className="container" style={{ padding: '2rem 1.5rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Panel de Autor</h1>
-        <Link href="/dashboard/upload" className="btn btn-primary">+ Subir Nuevo Libro (ePub)</Link>
+        <Link href={isStripeConnected ? "/dashboard/upload" : "#"} onClick={!isStripeConnected ? (e) => { e.preventDefault(); alert('Conecta tu cuenta de Stripe primero.'); } : undefined} className="btn btn-primary" style={{ opacity: isStripeConnected ? 1 : 0.5, cursor: isStripeConnected ? 'pointer' : 'not-allowed' }}>
+          + Subir Nuevo Libro
+        </Link>
       </div>
+
+      <StripeConnectButton isConnected={isStripeConnected} />
 
       <section style={{ marginBottom: '3rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
