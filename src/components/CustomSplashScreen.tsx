@@ -69,7 +69,7 @@ export default function CustomSplashScreen() {
         zIndex: -1
       }}></div>
 
-      <div style={{ marginTop: '-20vh' }}>
+      <div style={{ marginTop: '-45vh' }}>
         <div style={{
           width: '250px',
           height: '250px',
