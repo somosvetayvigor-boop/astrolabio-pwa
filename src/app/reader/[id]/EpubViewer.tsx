@@ -129,6 +129,21 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
           <div style={{ fontWeight: 600, opacity: 0.5 }}>{progress}% Leído</div>
+          
+          <button 
+            onClick={() => {
+              if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+              } else {
+                document.exitFullscreen();
+              }
+            }}
+            style={{ background: 'none', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer', opacity: 0.8 }}
+            title="Pantalla Completa"
+          >
+            ⛶
+          </button>
+
           <button 
             onClick={() => setShowSettings(!showSettings)}
             style={{ background: 'none', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer', opacity: 0.8 }}
