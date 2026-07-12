@@ -7,6 +7,7 @@ import 'react-pdf/dist/Page/TextLayer.css'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { updateReadingStreak } from './actions'
+import TipModal from '@/components/TipModal'
 
 // Initialize pdf.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
@@ -25,6 +26,7 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
   const [windowWidth, setWindowWidth] = useState(0)
   const [sepia, setSepia] = useState(false)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
+  const [showTipModal, setShowTipModal] = useState(false)
   
   const router = useRouter()
 
@@ -146,6 +148,13 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button 
+            onClick={() => setShowTipModal(true)}
+            style={{ backgroundColor: 'rgba(212, 175, 55, 0.1)', border: '1px solid var(--brand-primary)', color: 'var(--brand-primary)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+            title="Invitar un Café al Autor"
+          >
+            💖 Apoyar
+          </button>
+          <button 
             onClick={() => setSepia(!sepia)}
             style={{ 
               backgroundColor: sepia ? 'rgba(212, 175, 55, 0.2)' : 'transparent',
@@ -218,6 +227,10 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
             </Link>
           </div>
         </div>
+      )}
+
+      {showTipModal && (
+        <TipModal bookId={bookId} onClose={() => setShowTipModal(false)} />
       )}
     </div>
   )

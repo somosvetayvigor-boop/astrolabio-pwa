@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import ePub, { Book, Rendition } from 'epubjs'
 import { saveProgress, getProgress, updateReadingStreak } from './actions'
+import TipModal from '@/components/TipModal'
 
 export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = false }: { bookId: string, bookTitle: string, epubUrl: string, isSample?: boolean }) {
   const viewerRef = useRef<HTMLDivElement>(null)
@@ -16,6 +17,7 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
   const [fontSize, setFontSize] = useState(100)
   const [showSettings, setShowSettings] = useState(false)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
+  const [showTipModal, setShowTipModal] = useState(false)
 
   // Load preferences
   useEffect(() => {
@@ -208,6 +210,14 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         <div style={{ fontWeight: 600, opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '35%' }}>{bookTitle}</div>
         
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
+          <button 
+            onClick={() => setShowTipModal(true)}
+            style={{ backgroundColor: 'rgba(212, 175, 55, 0.1)', border: '1px solid var(--brand-primary)', color: 'var(--brand-primary)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+            title="Invitar un Café al Autor"
+          >
+            💖 Apoyar
+          </button>
+          
           <div style={{ fontWeight: 600, opacity: 0.5 }}>{progress}% Leído</div>
           
           <button 
@@ -326,6 +336,10 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       <div style={{ width: '100%', height: '4px', backgroundColor: 'var(--bg-secondary)' }}>
         <div style={{ width: `${progress}%`, height: '100%', backgroundColor: 'var(--brand-primary)', transition: 'width 0.3s' }}></div>
       </div>
+
+      {showTipModal && (
+        <TipModal bookId={bookId} onClose={() => setShowTipModal(false)} />
+      )}
     </div>
   )
 }
