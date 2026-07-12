@@ -39,6 +39,7 @@ export default function EditBookForm({ book }: { book: any }) {
         setProgressText('Generando enlaces de subida seguros...')
         const urlsResult = await getSignedUrls(
           hasEpub ? epubFile.name : 'dummy.epub',
+          null, // audioFilename
           hasCover ? coverFile.name : null
         )
 
