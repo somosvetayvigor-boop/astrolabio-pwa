@@ -62,7 +62,7 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
         padding: '2rem', borderRadius: 'var(--radius-lg)', maxWidth: '400px', width: '90%',
         boxShadow: 'var(--shadow-xl)', border: '1px solid var(--border-color)'
       }}>
-        <h3 style={{ margin: '0 0 1rem 0' }}>💬 Deja un comentario</h3>
+        <h3 style={{ margin: '0 0 1rem 0' }}>💬 Comentar o Preguntar a IA</h3>
         
         <div style={{ borderLeft: '3px solid var(--brand-primary)', paddingLeft: '0.75rem', fontStyle: 'italic', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem', backgroundColor: 'rgba(212, 175, 55, 0.05)', padding: '0.5rem' }}>
           "{highlightedText.substring(0, 100)}{highlightedText.length > 100 ? '...' : ''}"
@@ -72,7 +72,7 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
           <textarea 
             value={commentText}
             onChange={e => setCommentText(e.target.value)}
-            placeholder="¿Qué opinas de esta parte?"
+            placeholder="Escribe tu opinión para que otros la lean, o escribe una duda para que la IA te la explique..."
             required
             style={{ 
               width: '100%', minHeight: '100px', padding: '0.75rem', 
@@ -89,7 +89,7 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
               {aiLoading ? 'Pensando...' : '✨ Explicar con IA'}
             </button>
             <button type="submit" disabled={loading || aiLoading} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--brand-primary)', color: 'var(--brand-text)', cursor: 'pointer', fontWeight: 600 }}>
-              {loading ? '...' : 'Publicar'}
+              {loading ? '...' : 'Publicar Comentario'}
             </button>
           </div>
         </form>
