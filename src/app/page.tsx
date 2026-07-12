@@ -80,8 +80,17 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
           </div>
         ) : (
           <div className="book-grid">
-            {featuredBooks.map((book) => (
-              <div className="book-card" key={book.id}>
+            {featuredBooks.map((book) => {
+              const isPromoActive = book.promotional_free_until && new Date(book.promotional_free_until) > new Date();
+              const isFree = book.price === 0 || isPromoActive;
+              
+              return (
+              <div className="book-card" key={book.id} style={{ position: 'relative' }}>
+                {isPromoActive && (
+                  <div style={{ position: 'absolute', top: '-10px', right: '-10px', background: 'var(--brand-primary)', color: 'white', padding: '0.25rem 0.75rem', borderRadius: '1rem', fontSize: '0.75rem', fontWeight: 700, zIndex: 10, boxShadow: '0 4px 10px rgba(255,165,0,0.3)', transform: 'rotate(5deg)' }}>
+                    ¡Gratis hoy!
+                  </div>
+                )}
                 <Link href={`/book/${book.id}`} style={{ display: 'block', textDecoration: 'none' }}>
                   <div className="book-cover" style={{ backgroundImage: `url(${book.cover_url || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop'})`, backgroundSize: 'cover', backgroundPosition: 'center' }}></div>
                 </Link>
@@ -97,12 +106,15 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
                   </Link>
                   
                   <div className="book-footer">
-                    <span className="book-price">${book.price}</span>
+                    <span className="book-price">
+                      {isFree ? <span style={{ color: 'var(--brand-primary)' }}>Gratis</span> : `$${book.price}`}
+                      {isPromoActive && <span style={{ textDecoration: 'line-through', color: 'var(--text-tertiary)', fontSize: '0.75rem', marginLeft: '0.5rem' }}>${book.price}</span>}
+                    </span>
                     <Link href={`/book/${book.id}`} className="btn btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', textDecoration: 'none' }}>Leer</Link>
                   </div>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         )}
       </section>

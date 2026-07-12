@@ -69,7 +69,9 @@ export async function insertBookData(data: {
   category: string,
   price: number,
   epubPath: string,
-  coverPath: string | null
+  coverPath: string | null,
+  promoDays: number | null,
+  isAlwaysFree: boolean
 }) {
   try {
     const supabase = await createClient()
@@ -87,6 +89,13 @@ export async function insertBookData(data: {
       coverUrl = publicUrlData.publicUrl
     }
 
+    let promotional_free_until = null
+    if (data.promoDays) {
+      const expirationDate = new Date()
+      expirationDate.setDate(expirationDate.getDate() + data.promoDays)
+      promotional_free_until = expirationDate.toISOString()
+    }
+
     const { error: dbError } = await supabaseAdmin
       .from('books')
       .insert({
@@ -97,7 +106,8 @@ export async function insertBookData(data: {
         price: data.price,
         cover_url: coverUrl,
         epub_file_url: data.epubPath, // Keep path for private bucket
-        total_pages: 0
+        total_pages: 0,
+        promotional_free_until
       })
 
     if (dbError) {

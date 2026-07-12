@@ -21,29 +21,28 @@ export default async function ReaderPage(props: { params: Promise<{ id: string }
   // Get current user
   const { data: { user } } = await supabase.auth.getUser()
 
+  if (!user) {
+    // Restrict all reading (even free books) to logged in users
+    const { redirect } = await import('next/navigation');
+    redirect('/login');
+  }
+  
   let isSample = false;
 
-  if (!user) {
-    // If not logged in, they can only read full if it's free, otherwise it's a sample
-    if (book.price > 0) {
+  const isPromoActive = book.promotional_free_until && new Date(book.promotional_free_until) > new Date();
+  const isFree = book.price === 0 || isPromoActive;
+  const isAuthor = book.author_id === user.id;
+
+  if (!isAuthor && !isFree) {
+    const { data: purchase } = await supabase
+      .from('purchases')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('book_id', book.id)
+      .single();
+
+    if (!purchase) {
       isSample = true;
-    }
-  } else {
-    // If logged in, check if author, free, or purchased
-    const isAuthor = book.author_id === user.id;
-    const isFree = book.price === 0;
-
-    if (!isAuthor && !isFree) {
-      const { data: purchase } = await supabase
-        .from('purchases')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('book_id', book.id)
-        .single();
-
-      if (!purchase) {
-        isSample = true;
-      }
     }
   }
 

@@ -31,9 +31,12 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
 
   const { data: { user } } = await supabase.auth.getUser()
   
+  const isPromoActive = book.promotional_free_until && new Date(book.promotional_free_until) > new Date();
+  const isFree = book.price === 0 || isPromoActive;
+
   let hasPurchased = false;
   if (user) {
-    if (book.author_id === user.id || book.price === 0) {
+    if (book.author_id === user.id || isFree) {
       hasPurchased = true;
     } else {
       const { data: purchase } = await supabase
@@ -44,8 +47,6 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
         .single();
       if (purchase) hasPurchased = true;
     }
-  } else if (book.price === 0) {
-    hasPurchased = true;
   }
 
   const hasReviewed = user && reviews?.some(r => r.user_id === user.id);
@@ -79,7 +80,10 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
           <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', paddingBottom: '2rem', borderBottom: '1px solid var(--border-color)' }}>
             <div>
               <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>Precio</p>
-              <p style={{ fontWeight: 600 }}>${book.price} MXN</p>
+              <p style={{ fontWeight: 600 }}>
+                {isFree ? <span style={{ color: 'var(--brand-primary)' }}>Gratis</span> : `$${book.price} MXN`}
+                {isPromoActive && <span style={{ textDecoration: 'line-through', color: 'var(--text-tertiary)', fontSize: '0.875rem', marginLeft: '0.5rem' }}>${book.price} MXN</span>}
+              </p>
             </div>
             <div>
               <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>Publicación</p>
@@ -95,14 +99,18 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
           <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', flexWrap: 'wrap' }}>
             {hasPurchased ? (
               <Link href={`/reader/${book.id}`} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center' }}>
-                📖 Continuar Leyendo
+                📖 Leer Libro Completo
               </Link>
             ) : (
               <>
                 <Link href={`/reader/${book.id}`} className="btn btn-secondary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid var(--border-color)' }}>
                   <span>👀 Leer Muestra Gratis</span>
                 </Link>
-                {book.price > 0 && (
+                {isFree ? (
+                  <Link href="/login" className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center' }}>
+                    Registrarse para leer gratis
+                  </Link>
+                ) : (
                   <div style={{ flex: 1 }}>
                     <BuyButton bookId={book.id} price={book.price} />
                   </div>

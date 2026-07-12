@@ -8,6 +8,9 @@ export default function UploadBookPage() {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [progressText, setProgressText] = useState<string | null>(null)
+  
+  const [isAlwaysFree, setIsAlwaysFree] = useState(false)
+  const [isPromoFree, setIsPromoFree] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -22,9 +25,12 @@ export default function UploadBookPage() {
       const title = formData.get('title') as string
       const description = formData.get('description') as string
       const category = formData.get('category') as string
-      const price = parseFloat(formData.get('price') as string)
+      let price = parseFloat(formData.get('price') as string)
       const epubFile = formData.get('epubFile') as File
       const coverFile = formData.get('coverFile') as File
+      const promoDays = formData.get('promoDays') ? parseInt(formData.get('promoDays') as string) : null
+
+      if (isAlwaysFree) price = 0;
 
       if (!epubFile || !title) {
         throw new Error('El título y el archivo ePub son requeridos.')
@@ -83,7 +89,9 @@ export default function UploadBookPage() {
         category,
         price,
         epubPath: epub.path,
-        coverPath: finalCoverPath
+        coverPath: finalCoverPath,
+        promoDays: isPromoFree ? promoDays : null,
+        isAlwaysFree
       })
 
       if (dbResult && dbResult.error) {
@@ -166,20 +174,43 @@ export default function UploadBookPage() {
             </select>
           </div>
 
-          <div>
-            <label htmlFor="price" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Precio de Venta Directa ($ MXN)</label>
-            <input 
-              type="number" 
-              id="price" 
-              name="price" 
-              min="0"
-              step="0.01"
-              defaultValue="0.00"
-              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} 
-            />
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
-              Pon 0 si solo quieres ganar dinero por hoja leída (KENPC).
-            </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+            <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Opciones de Precio y Promociones</h3>
+            
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input type="checkbox" checked={isAlwaysFree} onChange={(e) => { setIsAlwaysFree(e.target.checked); if(e.target.checked) setIsPromoFree(false); }} style={{ accentColor: 'var(--brand-primary)' }} />
+              <strong>Libro 100% Gratuito Siempre</strong>
+            </label>
+
+            {!isAlwaysFree && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                <input type="checkbox" checked={isPromoFree} onChange={(e) => setIsPromoFree(e.target.checked)} style={{ accentColor: 'var(--brand-primary)' }} />
+                <span>Promoción: <strong>Gratis por tiempo limitado</strong></span>
+              </label>
+            )}
+
+            {!isAlwaysFree && isPromoFree && (
+              <div>
+                <label htmlFor="promoDays" style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.25rem' }}>¿Por cuántos días será gratis?</label>
+                <input type="number" id="promoDays" name="promoDays" min="1" max="30" defaultValue="5" required={isPromoFree} style={{ width: '100px', padding: '0.5rem', borderRadius: 'var(--radius-sm)' }} /> días
+              </div>
+            )}
+
+            {!isAlwaysFree && (
+              <div style={{ marginTop: '0.5rem' }}>
+                <label htmlFor="price" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Precio Base ({isPromoFree ? 'después de promoción' : 'Venta Directa'}) ($ MXN) *</label>
+                <input 
+                  type="number" 
+                  id="price" 
+                  name="price" 
+                  min="0"
+                  step="0.01"
+                  defaultValue="0.00"
+                  required={!isAlwaysFree}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} 
+                />
+              </div>
+            )}
           </div>
 
           <div style={{ borderTop: '1px solid var(--border-color)', margin: '1rem 0' }}></div>
