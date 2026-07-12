@@ -5,7 +5,8 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/utils/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-export async function getSignedUrls(epubFilename: string, coverFilename: string | null) {
+
+export async function getSignedUrls(epubFilename: string | null, audioFilename: string | null, coverFilename: string | null) {
   try {
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -21,20 +22,42 @@ export async function getSignedUrls(epubFilename: string, coverFilename: string 
     )
 
     const timestamp = Date.now()
-    const cleanEpubName = epubFilename.split('.').pop()
-    const epubPath = `${user.id}-${timestamp}.${cleanEpubName}`
     
+    let epubPath = null
+    let epubSignedUrl = null
+    let audioPath = null
+    let audioSignedUrl = null
     let coverPath = null
     let coverSignedUrl = null
 
     // 1. Generate Signed URL for ePub
-    const { data: epubData, error: epubError } = await supabaseAdmin.storage
-      .from('epubs')
-      .createSignedUploadUrl(epubPath)
+    if (epubFilename) {
+      const cleanEpubName = epubFilename.split('.').pop()
+      epubPath = `${user.id}-${timestamp}.${cleanEpubName}`
+      const { data: epubData, error: epubError } = await supabaseAdmin.storage
+        .from('epubs')
+        .createSignedUploadUrl(epubPath)
 
-    if (epubError || !epubData) {
-      console.error('Error generando URL para epub:', epubError)
-      return { error: 'Error al generar enlace seguro para el archivo ePub.' }
+      if (epubError || !epubData) {
+        console.error('Error generando URL para epub:', epubError)
+        return { error: 'Error al generar enlace seguro para el archivo ePub.' }
+      }
+      epubSignedUrl = epubData.signedUrl
+    }
+
+    // 1.5 Generate Signed URL for Audio
+    if (audioFilename) {
+      const cleanAudioName = audioFilename.split('.').pop()
+      audioPath = `${user.id}-${timestamp}.${cleanAudioName}`
+      const { data: audioData, error: audioError } = await supabaseAdmin.storage
+        .from('audios')
+        .createSignedUploadUrl(audioPath)
+
+      if (audioError || !audioData) {
+        console.error('Error generando URL para audio:', audioError)
+        return { error: 'Error al generar enlace seguro para el archivo de Audio.' }
+      }
+      audioSignedUrl = audioData.signedUrl
     }
 
     // 2. Generate Signed URL for Cover (if present)
@@ -53,7 +76,8 @@ export async function getSignedUrls(epubFilename: string, coverFilename: string 
     }
 
     return {
-      epub: { signedUrl: epubData.signedUrl, path: epubPath },
+      epub: epubPath ? { signedUrl: epubSignedUrl, path: epubPath } : null,
+      audio: audioPath ? { signedUrl: audioSignedUrl, path: audioPath } : null,
       cover: coverPath ? { signedUrl: coverSignedUrl, path: coverPath } : null
     }
 
@@ -68,7 +92,9 @@ export async function insertBookData(data: {
   description: string,
   category: string,
   price: number,
-  epubPath: string,
+  epubPath: string | null,
+  audioPath: string | null,
+  formatType: string,
   coverPath: string | null,
   promoDays: number | null,
   isAlwaysFree: boolean
@@ -106,6 +132,8 @@ export async function insertBookData(data: {
         price: data.price,
         cover_url: coverUrl,
         epub_file_url: data.epubPath, // Keep path for private bucket
+        audio_url: data.audioPath,
+        format_type: data.formatType,
         total_pages: 0,
         promotional_free_until
       })

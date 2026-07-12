@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { createClient } from '@/utils/supabase/server'
 import VirtualLibrarian from '@/components/VirtualLibrarian'
+import PlayAudioButton from '@/components/PlayAudioButton'
 
 export const revalidate = 0; // Dynamic rendering for the home page
 
-export default async function Home(props: { searchParams: Promise<{ q?: string, cat?: string }> }) {
+export default async function Home(props: { searchParams: Promise<{ q?: string, cat?: string, format?: string }> }) {
   const searchParams = await props.searchParams;
+  const currentFormat = searchParams.format || 'ebook';
   const supabase = await createClient()
 
   let isSubscribed = false;
@@ -18,6 +20,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
   let query = supabase
     .from('books')
     .select('*, profiles!inner(full_name)')
+    .eq('format_type', currentFormat)
     .order('created_at', { ascending: false })
     .limit(20)
 
@@ -48,7 +51,18 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
       <section id="catalogo" className="container" style={{ paddingBottom: '4rem' }}>
         <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 700 }}>Catálogo</h2>
         
+        {/* Format Tabs */}
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+          <Link href={`/?format=ebook#catalogo`} style={{ padding: '0.5rem 1rem', textDecoration: 'none', color: currentFormat === 'ebook' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: currentFormat === 'ebook' ? 700 : 500, borderBottom: currentFormat === 'ebook' ? '2px solid var(--brand-primary)' : 'none' }}>
+            📖 Libros Digitales
+          </Link>
+          <Link href={`/?format=audiobook#catalogo`} style={{ padding: '0.5rem 1rem', textDecoration: 'none', color: currentFormat === 'audiobook' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: currentFormat === 'audiobook' ? 700 : 500, borderBottom: currentFormat === 'audiobook' ? '2px solid var(--brand-primary)' : 'none' }}>
+            🎧 Audiolibros & Podcasts
+          </Link>
+        </div>
+
         <form method="GET" action="/#catalogo" style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <input type="hidden" name="format" value={currentFormat} />
           <input 
             type="text" 
             name="q" 
@@ -118,7 +132,18 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
                       {isFree ? <span style={{ color: 'var(--brand-primary)' }}>Gratis</span> : `$${book.price}`}
                       {isPromoActive && <span style={{ textDecoration: 'line-through', color: 'var(--text-tertiary)', fontSize: '0.75rem', marginLeft: '0.5rem' }}>${book.price}</span>}
                     </span>
-                    <Link href={`/book/${book.id}`} className="btn btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', textDecoration: 'none' }}>Leer</Link>
+                    {book.format_type === 'audiobook' && book.audio_url ? (
+                      <PlayAudioButton 
+                        url={book.audio_url}
+                        title={book.title}
+                        author={book.profiles?.full_name || 'Autor Desconocido'}
+                        coverUrl={book.cover_url}
+                        className="btn btn-secondary"
+                        style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}
+                      />
+                    ) : (
+                      <Link href={`/book/${book.id}`} className="btn btn-secondary" style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem', textDecoration: 'none' }}>Leer</Link>
+                    )}
                   </div>
                 </div>
               </div>

@@ -27,6 +27,7 @@ import PWAProvider from '@/components/PWAProvider';
 import InstallPWA from '@/components/InstallPWA';
 import CustomSplashScreen from '@/components/CustomSplashScreen';
 import Navbar from '@/components/Navbar';
+import { AudioProvider } from '@/components/GlobalAudioPlayer';
 
 export default async function RootLayout({
   children,
@@ -52,12 +53,15 @@ export default async function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.variable}`}>
-        <CustomSplashScreen />
-        <PWAProvider />
-        <Navbar user={user} streak={currentStreak} />
-        <main>
-          {children}
-        </main>
+        <AudioProvider>
+          <CustomSplashScreen />
+          <PWAProvider />
+          <Navbar user={user} streak={currentStreak} />
+          <main>
+            {children}
+          </main>
+          <InstallPWA />
+        </AudioProvider>
       </body>
     </html>
   );

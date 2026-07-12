@@ -11,6 +11,7 @@ export default function UploadBookPage() {
   
   const [isAlwaysFree, setIsAlwaysFree] = useState(false)
   const [isPromoFree, setIsPromoFree] = useState(false)
+  const [formatType, setFormatType] = useState<'ebook' | 'audiobook'>('ebook')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -26,41 +27,66 @@ export default function UploadBookPage() {
       const description = formData.get('description') as string
       const category = formData.get('category') as string
       let price = parseFloat(formData.get('price') as string)
-      const epubFile = formData.get('epubFile') as File
+      const epubFile = formData.get('epubFile') as File | null
+      const audioFile = formData.get('audioFile') as File | null
       const coverFile = formData.get('coverFile') as File
       const promoDays = formData.get('promoDays') ? parseInt(formData.get('promoDays') as string) : null
 
       if (isAlwaysFree) price = 0;
 
-      if (!epubFile || !title) {
+      if (formatType === 'ebook' && (!epubFile || epubFile.size === 0 || !title)) {
         throw new Error('El título y el archivo ePub son requeridos.')
+      }
+
+      if (formatType === 'audiobook' && (!audioFile || audioFile.size === 0 || !title)) {
+        throw new Error('El título y el archivo de Audio son requeridos.')
       }
 
       // 1. Obtener URLs de subida directa
       setProgressText('Generando rutas seguras de subida...')
-      const urlsResult = await getSignedUrls(epubFile.name, coverFile && coverFile.size > 0 ? coverFile.name : null)
+      const epubName = epubFile && epubFile.size > 0 ? epubFile.name : null;
+      const audioName = audioFile && audioFile.size > 0 ? audioFile.name : null;
+      const urlsResult = await getSignedUrls(epubName, audioName, coverFile && coverFile.size > 0 ? coverFile.name : null)
       
       if (urlsResult.error) {
         throw new Error(urlsResult.error)
       }
 
-      const { epub, cover } = urlsResult as any
+      const { epub, audio, cover } = urlsResult as any
 
-      // 2. Subir ePub directamente a Supabase
-      setProgressText('Subiendo libro (esto puede tardar unos minutos si es muy pesado, no cierres la ventana)...')
-      
       const { createClient } = await import('@/utils/supabase/client')
       const supabase = createClient()
-      
-      const epubToken = new URL(epub.signedUrl).searchParams.get('token')
-      if (!epubToken) throw new Error('Error al extraer token ePub.')
-      
-      const { error: epubUploadError } = await supabase.storage
-        .from('epubs')
-        .uploadToSignedUrl(epub.path, epubToken, epubFile)
 
-      if (epubUploadError) {
-        throw new Error('Falló la subida del archivo ePub directo a Supabase: ' + epubUploadError.message)
+      // 2. Subir ePub directamente a Supabase (si aplica)
+      if (epub && epubFile) {
+        setProgressText('Subiendo libro digital (esto puede tardar unos minutos si es muy pesado, no cierres la ventana)...')
+        
+        const epubToken = new URL(epub.signedUrl).searchParams.get('token')
+        if (!epubToken) throw new Error('Error al extraer token ePub.')
+        
+        const { error: epubUploadError } = await supabase.storage
+          .from('epubs')
+          .uploadToSignedUrl(epub.path, epubToken, epubFile)
+          
+        if (epubUploadError) {
+          throw new Error('Falló la subida del archivo ePub directo a Supabase: ' + epubUploadError.message)
+        }
+      }
+
+      // 2.5. Subir Audio directamente a Supabase (si aplica)
+      if (audio && audioFile) {
+        setProgressText('Subiendo audiolibro/podcast (esto puede tardar varios minutos, no cierres la ventana)...')
+        
+        const audioToken = new URL(audio.signedUrl).searchParams.get('token')
+        if (!audioToken) throw new Error('Error al extraer token de Audio.')
+        
+        const { error: audioUploadError } = await supabase.storage
+          .from('audios')
+          .uploadToSignedUrl(audio.path, audioToken, audioFile)
+          
+        if (audioUploadError) {
+          throw new Error('Falló la subida del archivo de audio directo a Supabase: ' + audioUploadError.message)
+        }
       }
 
       // 3. Subir portada directamente (si hay)
@@ -82,13 +108,15 @@ export default function UploadBookPage() {
       }
 
       // 4. Guardar datos en la base de datos
-      setProgressText('Guardando información del libro...')
+      setProgressText('Guardando información del contenido...')
       const dbResult = await insertBookData({
         title,
         description,
         category,
         price,
-        epubPath: epub.path,
+        epubPath: epub?.path || null,
+        audioPath: audio?.path || null,
+        formatType,
         coverPath: finalCoverPath,
         promoDays: isPromoFree ? promoDays : null,
         isAlwaysFree
@@ -127,6 +155,23 @@ export default function UploadBookPage() {
       <div className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+            <button 
+              type="button" 
+              onClick={() => setFormatType('ebook')}
+              style={{ flex: 1, padding: '1rem', borderRadius: 'var(--radius-md)', border: formatType === 'ebook' ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)', backgroundColor: formatType === 'ebook' ? 'rgba(212, 175, 55, 0.1)' : 'var(--bg-primary)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600, fontSize: '1.1rem' }}
+            >
+              📖 Libro Digital
+            </button>
+            <button 
+              type="button" 
+              onClick={() => setFormatType('audiobook')}
+              style={{ flex: 1, padding: '1rem', borderRadius: 'var(--radius-md)', border: formatType === 'audiobook' ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)', backgroundColor: formatType === 'audiobook' ? 'rgba(212, 175, 55, 0.1)' : 'var(--bg-primary)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600, fontSize: '1.1rem' }}
+            >
+              🎧 Audiolibro o Podcast
+            </button>
+          </div>
+
           <div>
             <label htmlFor="title" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Título del Libro *</label>
             <input 
@@ -226,35 +271,54 @@ export default function UploadBookPage() {
             />
           </div>
 
-          <div>
-            <label htmlFor="epubFile" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Archivo del Libro (.epub o .pdf) *</label>
-            <input 
-              type="file" 
-              id="epubFile" 
-              name="epubFile" 
-              accept=".epub,.pdf"
-              required
-              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)' }} 
-            />
-            <div style={{ marginTop: '0.75rem', padding: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)', border: '1px dashed rgba(255,255,255,0.2)' }}>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-              💡 <strong>Regla de oro de formatos:</strong> <br/>
-              - <strong>PDF:</strong> Para libros con imágenes en cada página (cuentos, cómics) donde la imagen y el texto tienen que estar estrictamente juntos.<br/>
-              - <strong>EPUB:</strong> Para libros de solo texto o con imágenes sin correlación estricta con el texto (novelas, artículos).
-            </p>
-            <p style={{ fontSize: '0.875rem', color: 'var(--text-tertiary)', margin: '0.5rem 0 0 0' }}>
-              Si tienes tu libro en Word, conviértelo gratis usando: 
-              <a 
-                href="https://convertio.co/es/document-epub/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                style={{ marginLeft: '0.25rem', color: 'var(--brand-primary)', textDecoration: 'underline', fontWeight: 600 }}
-              >
-                Convertio ↗
-              </a>
-            </p>
-          </div>
-          </div>
+          {formatType === 'ebook' && (
+            <div>
+              <label htmlFor="epubFile" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Archivo del Libro (.epub o .pdf) *</label>
+              <input 
+                type="file" 
+                id="epubFile" 
+                name="epubFile" 
+                accept=".epub,.pdf"
+                required
+                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)' }} 
+              />
+              <div style={{ marginTop: '0.75rem', padding: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)', border: '1px dashed rgba(255,255,255,0.2)' }}>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                💡 <strong>Regla de oro de formatos:</strong> <br/>
+                - <strong>PDF:</strong> Para libros con imágenes en cada página (cuentos, cómics) donde la imagen y el texto tienen que estar estrictamente juntos.<br/>
+                - <strong>EPUB:</strong> Para libros de solo texto o con imágenes sin correlación estricta con el texto (novelas, artículos).
+              </p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-tertiary)', margin: '0.5rem 0 0 0' }}>
+                Si tienes tu libro en Word, conviértelo gratis usando: 
+                <a 
+                  href="https://convertio.co/es/document-epub/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  style={{ color: 'var(--brand-primary)', marginLeft: '0.25rem' }}
+                >Convertio</a>.
+              </p>
+              </div>
+            </div>
+          )}
+
+          {formatType === 'audiobook' && (
+            <div>
+              <label htmlFor="audioFile" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Archivo de Audio (.mp3 o .m4a) *</label>
+              <input 
+                type="file" 
+                id="audioFile" 
+                name="audioFile" 
+                accept="audio/mp3,audio/mpeg,audio/mp4,audio/m4a"
+                required
+                style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)' }} 
+              />
+              <div style={{ marginTop: '0.75rem', padding: '1rem', backgroundColor: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-md)', border: '1px dashed rgba(255,255,255,0.2)' }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                  💡 <strong>Recomendación:</strong> Usa archivos .mp3 comprimidos para que carguen más rápido en la plataforma. Límite sugerido por archivo: 50MB.
+                </p>
+              </div>
+            </div>
+          )}
 
           <div style={{ backgroundColor: 'rgba(212, 175, 55, 0.05)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(212, 175, 55, 0.2)', marginTop: '0.5rem' }}>
             <label style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start', cursor: 'pointer' }}>
