@@ -113,3 +113,51 @@ export async function updateReadingStreak() {
 
   return { success: true, updated: true, streak: newStreak }
 }
+
+export async function getComments(bookId: string) {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('book_comments')
+    .select(`
+      id,
+      cfi,
+      highlighted_text,
+      comment_text,
+      created_at,
+      profiles:user_id ( full_name, avatar_url )
+    `)
+    .eq('book_id', bookId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching comments:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true, data }
+}
+
+export async function addComment(bookId: string, cfi: string, highlightedText: string, commentText: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Not authenticated' }
+
+  const { error } = await supabase
+    .from('book_comments')
+    .insert({
+      book_id: bookId,
+      user_id: user.id,
+      cfi,
+      highlighted_text: highlightedText,
+      comment_text: commentText
+    })
+
+  if (error) {
+    console.error('Error adding comment:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
+}

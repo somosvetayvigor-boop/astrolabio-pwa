@@ -5,6 +5,8 @@ import Link from 'next/link'
 import ePub, { Book, Rendition } from 'epubjs'
 import { saveProgress, getProgress, updateReadingStreak } from './actions'
 import TipModal from '@/components/TipModal'
+import AddCommentModal from '@/components/AddCommentModal'
+import CommentsSidebar from '@/components/CommentsSidebar'
 
 export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = false }: { bookId: string, bookTitle: string, epubUrl: string, isSample?: boolean }) {
   const viewerRef = useRef<HTMLDivElement>(null)
@@ -18,6 +20,11 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
   const [showSettings, setShowSettings] = useState(false)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
   const [showTipModal, setShowTipModal] = useState(false)
+  
+  const [selectedCfi, setSelectedCfi] = useState<string | null>(null)
+  const [selectedText, setSelectedText] = useState<string | null>(null)
+  const [showAddCommentModal, setShowAddCommentModal] = useState(false)
+  const [showCommentsSidebar, setShowCommentsSidebar] = useState(false)
 
   // Load preferences
   useEffect(() => {
@@ -120,6 +127,18 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
           }, 2000)
         }
       })
+
+      // Listen for text selection
+      newRendition.on('selected', (cfiRange: string, contents: any) => {
+        newBook!.getRange(cfiRange).then((range) => {
+          if (range) {
+            const text = range.toString()
+            setSelectedCfi(cfiRange)
+            setSelectedText(text)
+            setShowAddCommentModal(true)
+          }
+        })
+      })
     })
 
     }) // End of .then(buffer => { ... })
@@ -208,8 +227,15 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       <div style={{ padding: '0.75rem', borderBottom: '1px solid rgba(128,128,128,0.2)', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
         <Link href={`/book/${bookId}`} style={{ fontWeight: 600, color: 'var(--brand-primary)', whiteSpace: 'nowrap' }}>← Volver</Link>
         <div style={{ fontWeight: 600, opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '35%' }}>{bookTitle}</div>
-        
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
+           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
+          <button 
+            onClick={() => setShowCommentsSidebar(true)}
+            style={{ backgroundColor: 'transparent', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer' }}
+            title="Ver Comentarios"
+          >
+            💬
+          </button>
+
           <button 
             onClick={() => setShowTipModal(true)}
             style={{ backgroundColor: 'rgba(212, 175, 55, 0.1)', border: '1px solid var(--brand-primary)', color: 'var(--brand-primary)', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-sm)', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}
@@ -244,51 +270,46 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
 
           <button 
             onClick={() => setShowSettings(!showSettings)}
-            style={{ background: 'none', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer', opacity: 0.8 }}
+            style={{ background: 'none', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer' }}
+            title="Configuración de Lectura"
           >
-            Aa
+            ⚙️
           </button>
         </div>
+      </div>
 
-        {/* Settings Dropdown */}
+      {/* Reader Area */}
+      <div style={{ flex: 1, display: 'flex', position: 'relative', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+        
+        {/* Settings Panel */}
         {showSettings && (
-          <div style={{
-            position: 'absolute',
-            top: '100%',
-            right: '1rem',
-            marginTop: '0.5rem',
-            backgroundColor: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-            borderRadius: 'var(--radius-md)',
-            boxShadow: 'var(--shadow-lg)',
-            padding: '1rem',
-            zIndex: 50,
-            minWidth: '200px',
-            border: '1px solid var(--border-color)'
+          <div style={{ 
+            position: 'absolute', right: '1rem', top: '1rem', 
+            backgroundColor: 'var(--bg-secondary)', 
+            padding: '1rem', borderRadius: 'var(--radius-md)', 
+            boxShadow: 'var(--shadow-lg)', zIndex: 50,
+            border: '1px solid var(--border-color)',
+            display: 'flex', flexDirection: 'column', gap: '1rem'
           }}>
-            <div style={{ marginBottom: '1rem' }}>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', fontWeight: 600 }}>Tamaño de Letra</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <button onClick={() => setFontSize(f => Math.max(80, f - 10))} style={{ padding: '0.25rem 0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', cursor: 'pointer' }}>A-</button>
-                <span style={{ fontSize: '0.875rem', flex: 1, textAlign: 'center' }}>{fontSize}%</span>
-                <button onClick={() => setFontSize(f => Math.min(200, f + 10))} style={{ padding: '0.25rem 0.75rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', cursor: 'pointer' }}>A+</button>
-              </div>
-            </div>
-            
             <div>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem', fontWeight: 600 }}>Color de Fondo</p>
+              <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Tema</div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button onClick={() => setTheme('light')} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: theme === 'light' ? '2px solid var(--brand-primary)' : '1px solid #ddd', background: '#fdfbf7', color: '#111a28', cursor: 'pointer' }}>Día</button>
                 <button onClick={() => setTheme('sepia')} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: theme === 'sepia' ? '2px solid var(--brand-primary)' : '1px solid #ddd', background: '#f4ecd8', color: '#433422', cursor: 'pointer' }}>Sepia</button>
                 <button onClick={() => setTheme('dark')} style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: theme === 'dark' ? '2px solid var(--brand-primary)' : '1px solid #444', background: '#111a28', color: '#fdfbf7', cursor: 'pointer' }}>Noche</button>
               </div>
             </div>
+            
+            <div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Tamaño de Letra</div>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <button onClick={() => setFontSize(Math.max(50, fontSize - 10))} style={{ padding: '0.25rem 0.5rem', border: '1px solid var(--border-color)', background: 'transparent', borderRadius: '4px', cursor: 'pointer', color: 'var(--text-primary)' }}>A-</button>
+                <span style={{ fontSize: '0.85rem', width: '40px', textAlign: 'center', color: 'var(--text-primary)' }}>{fontSize}%</span>
+                <button onClick={() => setFontSize(Math.min(200, fontSize + 10))} style={{ padding: '0.25rem 0.5rem', border: '1px solid var(--border-color)', background: 'transparent', borderRadius: '4px', cursor: 'pointer', color: 'var(--text-primary)' }}>A+</button>
+              </div>
+            </div>
           </div>
         )}
-      </div>
-
-      {/* Reader Area */}
-      <div style={{ flex: 1, display: 'flex', position: 'relative', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
         {/* Previous Page Button */}
         <button onClick={prev} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '50px', zIndex: 10, backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'var(--text-tertiary)', cursor: 'pointer' }}>
           ‹
@@ -340,6 +361,31 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       {showTipModal && (
         <TipModal bookId={bookId} onClose={() => setShowTipModal(false)} />
       )}
+
+      {showAddCommentModal && selectedCfi && selectedText && (
+        <AddCommentModal
+          bookId={bookId}
+          cfi={selectedCfi}
+          highlightedText={selectedText}
+          onClose={() => setShowAddCommentModal(false)}
+          onSuccess={() => {
+            setShowAddCommentModal(false)
+            setShowCommentsSidebar(true)
+            if (rendition) rendition.getContents()[0].window.getSelection()?.removeAllRanges()
+          }}
+        />
+      )}
+
+      <CommentsSidebar 
+        bookId={bookId} 
+        isOpen={showCommentsSidebar} 
+        onClose={() => setShowCommentsSidebar(false)}
+        onCommentClick={(cfi) => {
+          if (rendition) {
+            rendition.display(cfi)
+          }
+        }}
+      />
     </div>
   )
 }
