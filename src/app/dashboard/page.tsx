@@ -42,9 +42,15 @@ export default async function Dashboard() {
     <div className="container" style={{ padding: '2rem 1.5rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <h1 style={{ fontSize: '2.5rem', fontWeight: 800 }}>Panel de Autor</h1>
-        <Link href={isStripeConnected ? "/dashboard/upload" : "#"} onClick={!isStripeConnected ? (e) => { e.preventDefault(); alert('Conecta tu cuenta de Stripe primero.'); } : undefined} className="btn btn-primary" style={{ opacity: isStripeConnected ? 1 : 0.5, cursor: isStripeConnected ? 'pointer' : 'not-allowed' }}>
-          + Subir Nuevo Libro
-        </Link>
+        {isStripeConnected ? (
+          <Link href="/dashboard/upload" className="btn btn-primary">
+            + Subir Nuevo Libro
+          </Link>
+        ) : (
+          <button disabled className="btn btn-primary" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+            + Subir Nuevo Libro
+          </button>
+        )}
       </div>
 
       <StripeConnectButton isConnected={isStripeConnected} />
