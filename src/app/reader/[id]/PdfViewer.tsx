@@ -23,6 +23,7 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
   const [isReady, setIsReady] = useState(false)
   const [windowWidth, setWindowWidth] = useState(0)
   const [sepia, setSepia] = useState(false)
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false)
   
   const router = useRouter()
 
@@ -56,6 +57,45 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
   }
 
   const sampleEnded = isSample && pageNumber >= numPages;
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [])
+
+  const toggleAudio = () => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    
+    if (isPlayingAudio) {
+      window.speechSynthesis.cancel();
+      setIsPlayingAudio(false);
+      return;
+    }
+
+    try {
+      // Find the text layer of the currently rendered PDF page
+      const textLayer = document.querySelector('.react-pdf__Page__textContent');
+      if (textLayer) {
+        const text = (textLayer as HTMLElement).innerText;
+        if (!text) return;
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-ES';
+        
+        utterance.onend = () => {
+          setIsPlayingAudio(false);
+        }
+        
+        window.speechSynthesis.speak(utterance);
+        setIsPlayingAudio(true);
+      }
+    } catch (e) {
+      console.error("Audio error:", e);
+    }
+  }
 
   // Swipe gesture handling
   const [touchStart, setTouchStart] = useState<number | null>(null)
@@ -97,6 +137,14 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
           {bookTitle}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button 
+            onClick={toggleAudio}
+            style={{ backgroundColor: 'transparent', border: 'none', fontSize: '1.25rem', cursor: 'pointer', opacity: isPlayingAudio ? 1 : 0.8 }}
+            title={isPlayingAudio ? "Pausar Audiolibro" : "Escuchar Capítulo"}
+          >
+            {isPlayingAudio ? '⏸️' : '🎧'}
+          </button>
+          
           <button 
             onClick={() => setSepia(!sepia)}
             style={{ 

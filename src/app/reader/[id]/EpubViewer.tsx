@@ -15,6 +15,7 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
   const [theme, setTheme] = useState<'light' | 'dark' | 'sepia'>('light')
   const [fontSize, setFontSize] = useState(100)
   const [showSettings, setShowSettings] = useState(false)
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false)
 
   // Load preferences
   useEffect(() => {
@@ -145,6 +146,48 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
     if (rendition) rendition.prev()
   }
 
+  // Audio / TTS Logic
+  useEffect(() => {
+    // Cleanup audio when component unmounts
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [])
+
+  const toggleAudio = () => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    
+    if (isPlayingAudio) {
+      window.speechSynthesis.cancel();
+      setIsPlayingAudio(false);
+      return;
+    }
+
+    if (!rendition) return;
+
+    try {
+      const contents = (rendition as any).getContents();
+      if (contents && contents.length > 0) {
+        const text = contents[0].document.body.innerText;
+        if (!text) return;
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'es-ES'; // We can default to spanish
+        
+        utterance.onend = () => {
+          setIsPlayingAudio(false);
+        }
+        
+        window.speechSynthesis.speak(utterance);
+        setIsPlayingAudio(true);
+      }
+    } catch (e) {
+      console.error("Audio error:", e);
+    }
+  }
+
   // Theme colors for the UI wrapper
   const wrapperBg = theme === 'light' ? '#fdfbf7' : theme === 'dark' ? '#111a28' : '#f4ecd8';
   const wrapperText = theme === 'light' ? '#111a28' : theme === 'dark' ? '#fdfbf7' : '#433422';
@@ -160,6 +203,14 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
           <div style={{ fontWeight: 600, opacity: 0.5 }}>{progress}% Leído</div>
           
+          <button 
+            onClick={toggleAudio}
+            style={{ background: 'none', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer', opacity: isPlayingAudio ? 1 : 0.8 }}
+            title={isPlayingAudio ? "Pausar Audiolibro" : "Escuchar Capítulo"}
+          >
+            {isPlayingAudio ? '⏸️' : '🎧'}
+          </button>
+
           <button 
             onClick={() => {
               if (!document.fullscreenElement) {
