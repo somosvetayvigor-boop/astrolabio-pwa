@@ -128,7 +128,7 @@ export async function getAvatarSignedUrl(avatarFilename: string) {
       
     if (error || !data) {
       console.error('Error avatar url:', error)
-      return { error: 'Verifica que el bucket "avatars" exista en Storage.' }
+      return { error: `Error de Supabase: ${error?.message || 'Desconocido'}` }
     }
 
     return { signedUrl: data.signedUrl, path: avatarPath }

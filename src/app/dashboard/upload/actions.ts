@@ -46,8 +46,8 @@ export async function getSignedUrls(epubFilename: string, coverFilename: string 
         .createSignedUploadUrl(coverPath)
 
       if (coverError || !coverData) {
-        console.error('Error generando URL para portada:', coverError)
-        return { error: 'Error al generar enlace seguro para la portada.' }
+        console.error('Error cover url:', coverError)
+        return { error: `Error de Supabase (Cover): ${coverError?.message || 'Desconocido'}` }
       }
       coverSignedUrl = coverData.signedUrl
     }
