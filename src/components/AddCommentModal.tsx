@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { addComment } from '@/app/reader/[id]/actions'
+import { askReadingAssistant } from '@/app/actions/gemini'
 
 interface AddCommentModalProps {
   bookId: string
@@ -14,6 +15,8 @@ interface AddCommentModalProps {
 export default function AddCommentModal({ bookId, cfi, highlightedText, onClose, onSuccess }: AddCommentModalProps) {
   const [commentText, setCommentText] = useState('')
   const [loading, setLoading] = useState(false)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiResponse, setAiResponse] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -27,6 +30,24 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
       onSuccess()
     } else {
       alert(res.error || 'Error al guardar el comentario')
+    }
+  }
+
+  const handleAskAI = async () => {
+    if (!commentText.trim()) {
+      alert('Escribe tu duda o pregunta sobre este texto antes de consultar a la IA.');
+      return;
+    }
+
+    setAiLoading(true);
+    setAiResponse(null);
+    const res = await askReadingAssistant(bookId, highlightedText, commentText);
+    setAiLoading(false);
+
+    if (res.success) {
+      setAiResponse(res.text!);
+    } else {
+      alert(res.error || 'Error al consultar a la IA');
     }
   }
 
@@ -61,23 +82,24 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
             }}
           />
           <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-            <button 
-              type="button" 
-              onClick={onClose}
-              style={{ padding: '0.5rem 1rem', background: 'transparent', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', color: 'var(--text-secondary)', cursor: 'pointer' }}
-            >
+            <button type="button" onClick={onClose} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600 }}>
               Cancelar
             </button>
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="btn btn-primary"
-              style={{ padding: '0.5rem 1rem' }}
-            >
-              {loading ? 'Guardando...' : 'Comentar'}
+            <button type="button" onClick={handleAskAI} disabled={loading || aiLoading} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'linear-gradient(135deg, #6e8efb, #a777e3)', color: 'white', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+              {aiLoading ? 'Pensando...' : '✨ Explicar con IA'}
+            </button>
+            <button type="submit" disabled={loading || aiLoading} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--brand-primary)', color: 'var(--brand-text)', cursor: 'pointer', fontWeight: 600 }}>
+              {loading ? '...' : 'Publicar'}
             </button>
           </div>
         </form>
+
+        {aiResponse && (
+          <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'rgba(110, 142, 251, 0.1)', borderLeft: '4px solid #6e8efb', borderRadius: '0 var(--radius-md) var(--radius-md) 0' }}>
+            <h4 style={{ margin: '0 0 0.5rem 0', color: '#6e8efb', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>✨ Respuesta de la IA</h4>
+            <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{aiResponse}</p>
+          </div>
+        )}
       </div>
     </div>
   )

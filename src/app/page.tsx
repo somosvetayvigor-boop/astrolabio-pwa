@@ -1,11 +1,19 @@
 import Link from "next/link";
 import { createClient } from '@/utils/supabase/server'
+import VirtualLibrarian from '@/components/VirtualLibrarian'
 
 export const revalidate = 0; // Dynamic rendering for the home page
 
 export default async function Home(props: { searchParams: Promise<{ q?: string, cat?: string }> }) {
   const searchParams = await props.searchParams;
   const supabase = await createClient()
+
+  let isSubscribed = false;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (user) {
+    const { data: profile } = await supabase.from('profiles').select('subscription_status').eq('id', user.id).single();
+    isSubscribed = profile?.subscription_status === 'active';
+  }
 
   let query = supabase
     .from('books')
@@ -118,6 +126,8 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
           </div>
         )}
       </section>
+
+      <VirtualLibrarian isSubscribed={isSubscribed} />
     </div>
   );
 }
