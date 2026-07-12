@@ -52,7 +52,7 @@ export default function EditBookForm({ book }: { book: any }) {
         if (hasEpub && urlsResult.epub) {
           setProgressText('Subiendo libro (esto puede tardar unos minutos si es muy pesado, no cierres la ventana)...')
           
-          const epubToken = new URL(urlsResult.epub.signedUrl).searchParams.get('token')
+          const epubToken = urlsResult.epub.signedUrl ? new URL(urlsResult.epub.signedUrl).searchParams.get('token') : null;
           if (!epubToken) throw new Error('Error al extraer token ePub.')
           
           const { error: epubUploadError } = await supabase.storage
@@ -68,7 +68,7 @@ export default function EditBookForm({ book }: { book: any }) {
         // 3. Upload Cover
         if (hasCover && urlsResult.cover && urlsResult.cover.signedUrl) {
           setProgressText('Subiendo nueva portada...')
-          const coverToken = new URL(urlsResult.cover.signedUrl).searchParams.get('token')
+          const coverToken = urlsResult.cover.signedUrl ? new URL(urlsResult.cover.signedUrl).searchParams.get('token') : null;
           if (!coverToken) throw new Error('Error al extraer token de portada.')
 
           const { error: coverUploadError } = await supabase.storage
