@@ -171,7 +171,10 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       const contents = (rendition as any).getContents();
       if (contents && contents.length > 0) {
         const text = contents[0].document.body.innerText;
-        if (!text) return;
+        if (!text || text.trim() === '') {
+          alert('No se encontró texto en esta página para leer en voz alta. Es posible que solo contenga imágenes.');
+          return;
+        }
         
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'es-ES'; // We can default to spanish
@@ -182,6 +185,8 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         
         window.speechSynthesis.speak(utterance);
         setIsPlayingAudio(true);
+      } else {
+        alert('No se pudo extraer el texto de esta página.');
       }
     } catch (e) {
       console.error("Audio error:", e);

@@ -80,7 +80,10 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
       const textLayer = document.querySelector('.react-pdf__Page__textContent');
       if (textLayer) {
         const text = (textLayer as HTMLElement).innerText;
-        if (!text) return;
+        if (!text || text.trim() === '') {
+          alert('No se encontró texto en esta página para leer en voz alta. Es posible que sea una imagen.');
+          return;
+        }
         
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'es-ES';
@@ -91,6 +94,8 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
         
         window.speechSynthesis.speak(utterance);
         setIsPlayingAudio(true);
+      } else {
+        alert('No se detectó texto en esta página para leer en voz alta. (Puede que sea un documento escaneado como imagen).');
       }
     } catch (e) {
       console.error("Audio error:", e);
