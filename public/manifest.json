@@ -2,7 +2,7 @@
   "name": "Astrolabio PWA",
   "short_name": "Astrolabio",
   "description": "Navegando por historias. Apoya a escritores independientes.",
-  "start_url": "/",
+  "start_url": "https://app.astrolabiobooks.com/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#6366f1",

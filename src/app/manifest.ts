@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Astrolabio',
     short_name: 'Astrolabio',
     description: 'Navegando por historias',
-    start_url: '/',
+    start_url: 'https://app.astrolabiobooks.com/',
     display: 'standalone',
     background_color: '#F7F5F0',
     theme_color: '#0d1117',
