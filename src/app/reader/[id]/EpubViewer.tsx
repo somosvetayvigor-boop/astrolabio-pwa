@@ -19,6 +19,7 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
   const [fontSize, setFontSize] = useState(100)
   const [showSettings, setShowSettings] = useState(false)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
+  const isAutoReadingRef = useRef(false)
   const [showTipModal, setShowTipModal] = useState(false)
   
   const [selectedCfi, setSelectedCfi] = useState<string | null>(null)
@@ -126,6 +127,15 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
             updateReadingStreak().catch(console.error)
           }, 2000)
         }
+
+        // Auto-read next page if active
+        if (isAutoReadingRef.current) {
+          setTimeout(() => {
+            // Need to dispatch a custom event or call a global function because playPage isn't strictly in this scope easily,
+            // but wait, we can just trigger window.dispatchEvent
+            window.dispatchEvent(new CustomEvent('epub-auto-read-next'));
+          }, 400);
+        }
       })
 
       // Listen for text selection
@@ -162,57 +172,101 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
   }, [theme, fontSize, rendition])
 
   const next = () => {
+    if (isAutoReadingRef.current) toggleAudio(); // Stop audio on manual turn
     if (rendition) rendition.next()
   }
 
   const prev = () => {
+    if (isAutoReadingRef.current) toggleAudio(); // Stop audio on manual turn
     if (rendition) rendition.prev()
   }
 
   // Audio / TTS Logic
   useEffect(() => {
+    // Pre-load voices
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.getVoices()
+    }
+    
+    // Listen for auto-read relocated event
+    const handleAutoRead = () => {
+      if (isAutoReadingRef.current) {
+        playPage();
+      }
+    };
+    window.addEventListener('epub-auto-read-next', handleAutoRead);
+
     // Cleanup audio when component unmounts
     return () => {
       if (typeof window !== 'undefined' && window.speechSynthesis) {
         window.speechSynthesis.cancel()
       }
+      window.removeEventListener('epub-auto-read-next', handleAutoRead);
     }
-  }, [])
+  }, [rendition])
 
-  const toggleAudio = () => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  const playPage = () => {
+    if (typeof window === 'undefined' || !window.speechSynthesis || !rendition) return;
     
-    if (isPlayingAudio) {
-      window.speechSynthesis.cancel();
-      setIsPlayingAudio(false);
-      return;
-    }
-
-    if (!rendition) return;
+    window.speechSynthesis.cancel(); // Clear any existing audio
 
     try {
       const contents = (rendition as any).getContents();
       if (contents && contents.length > 0) {
         const text = contents[0].document.body.innerText;
         if (!text || text.trim() === '') {
-          alert('No se encontró texto en esta página para leer en voz alta. Es posible que solo contenga imágenes.');
+          // If empty page, just turn to next page automatically
+          if (isAutoReadingRef.current) rendition.next();
           return;
         }
         
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'es-ES'; // We can default to spanish
         
-        utterance.onend = () => {
-          setIsPlayingAudio(false);
+        // Find Latin American voice
+        const voices = window.speechSynthesis.getVoices();
+        let voice = voices.find(v => v.lang === 'es-MX' || v.lang === 'es-US' || v.lang === 'es_MX' || v.lang === 'es_US');
+        if (!voice) voice = voices.find(v => v.lang === 'es-LA' || v.lang === 'es_LA');
+        if (!voice) voice = voices.find(v => v.lang.startsWith('es'));
+        
+        if (voice) {
+          utterance.voice = voice;
+        }
+        utterance.lang = 'es-MX'; // Fallback
+        
+        utterance.onend = (e) => {
+          // If finished naturally and still in auto-read mode, turn page
+          // (We check isAutoReadingRef to ensure user didn't pause)
+          if (isAutoReadingRef.current) {
+            rendition.next();
+          }
+        }
+
+        utterance.onerror = () => {
+          // Silent catch for cancel events
         }
         
         window.speechSynthesis.speak(utterance);
-        setIsPlayingAudio(true);
-      } else {
-        alert('No se pudo extraer el texto de esta página.');
       }
     } catch (e) {
       console.error("Audio error:", e);
+      setIsPlayingAudio(false);
+      isAutoReadingRef.current = false;
+    }
+  }
+
+  const toggleAudio = () => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    
+    if (isAutoReadingRef.current) {
+      // Pause
+      window.speechSynthesis.cancel();
+      setIsPlayingAudio(false);
+      isAutoReadingRef.current = false;
+    } else {
+      // Play
+      setIsPlayingAudio(true);
+      isAutoReadingRef.current = true;
+      playPage();
     }
   }
 
