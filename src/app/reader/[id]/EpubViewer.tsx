@@ -371,7 +371,12 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
           onSuccess={() => {
             setShowAddCommentModal(false)
             setShowCommentsSidebar(true)
-            if (rendition) rendition.getContents()[0].window.getSelection()?.removeAllRanges()
+            if (rendition) {
+              const contents = (rendition as any).getContents();
+              if (contents && contents.length > 0) {
+                contents[0].window.getSelection()?.removeAllRanges()
+              }
+            }
           }}
         />
       )}
