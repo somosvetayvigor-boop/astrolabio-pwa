@@ -21,121 +21,62 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
   }
 
   const { data: books } = await query
+
   const featuredBooks = books || []
 
   return (
-    <div className="bg-gradient-mesh" style={{ minHeight: '100vh' }}>
-      {/* Hero Section */}
-      <section style={{ paddingTop: '150px', paddingBottom: '100px', textAlign: 'center', position: 'relative' }}>
-        <div className="container animate-fade-in">
-          <h1 style={{ 
-            fontSize: 'clamp(3rem, 8vw, 5rem)', 
-            fontWeight: 800, 
-            lineHeight: 1.1,
-            letterSpacing: '-0.02em',
-            marginBottom: '1.5rem',
-            maxWidth: '900px',
-            margin: '0 auto 1.5rem auto'
-          }}>
-            Historias independientes, <br/>
-            <span className="text-gradient">sin intermediarios.</span>
-          </h1>
-          <p style={{ 
-            fontSize: '1.25rem', 
-            color: 'var(--text-secondary)', 
-            maxWidth: '600px', 
-            margin: '0 auto 3rem auto',
-            lineHeight: 1.6
-          }} className="animate-fade-in animate-delay-1">
-            Lee historias increíbles de autores emergentes en cualquier dispositivo, sin conexión a internet. Apoya directamente a los creadores.
-          </p>
-          
-          <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }} className="animate-fade-in animate-delay-2">
-            <Link href="#catalogo" className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem' }}>
-              📖 Explorar Catálogo
-            </Link>
-            <Link href="/dashboard" className="btn btn-secondary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem' }}>
-              ✍️ Publicar mi Libro
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section style={{ padding: '4rem 0', position: 'relative', zIndex: 10 }}>
+    <div>
+      <section className="hero">
         <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-            
-            <div className="glass" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>📱</div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Lectura Offline</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>Instala la app nativa en 1 segundo. Tus libros se guardan automáticamente para leer sin conexión en el avión o en el metro.</p>
-            </div>
-
-            <div className="glass" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>💸</div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Apoya Directo al Autor</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>Gracias a Stripe Connect, el 70% de tu dinero va directo a la cuenta bancaria del escritor en tiempo real. Sin trucos.</p>
-            </div>
-
-            <div className="glass" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>🎨</div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1rem' }}>Soporte Total</h3>
-              <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>Disfruta novelas puras en formato EPUB (con modo oscuro y cambio de letra) o maravíllate con cómics y cuentos en PDF.</p>
-            </div>
-
+          <h1>Descubre historias increíbles. <br />Apoya a creadores independientes.</h1>
+          <p>Lee miles de libros de autores emergentes. Paga por libro o suscríbete para leer sin límites, mientras los autores ganan por cada página que disfrutas.</p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <Link href="#catalogo" className="btn btn-primary" style={{ padding: '0.75rem 2rem', fontSize: '1.125rem' }}>Explorar Catálogo</Link>
+            <Link href="/dashboard" className="btn btn-secondary" style={{ padding: '0.75rem 2rem', fontSize: '1.125rem' }}>Publicar mi Libro</Link>
           </div>
         </div>
       </section>
 
-      {/* Catalog Section */}
-      <section id="catalogo" className="container" style={{ paddingTop: '6rem', paddingBottom: '8rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem' }}>Descubre tu próxima aventura</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem' }}>Filtra nuestro catálogo y encuentra joyas literarias escondidas.</p>
-        </div>
+      <section id="catalogo" className="container" style={{ paddingBottom: '4rem' }}>
+        <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 700 }}>Catálogo</h2>
         
-        <div className="glass" style={{ padding: '1.5rem', marginBottom: '3rem' }}>
-          <form method="GET" action="/#catalogo" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
-            <input 
-              type="text" 
-              name="q" 
-              placeholder="Buscar por título..." 
-              defaultValue={searchParams.q || ''} 
-              style={{ flex: '1 1 300px', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', outline: 'none' }}
-            />
-            <select 
-              name="cat" 
-              defaultValue={searchParams.cat || ''}
-              style={{ flex: '1 1 200px', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(0,0,0,0.2)', color: 'white', outline: 'none' }}
-            >
-              <option value="">Todas las categorías</option>
-              <option value="Romance">Romance</option>
-              <option value="Ciencia Ficción">Ciencia Ficción</option>
-              <option value="Fantasía">Fantasía</option>
-              <option value="Terror / Suspenso">Terror / Suspenso</option>
-              <option value="Desarrollo Personal">Desarrollo Personal</option>
-              <option value="Artículos Científicos">Artículos Científicos</option>
-              <option value="Infantil (0-5 años)">Infantil (0-5 años)</option>
-              <option value="Infantil (6-9 años)">Infantil (6-9 años)</option>
-              <option value="Infantil (10-12 años)">Infantil (10-12 años)</option>
-              <option value="Poesía">Poesía</option>
-              <option value="Biografía">Biografía</option>
-              <option value="Otro">Otro</option>
-            </select>
-            <button type="submit" className="btn btn-primary" style={{ padding: '1rem 2rem' }}>Filtrar</button>
-            
-            {(searchParams.q || searchParams.cat) && (
-              <Link href="/#catalogo" className="btn btn-secondary" style={{ padding: '1rem 2rem' }}>Limpiar</Link>
-            )}
-          </form>
-        </div>
+        <form method="GET" action="/#catalogo" style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+          <input 
+            type="text" 
+            name="q" 
+            placeholder="Buscar por título..." 
+            defaultValue={searchParams.q || ''} 
+            style={{ flex: '1 1 300px', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+          />
+          <select 
+            name="cat" 
+            defaultValue={searchParams.cat || ''}
+            style={{ flex: '1 1 200px', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+          >
+            <option value="">Todas las categorías</option>
+            <option value="Romance">Romance</option>
+            <option value="Ciencia Ficción">Ciencia Ficción</option>
+            <option value="Fantasía">Fantasía</option>
+            <option value="Terror / Suspenso">Terror / Suspenso</option>
+            <option value="Desarrollo Personal">Desarrollo Personal</option>
+            <option value="Artículos Científicos">Artículos Científicos</option>
+            <option value="Infantil (0-5 años)">Infantil (0-5 años)</option>
+            <option value="Infantil (6-9 años)">Infantil (6-9 años)</option>
+            <option value="Infantil (10-12 años)">Infantil (10-12 años)</option>
+            <option value="Poesía">Poesía</option>
+            <option value="Biografía">Biografía</option>
+            <option value="Otro">Otro</option>
+          </select>
+          <button type="submit" className="btn btn-secondary" style={{ padding: '0.75rem 2rem' }}>Filtrar</button>
+          
+          {(searchParams.q || searchParams.cat) && (
+            <Link href="/#catalogo" className="btn btn-secondary" style={{ padding: '0.75rem 1rem', background: 'transparent', border: '1px solid var(--border-color)' }}>Limpiar</Link>
+          )}
+        </form>
         
         {featuredBooks.length === 0 ? (
-          <div className="glass" style={{ padding: '4rem 2rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>🔭</div>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.5rem' }}>No encontramos resultados</h3>
-            <p style={{ color: 'var(--text-secondary)' }}>Intenta con otra búsqueda o categoría.</p>
+          <div style={{ padding: '3rem', textAlign: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
+            <p style={{ color: 'var(--text-secondary)' }}>No se encontraron libros con estos filtros.</p>
           </div>
         ) : (
           <div className="book-grid">
@@ -165,17 +106,6 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
           </div>
         )}
       </section>
-
-      {/* Footer */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '4rem 0', background: 'rgba(0,0,0,0.2)' }}>
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <img src="/logo.jpeg" alt="Astrolabio Logo" style={{ height: '40px', width: 'auto', borderRadius: '50%' }} />
-            <span style={{ fontWeight: 700, fontSize: '1.25rem', letterSpacing: '0.05em' }}>ASTROLABIO</span>
-          </div>
-          <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>© 2024 Astrolabio Books. Todos los derechos reservados.</p>
-        </div>
-      </footer>
     </div>
   );
 }
