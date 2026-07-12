@@ -143,14 +143,6 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button 
-            onClick={toggleAudio}
-            style={{ backgroundColor: 'transparent', border: 'none', fontSize: '1.25rem', cursor: 'pointer', opacity: isPlayingAudio ? 1 : 0.8 }}
-            title={isPlayingAudio ? "Pausar Audiolibro" : "Escuchar Capítulo"}
-          >
-            {isPlayingAudio ? '⏸️' : '🎧'}
-          </button>
-          
-          <button 
             onClick={() => setSepia(!sepia)}
             style={{ 
               backgroundColor: sepia ? 'rgba(212, 175, 55, 0.2)' : 'transparent',
