@@ -58,7 +58,7 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
         
         {/* Book Cover */}
         <div style={{ flex: '1 1 300px', maxWidth: '400px' }}>
-          <div className="book-cover" style={{ backgroundImage: `url(${book.cover_url || defaultCover})`, backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)', aspectRatio: '2/3', width: '100%' }}></div>
+          <div className="book-cover" style={{ backgroundImage: `url(${book.cover_url || defaultCover})`, backgroundSize: 'contain', backgroundRepeat: 'no-repeat', backgroundPosition: 'center', backgroundColor: '#0d1117', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-lg)', aspectRatio: '2/3', width: '100%' }}></div>
         </div>
 
         {/* Book Info */}
