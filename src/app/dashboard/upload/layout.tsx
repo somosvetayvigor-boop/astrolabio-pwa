@@ -20,10 +20,7 @@ export default async function UploadLayout({
     .eq('id', user.id)
     .single();
 
-  if (!profile?.stripe_account_id) {
-    redirect('/dashboard?error=stripe_required');
-  }
-
+  // We removed the strict Stripe redirect so users can upload free books
   return (
     <>
       {children}
