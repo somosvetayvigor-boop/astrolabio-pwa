@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from '@/utils/supabase/server'
+import InstallButton from '@/components/InstallButton'
 import './landing.css'
 
 export const revalidate = 0; // Dynamic rendering for the home page
@@ -52,9 +53,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
           </p>
           
           <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }} className="animate-fade-in animate-delay-2">
-            <Link href="https://app.astrolabiobooks.com" className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem' }}>
-              📖 Explorar Catálogo
-            </Link>
+            <InstallButton />
             <Link href="https://app.astrolabiobooks.com/dashboard" className="btn btn-secondary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem' }}>
               ✍️ Publicar mi Libro
             </Link>
