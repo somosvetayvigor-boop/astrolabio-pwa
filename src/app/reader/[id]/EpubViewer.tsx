@@ -122,6 +122,8 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
           saveTimeout = setTimeout(() => {
             saveProgress(bookId, location.start.cfi)
             // Update reading streak silently
+            updateReadingStreak().catch(console.error)
+          }, 2000)
         }
       })
 
