@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from '@/utils/supabase/server'
+import './landing.css'
 
 export const revalidate = 0; // Dynamic rendering for the home page
 
@@ -24,7 +25,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
   const featuredBooks = books || []
 
   return (
-    <div className="bg-gradient-mesh" style={{ minHeight: '100vh' }}>
+    <div className="landing-page bg-gradient-mesh" style={{ minHeight: '100vh' }}>
       {/* Hero Section */}
       <section style={{ paddingTop: '150px', paddingBottom: '100px', textAlign: 'center', position: 'relative' }}>
         <div className="container animate-fade-in">
