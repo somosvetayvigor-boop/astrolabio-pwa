@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import EpubViewer from './EpubViewer'
 import PdfViewer from './PdfViewer'
 
@@ -23,7 +23,6 @@ export default async function ReaderPage(props: { params: Promise<{ id: string }
 
   if (!user) {
     // Restrict all reading (even free books) to logged in users
-    const { redirect } = await import('next/navigation');
     redirect('/login');
   }
   
