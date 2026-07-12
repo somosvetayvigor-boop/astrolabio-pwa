@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import ePub, { Book, Rendition } from 'epubjs'
-import { saveProgress, getProgress } from './actions'
+import { saveProgress, getProgress, updateReadingStreak } from './actions'
 
 export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = false }: { bookId: string, bookTitle: string, epubUrl: string, isSample?: boolean }) {
   const viewerRef = useRef<HTMLDivElement>(null)
@@ -113,6 +113,8 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
           clearTimeout(saveTimeout)
           saveTimeout = setTimeout(() => {
             saveProgress(bookId, location.start.cfi)
+            // Update reading streak silently
+            updateReadingStreak().catch(console.error)
           }, 2000)
         }
       })

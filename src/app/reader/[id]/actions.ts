@@ -49,3 +49,67 @@ export async function getProgress(bookId: string) {
 
   return { success: true, data: data?.last_cfi || null }
 }
+
+export async function updateReadingStreak() {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Not authenticated' }
+
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { data: profile, error: profileError } = await supabaseAdmin
+    .from('profiles')
+    .select('current_streak, last_read_date')
+    .eq('id', user.id)
+    .single()
+
+  if (profileError) {
+    console.error('Error fetching profile for streak:', profileError)
+    return { success: false, error: profileError.message }
+  }
+
+  const today = new Date()
+  const todayStr = today.toISOString().split('T')[0] // 'YYYY-MM-DD'
+
+  let newStreak = profile.current_streak || 0
+
+  if (!profile.last_read_date) {
+    newStreak = 1
+  } else {
+    const lastReadDate = new Date(profile.last_read_date)
+    const lastReadStr = lastReadDate.toISOString().split('T')[0]
+
+    if (lastReadStr !== todayStr) {
+      // Check if it was yesterday
+      const yesterday = new Date(today)
+      yesterday.setDate(yesterday.getDate() - 1)
+      const yesterdayStr = yesterday.toISOString().split('T')[0]
+
+      if (lastReadStr === yesterdayStr) {
+        newStreak += 1
+      } else {
+        // Streak broken
+        newStreak = 1
+      }
+    } else {
+      // Already read today, no change needed
+      return { success: true, updated: false, streak: newStreak }
+    }
+  }
+
+  const { error: updateError } = await supabaseAdmin
+    .from('profiles')
+    .update({ current_streak: newStreak, last_read_date: today.toISOString() })
+    .eq('id', user.id)
+
+  if (updateError) {
+    console.error('Error updating streak:', updateError)
+    return { success: false, error: updateError.message }
+  }
+
+  return { success: true, updated: true, streak: newStreak }
+}

@@ -35,12 +35,26 @@ export default async function RootLayout({
 }>) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  
+  let currentStreak = 0;
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('current_streak')
+      .eq('id', user.id)
+      .single();
+      
+    if (profile && profile.current_streak) {
+      currentStreak = profile.current_streak;
+    }
+  }
+
   return (
     <html lang="es">
       <body className={`${inter.variable}`}>
         <CustomSplashScreen />
         <PWAProvider />
-        <Navbar user={user} />
+        <Navbar user={user} streak={currentStreak} />
         <main>
           {children}
         </main>

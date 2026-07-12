@@ -6,6 +6,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { updateReadingStreak } from './actions'
 
 // Initialize pdf.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
@@ -47,12 +48,14 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
   const prev = () => {
     if (pageNumber > 1) {
       setPageNumber(pageNumber - 1)
+      if (!isSample) updateReadingStreak().catch(console.error)
     }
   }
 
   const next = () => {
     if (pageNumber < numPages) {
       setPageNumber(pageNumber + 1)
+      if (!isSample) updateReadingStreak().catch(console.error)
     }
   }
 
