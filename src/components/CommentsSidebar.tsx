@@ -21,7 +21,7 @@ export default function CommentsSidebar({ bookId, isOpen, onClose, onCommentClic
       setLoading(true)
       getComments(bookId).then(res => {
         if (res.success && res.data) {
-          setComments(res.data)
+          setComments(res.data as any)
         }
         setLoading(false)
       })
@@ -52,15 +52,17 @@ export default function CommentsSidebar({ bookId, isOpen, onClose, onCommentClic
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {comments.map(c => (
+            {comments.map(c => {
+              const profile = Array.isArray(c.profiles) ? c.profiles[0] : c.profiles;
+              return (
               <div key={c.id} style={{ backgroundColor: 'var(--bg-primary)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <img 
-                    src={c.profiles?.avatar_url || `https://ui-avatars.com/api/?name=${c.profiles?.full_name || 'Anon'}`} 
+                    src={profile?.avatar_url || `https://ui-avatars.com/api/?name=${profile?.full_name || 'Anon'}`} 
                     alt="Avatar" 
                     style={{ width: '24px', height: '24px', borderRadius: '50%' }}
                   />
-                  <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.profiles?.full_name || 'Usuario Anónimo'}</span>
+                  <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{profile?.full_name || 'Usuario Anónimo'}</span>
                 </div>
                 {c.highlighted_text && (
                   <div 
@@ -72,7 +74,8 @@ export default function CommentsSidebar({ bookId, isOpen, onClose, onCommentClic
                 )}
                 <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{c.comment_text}</p>
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
