@@ -3,10 +3,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
-// Initialize Gemini (Will fail gracefully if API key is not set yet)
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'MISSING_API_KEY');
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
 /**
  * Utility to check and enforce rate limits for the AI features.
  */
@@ -125,6 +121,9 @@ export async function askLibrarian(message: string) {
   }
 
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
     const prompt = `Eres el Bibliotecario Virtual de Astrolabio (una plataforma de libros independientes). 
     Un usuario te dice: "${message}". 
     Responde de manera amable, corta y concisa (máximo 3 párrafos). Actúa como un experto en libros. Si no sabes qué recomendar, sugiere temas filosóficos, novela negra o ciencia ficción que podrían estar en nuestro catálogo.`
@@ -157,6 +156,9 @@ export async function askReadingAssistant(bookId: string, selectedText: string, 
   }
 
   try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
     const prompt = `El usuario está leyendo un libro y ha seleccionado este extracto:
     "${selectedText}"
     
