@@ -38,10 +38,11 @@ export default async function RootLayout({
   const { data: { user } } = await supabase.auth.getUser();
   let currentStreak = 0;
   let isAdmin = false;
+  let isPremium = false;
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('current_streak, is_admin')
+      .select('current_streak, is_admin, subscription_status')
       .eq('id', user.id)
       .single();
       
@@ -51,6 +52,9 @@ export default async function RootLayout({
     if (profile && profile.is_admin) {
       isAdmin = profile.is_admin;
     }
+    if (profile && profile.subscription_status === 'active') {
+      isPremium = true;
+    }
   }
 
   return (
@@ -59,7 +63,7 @@ export default async function RootLayout({
         <AudioProvider>
           <CustomSplashScreen />
           <PWAProvider />
-          <Navbar user={user} streak={currentStreak} isAdmin={isAdmin} />
+          <Navbar user={user} streak={currentStreak} isAdmin={isAdmin} isPremium={isPremium} />
           <main>
             {children}
           </main>

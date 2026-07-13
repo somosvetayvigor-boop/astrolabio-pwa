@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import InstallPWA from './InstallPWA'
 import { logout } from '@/app/login/actions'
 
-export default function Navbar({ user, streak = 0, isAdmin = false }: { user: any, streak?: number, isAdmin?: boolean }) {
+export default function Navbar({ user, streak = 0, isAdmin = false, isPremium = false }: { user: any, streak?: number, isAdmin?: boolean, isPremium?: boolean }) {
   const pathname = usePathname()
   
   // Hide navbar on the reader page to allow fullscreen reading
@@ -25,6 +25,11 @@ export default function Navbar({ user, streak = 0, isAdmin = false }: { user: an
           <Link href="/#catalogo" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Catálogo</Link>
           {user ? (
             <>
+              {isPremium && (
+                <div title="Suscripción Activa" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: 'rgba(212, 175, 55, 0.15)', padding: '0.25rem 0.75rem', borderRadius: '1rem', color: 'var(--brand-primary)', fontWeight: 600, border: '1px solid var(--brand-primary)' }}>
+                  ✨ Premium
+                </div>
+              )}
               <div title="Racha de lectura diaria" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: 'rgba(255,165,0,0.1)', padding: '0.25rem 0.75rem', borderRadius: '1rem', color: '#ff9800', fontWeight: 600 }}>
                 🔥 {streak}
               </div>
