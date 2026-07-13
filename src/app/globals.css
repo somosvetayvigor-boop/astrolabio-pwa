@@ -55,6 +55,17 @@ html, body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Make app feel native by disabling text selection and long-press menus */
+  -webkit-touch-callout: none; 
+  -webkit-user-select: none;   
+  user-select: none;
+}
+
+/* Allow text selection in inputs and textareas */
+input, textarea {
+  -webkit-user-select: auto;
+  user-select: auto;
 }
 
 a {
