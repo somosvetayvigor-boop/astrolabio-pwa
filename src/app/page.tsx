@@ -134,6 +134,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
                     </span>
                     {book.format_type === 'audiobook' && book.audio_url ? (
                       <PlayAudioButton 
+                        bookId={book.id}
                         url={book.audio_url}
                         title={book.title}
                         author={book.profiles?.full_name || 'Autor Desconocido'}

@@ -29,6 +29,30 @@ export async function saveProgress(bookId: string, cfi: string) {
   return { success: true }
 }
 
+export async function logPageRead(bookId: string, locationIdentifier: string) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Not authenticated' }
+
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  // Ignoramos el error 23505 que es el Unique Violation (ya leyó esta página)
+  const { error } = await supabaseAdmin
+    .from('pages_read_logs')
+    .insert({ user_id: user.id, book_id: bookId, location_identifier: locationIdentifier })
+
+  if (error && error.code !== '23505') {
+    console.error('Error logging page read:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
+}
+
 export async function getProgress(bookId: string) {
   const supabase = await createClient()
 

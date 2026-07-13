@@ -30,11 +30,23 @@ export default async function Dashboard() {
     .eq('author_id', user.id)
     .order('created_at', { ascending: false });
 
-  // Dummy stats for now
+  // Fetch pages read for the author's books
+  let totalPagesRead = 0;
+  if (myBooks && myBooks.length > 0) {
+    const bookIds = myBooks.map(b => b.id);
+    const { count, error: countError } = await supabase
+      .from('pages_read_logs')
+      .select('*', { count: 'exact', head: true })
+      .in('book_id', bookIds);
+      
+    if (count) totalPagesRead = count;
+  }
+
+  // Stats
   const authorStats = {
-    totalSales: "$0.00",
-    pagesRead: "0",
-    royalties: "$0.00",
+    totalSales: "$0.00", // (Ventas directas aún no implementadas en dashboard)
+    pagesRead: totalPagesRead.toString(),
+    royalties: `$${(totalPagesRead * 0.69).toFixed(2)} MXN`, // Estimación ficticia del fondo
     booksPublished: myBooks?.length || 0
   };
 

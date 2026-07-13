@@ -32,7 +32,13 @@ export default async function ReaderPage(props: { params: Promise<{ id: string }
   const isFree = book.price === 0 || isPromoActive;
   const isAuthor = book.author_id === user.id;
 
-  if (!isAuthor && !isFree) {
+  let isSubscribed = false;
+  const { data: userProfile } = await supabase.from('profiles').select('subscription_status').eq('id', user.id).single();
+  if (userProfile?.subscription_status === 'active') {
+    isSubscribed = true;
+  }
+
+  if (!isAuthor && !isFree && !isSubscribed) {
     const { data: purchase } = await supabase
       .from('purchases')
       .select('*')

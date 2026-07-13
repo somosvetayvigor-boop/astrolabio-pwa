@@ -4,10 +4,11 @@ import { useState, useRef, useEffect, createContext, useContext, ReactNode } fro
 import { createClient } from '@/utils/supabase/client'
 
 interface AudioContextType {
-  playAudio: (url: string, title: string, author: string, coverUrl: string | null) => void;
+  playAudio: (bookId: string, url: string, title: string, author: string, coverUrl: string | null) => void;
   stopAudio: () => void;
   isPlaying: boolean;
   currentTrack: {
+    bookId: string;
     url: string;
     title: string;
     author: string;
@@ -65,9 +66,10 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     }
   }, [isPlaying, audioUrl]);
 
-  const playAudio = (url: string, title: string, author: string, coverUrl: string | null) => {
-    setCurrentTrack({ url, title, author, coverUrl });
+  const playAudio = (bookId: string, url: string, title: string, author: string, coverUrl: string | null) => {
+    setCurrentTrack({ bookId, url, title, author, coverUrl });
     setIsPlaying(true);
+    lastLoggedMinute.current = -1; // Reset tracker for new track
   };
 
   const stopAudio = () => {
@@ -78,10 +80,25 @@ export function AudioProvider({ children }: { children: ReactNode }) {
 
   const togglePlay = () => setIsPlaying(!isPlaying);
   
+  const lastLoggedMinute = useRef<number>(-1);
+
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      setProgress(audioRef.current.currentTime);
+      const current = audioRef.current.currentTime;
+      setProgress(current);
       setDuration(audioRef.current.duration || 0);
+      
+      // Calculate current minute (0, 1, 2, ...)
+      const currentMinute = Math.floor(current / 60);
+      
+      // If we entered a new minute, log it to the server
+      if (currentMinute > lastLoggedMinute.current && currentTrack?.bookId) {
+        lastLoggedMinute.current = currentMinute;
+        // Import and call logPageRead dynamically to avoid circular dependencies or server action issues in client component
+        import('@/app/reader/[id]/actions').then(({ logPageRead }) => {
+          logPageRead(currentTrack.bookId, `audio_min_${currentMinute}`).catch(console.error);
+        });
+      }
     }
   };
 

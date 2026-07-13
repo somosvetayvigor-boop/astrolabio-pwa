@@ -35,9 +35,14 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
   const isFree = book.price === 0 || isPromoActive;
 
   let hasPurchased = false;
+  let isSubscribed = false;
+
   if (user) {
-    if (book.author_id === user.id || isFree) {
-      hasPurchased = true;
+    const { data: userProfile } = await supabase.from('profiles').select('subscription_status').eq('id', user.id).single();
+    isSubscribed = userProfile?.subscription_status === 'active';
+
+    if (book.author_id === user.id || isFree || isSubscribed) {
+      hasPurchased = true; // Conceptual bypass, allow them to read
     } else {
       const { data: purchase } = await supabase
         .from('purchases')
@@ -99,7 +104,7 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
           <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', flexWrap: 'wrap' }}>
             {hasPurchased ? (
               <Link href={`/reader/${book.id}`} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center' }}>
-                📖 Leer Libro Completo
+                {isSubscribed && !isFree && book.author_id !== user?.id ? '✨ Leer con Premium' : '📖 Leer Libro Completo'}
               </Link>
             ) : (
               <>

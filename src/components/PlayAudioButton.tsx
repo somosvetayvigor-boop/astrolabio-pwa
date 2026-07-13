@@ -3,6 +3,7 @@
 import { useAudioPlayer } from './GlobalAudioPlayer'
 
 interface PlayAudioButtonProps {
+  bookId: string;
   url: string;
   title: string;
   author: string;
@@ -11,19 +12,16 @@ interface PlayAudioButtonProps {
   style?: React.CSSProperties;
 }
 
-export default function PlayAudioButton({ url, title, author, coverUrl, className, style }: PlayAudioButtonProps) {
+export default function PlayAudioButton({ bookId, url, title, author, coverUrl, className, style }: PlayAudioButtonProps) {
   const { playAudio, currentTrack, isPlaying, stopAudio } = useAudioPlayer();
   const isThisPlaying = currentTrack?.url === url && isPlaying;
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault(); // prevent link navigation if it's inside a Link wrapper
     if (isThisPlaying) {
-      // Just let it keep playing, or maybe pause it, but standard is to pause?
-      // For simplicity, we just trigger play which might reset it. Actually, if we click play on playing track, let's pause.
-      // Wait, stopAudio clears it. Let's just do playAudio. If they want to pause, they use the global player.
-      playAudio(url, title, author, coverUrl);
+      playAudio(bookId, url, title, author, coverUrl);
     } else {
-      playAudio(url, title, author, coverUrl);
+      playAudio(bookId, url, title, author, coverUrl);
     }
   };
 
