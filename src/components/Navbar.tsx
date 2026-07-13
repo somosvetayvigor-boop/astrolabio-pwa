@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import InstallPWA from './InstallPWA'
 import { logout } from '@/app/login/actions'
 
-export default function Navbar({ user, streak = 0 }: { user: any, streak?: number }) {
+export default function Navbar({ user, streak = 0, isAdmin = false }: { user: any, streak?: number, isAdmin?: boolean }) {
   const pathname = usePathname()
   
   // Hide navbar on the reader page to allow fullscreen reading
@@ -30,6 +30,9 @@ export default function Navbar({ user, streak = 0 }: { user: any, streak?: numbe
               </div>
               <Link href="/library" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Mi Biblioteca</Link>
               <Link href="/dashboard" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Panel de Autor</Link>
+              {isAdmin && (
+                <Link href="/admin" style={{ color: '#fbbf24', fontWeight: 600 }}>👑 Panel Admin</Link>
+              )}
               <form action={logout}>
                 <button type="submit" className="btn btn-secondary" style={{ padding: '0.5rem 1rem' }}>Cerrar Sesión</button>
               </form>

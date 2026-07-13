@@ -36,17 +36,20 @@ export default async function RootLayout({
 }>) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
   let currentStreak = 0;
+  let isAdmin = false;
   if (user) {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('current_streak')
+      .select('current_streak, is_admin')
       .eq('id', user.id)
       .single();
       
     if (profile && profile.current_streak) {
       currentStreak = profile.current_streak;
+    }
+    if (profile && profile.is_admin) {
+      isAdmin = profile.is_admin;
     }
   }
 
@@ -56,7 +59,7 @@ export default async function RootLayout({
         <AudioProvider>
           <CustomSplashScreen />
           <PWAProvider />
-          <Navbar user={user} streak={currentStreak} />
+          <Navbar user={user} streak={currentStreak} isAdmin={isAdmin} />
           <main>
             {children}
           </main>
