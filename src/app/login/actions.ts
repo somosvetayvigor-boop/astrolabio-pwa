@@ -94,3 +94,54 @@ export async function logout() {
   revalidatePath('/', 'layout')
   redirect('/')
 }
+
+export async function resetPasswordForEmail(formData: FormData) {
+  let errorMessage = ''
+  try {
+    const supabase = await createClient()
+    const email = formData.get('email') as string
+    
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://app.astrolabiobooks.com'
+    const resetUrl = `${siteUrl}/reset-password`
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: resetUrl,
+    })
+    
+    if (error) errorMessage = error.message
+  } catch (err: any) {
+    errorMessage = err.message || 'Error de servidor'
+  }
+
+  if (errorMessage) {
+    redirect(`/forgot-password?error=${encodeURIComponent(errorMessage)}`)
+  }
+
+  redirect(`/forgot-password?success=true`)
+}
+
+export async function updatePassword(formData: FormData) {
+  let errorMessage = ''
+  let supabase = null;
+  try {
+    supabase = await createClient()
+    const password = formData.get('password') as string
+
+    const { error } = await supabase.auth.updateUser({
+      password: password
+    })
+    
+    if (error) errorMessage = error.message
+  } catch (err: any) {
+    errorMessage = err.message || 'Error de servidor'
+  }
+
+  if (errorMessage) {
+    redirect(`/reset-password?error=${encodeURIComponent(errorMessage)}`)
+  }
+
+  if (supabase) {
+    await supabase.auth.signOut()
+  }
+  redirect('/login?error=PIN+actualizado.+Por+favor+inicia+sesión+de+nuevo.')
+}

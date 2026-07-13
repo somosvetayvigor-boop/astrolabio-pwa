@@ -65,18 +65,26 @@ export default function AuthTabs({ errorMsg }: { errorMsg?: string }) {
             />
           </div>
           <div style={{ marginBottom: '1rem' }}>
-            <label htmlFor="password_login" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Contraseña</label>
+            <label htmlFor="password_login" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>PIN de 6 dígitos</label>
             <input 
               id="password_login" 
               name="password" 
               type="password" 
+              inputMode="numeric"
+              pattern="\d{6}"
+              maxLength={6}
+              title="Tu PIN debe ser de 6 números"
+              placeholder="Ej. 123456"
               required 
-              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} 
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', letterSpacing: '0.2em', fontFamily: 'monospace' }} 
             />
           </div>
           <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.875rem' }}>
             Entrar a mi cuenta
           </button>
+          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+            <a href="/forgot-password" style={{ color: 'var(--brand-primary)', fontSize: '0.875rem', textDecoration: 'none' }}>¿Olvidaste tu PIN?</a>
+          </div>
         </form>
       ) : (
         <form action={signup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -129,13 +137,18 @@ export default function AuthTabs({ errorMsg }: { errorMsg?: string }) {
             />
           </div>
           <div style={{ marginBottom: '1rem' }}>
-            <label htmlFor="password_register" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Contraseña *</label>
+            <label htmlFor="password_register" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Crea un PIN de 6 dígitos *</label>
             <input 
               id="password_register" 
               name="password" 
               type="password" 
+              inputMode="numeric"
+              pattern="\d{6}"
+              maxLength={6}
+              title="Tu PIN debe ser de 6 números"
+              placeholder="Ej. 123456"
               required 
-              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} 
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', letterSpacing: '0.2em', fontFamily: 'monospace' }} 
             />
           </div>
           <button type="submit" className="btn btn-secondary" style={{ width: '100%', padding: '0.875rem' }}>
