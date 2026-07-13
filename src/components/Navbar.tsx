@@ -25,10 +25,14 @@ export default function Navbar({ user, streak = 0, isAdmin = false, isPremium = 
           <Link href="/#catalogo" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Catálogo</Link>
           {user ? (
             <>
-              {isPremium && (
+              {isPremium ? (
                 <div title="Suscripción Activa" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: 'rgba(212, 175, 55, 0.15)', padding: '0.25rem 0.75rem', borderRadius: '1rem', color: 'var(--brand-primary)', fontWeight: 600, border: '1px solid var(--brand-primary)' }}>
                   ✨ Premium
                 </div>
+              ) : (
+                <Link href="/premium" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', padding: '0.25rem 0.75rem', borderRadius: '1rem', color: '#000', backgroundColor: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none' }}>
+                  ✨ Hazte Premium
+                </Link>
               )}
               <div title="Racha de lectura diaria" style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', backgroundColor: 'rgba(255,165,0,0.1)', padding: '0.25rem 0.75rem', borderRadius: '1rem', color: '#ff9800', fontWeight: 600 }}>
                 🔥 {streak}
