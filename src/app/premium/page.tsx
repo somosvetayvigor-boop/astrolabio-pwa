@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { activatePremiumSubscription } from './actions'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function PremiumPage() {
   const router = useRouter()
@@ -23,18 +22,39 @@ export default function PremiumPage() {
     setLoading(true)
     setError(null)
     
-    const result = await activatePremiumSubscription()
-    
-    if (result.success) {
-      setSuccess(true)
-      setTimeout(() => {
-        router.push('/')
-      }, 3000)
-    } else {
-      setError(result.error || 'Ocurrió un error inesperado.')
+    try {
+      const res = await fetch('/api/checkout/subscription', {
+        method: 'POST',
+      })
+      const data = await res.json()
+      
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        setError(data.error || 'Error al conectar con Stripe.')
+        setLoading(false)
+      }
+    } catch (err) {
+      console.error(err)
+      setError('Error de conexión.')
       setLoading(false)
     }
   }
+
+  // Handle return from Stripe
+  const searchParams = useSearchParams();
+  import('react').then(({ useEffect }) => {
+    useEffect(() => {
+      if (searchParams.get('success') === 'true') {
+        setSuccess(true)
+        setTimeout(() => {
+          router.push('/')
+        }, 3000)
+      } else if (searchParams.get('canceled') === 'true') {
+        setError('El pago fue cancelado.')
+      }
+    }, [searchParams, router])
+  })
 
   return (
     <div className="container" style={{ padding: '4rem 1.5rem', maxWidth: '800px', textAlign: 'center' }}>
