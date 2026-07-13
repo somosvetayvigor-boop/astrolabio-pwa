@@ -332,7 +332,7 @@ export default function UploadBookPage() {
                 style={{ marginTop: '0.25rem', width: '1.2rem', height: '1.2rem', accentColor: 'var(--brand-primary)' }}
               />
               <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                <strong style={{ color: 'var(--text-primary)' }}>Declaración de Derechos de Autor:</strong> Declaro bajo pena de perjurio que soy el autor original de esta obra o poseo los derechos legales para su venta y distribución. Acepto que cualquier infracción de derechos de autor resultará en la eliminación de mi cuenta y la retención de mis ganancias.
+                <strong style={{ color: 'var(--text-primary)' }}>Declaración de Derechos de Autor:</strong> Declaro bajo pena de perjurio que soy el autor original de esta obra, poseo los derechos legales para su distribución, o que la obra es de dominio público y es responsabilidad exclusiva de quien lo sube. Acepto que cualquier infracción de derechos resultará en la eliminación de mi cuenta y la retención de ganancias.
               </span>
             </label>
           </div>
