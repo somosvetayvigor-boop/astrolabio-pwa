@@ -22,6 +22,7 @@ export const metadata: Metadata = {
 
 import { createClient } from '@/utils/supabase/server';
 import { logout } from '@/app/login/actions';
+import PlatformDetector from '@/components/PlatformDetector';
 
 import PWAProvider from '@/components/PWAProvider';
 import InstallPWA from '@/components/InstallPWA';
@@ -60,6 +61,7 @@ export default async function RootLayout({
   return (
     <html lang="es">
       <body className={`${inter.variable}`}>
+        <PlatformDetector />
         <AudioProvider>
           <CustomSplashScreen />
           <PWAProvider />

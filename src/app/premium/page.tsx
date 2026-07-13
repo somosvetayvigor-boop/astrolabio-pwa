@@ -9,6 +9,15 @@ export default function PremiumPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isPlayStore, setIsPlayStore] = useState(false)
+
+  import('react').then(({ useEffect }) => {
+    useEffect(() => {
+      if (typeof window !== 'undefined') {
+        setIsPlayStore(localStorage.getItem('isPlayStore') === 'true')
+      }
+    }, [])
+  })
 
   const handleSubscribe = async () => {
     setLoading(true)
@@ -55,7 +64,11 @@ export default function PremiumPage() {
           </li>
         </ul>
 
-        {success ? (
+        {isPlayStore ? (
+          <div style={{ padding: '1.5rem', backgroundColor: 'rgba(255,165,0,0.1)', color: '#ff9800', borderRadius: 'var(--radius-md)', fontWeight: 600 }}>
+            Por políticas de Google, las suscripciones deben realizarse directamente en nuestro sitio web oficial.
+          </div>
+        ) : success ? (
           <div style={{ padding: '1rem', backgroundColor: 'rgba(16, 185, 129, 0.2)', color: '#10b981', borderRadius: 'var(--radius-md)', fontWeight: 600 }}>
             ¡Bienvenido a Astrolabio Premium! Redirigiendo al catálogo...
           </div>
@@ -70,7 +83,7 @@ export default function PremiumPage() {
               {loading ? 'Activando...' : 'Suscribirse ahora'}
             </button>
             <p style={{ color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
-              * Modo de prueba. No se realizarán cargos reales a tu tarjeta.
+              * Serás redirigido a la pasarela de pago segura de Stripe.
             </p>
             {error && <p style={{ color: '#ef4444', fontSize: '0.875rem' }}>{error}</p>}
           </div>
