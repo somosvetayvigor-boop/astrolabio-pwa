@@ -12,11 +12,9 @@ export default async function LibraryPage() {
   }
 
   // Fetch purchased books
-  const { data: purchases, error } = await supabase
+  const { data: purchases, error: purchasesError } = await supabase
     .from('purchases')
     .select(`
-      id,
-      created_at,
       books (
         id,
         title,
@@ -28,12 +26,39 @@ export default async function LibraryPage() {
       )
     `)
     .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
 
-  // Supabase returns books as an object or array depending on the relationship, 
-  // since it's a many-to-one (many purchases to one book), books is an object.
-  // We'll map it safely.
-  const purchasedBooks = (purchases || []).map((p: any) => p.books).filter(Boolean)
+  // Fetch books started reading (reading_progress)
+  const { data: readingProgress, error: readingError } = await supabase
+    .from('reading_progress')
+    .select(`
+      books (
+        id,
+        title,
+        cover_url,
+        author_id,
+        profiles (
+          full_name
+        )
+      )
+    `)
+    .eq('user_id', user.id)
+
+  // Extract books and remove duplicates by ID
+  const allBooksMap = new Map<string, any>()
+  
+  if (purchases) {
+    purchases.forEach((p: any) => {
+      if (p.books && p.books.id) allBooksMap.set(p.books.id, p.books)
+    })
+  }
+  
+  if (readingProgress) {
+    readingProgress.forEach((rp: any) => {
+      if (rp.books && rp.books.id) allBooksMap.set(rp.books.id, rp.books)
+    })
+  }
+
+  const myLibraryBooks = Array.from(allBooksMap.values())
 
   // Fetch gamification stats
   const { data: profile } = await supabase
@@ -105,7 +130,7 @@ export default async function LibraryPage() {
 
       <h1 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 700 }}>Mi Colección</h1>
       
-      {purchasedBooks.length === 0 ? (
+      {myLibraryBooks.length === 0 ? (
         <div style={{ padding: '3rem', textAlign: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
           <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Tu biblioteca está vacía</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
@@ -117,7 +142,7 @@ export default async function LibraryPage() {
         </div>
       ) : (
         <div className="books-grid">
-          {purchasedBooks.map((book: any) => (
+          {myLibraryBooks.map((book: any) => (
             <div key={book.id} className="book-card" style={{ display: 'flex', flexDirection: 'column' }}>
               <Link href={`/book/${book.id}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
                 {book.cover_url ? (

@@ -14,6 +14,7 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
   const [rendition, setRendition] = useState<Rendition | null>(null)
   const [progress, setProgress] = useState(0)
   const [sampleEnded, setSampleEnded] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(true)
   const visitedLocations = useRef<Set<string>>(new Set())
   const [theme, setTheme] = useState<'light' | 'dark' | 'sepia'>('light')
   const [fontSize, setFontSize] = useState(100)
@@ -39,6 +40,7 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
     let newBook: Book | null = null
 
     // Fetch the EPUB file as an ArrayBuffer to avoid URL extension parsing bugs in epub.js
+    setIsDownloading(true)
     fetch(epubUrl)
       .then(res => {
         if (!res.ok) throw new Error('Error downloading epub')
@@ -87,6 +89,10 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
     newRendition.themes.fontSize(`${fontSize}%`)
 
     setRendition(newRendition)
+
+    newRendition.on('rendered', () => {
+      setIsDownloading(false)
+    })
 
     if (!isSample) {
       getProgress(bookId).then(res => {
@@ -233,6 +239,17 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       {/* Reader Area */}
       <div style={{ flex: 1, display: 'flex', position: 'relative', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
         
+        {isDownloading && (
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', backgroundColor: wrapperBg, zIndex: 10 }}>
+            <div className="spinner" style={{ width: '40px', height: '40px', border: `4px solid ${wrapperText}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+            <p style={{ color: wrapperText, marginTop: '1rem', fontWeight: 600 }}>Descargando libro a tu dispositivo...</p>
+            <p style={{ color: wrapperText, fontSize: '0.8rem', opacity: 0.7 }}>Para lectura ultrarrápida y sin internet</p>
+            <style>{`
+              @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            `}</style>
+          </div>
+        )}
+
         {/* Settings Panel */}
         {showSettings && (
           <div style={{ 
