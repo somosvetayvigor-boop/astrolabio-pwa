@@ -150,11 +150,12 @@ button {
   line-height: 1.2;
   margin-bottom: 1.5rem;
   letter-spacing: -0.05em;
+  color: #ffffff;
 }
 
 .hero p {
   font-size: 1.25rem;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.9);
   max-width: 600px;
   margin: 0 auto 2.5rem;
 }

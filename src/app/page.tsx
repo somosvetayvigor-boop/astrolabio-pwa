@@ -37,7 +37,12 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
 
   return (
     <div>
-      <section className="hero">
+      <section className="hero" style={{ 
+        backgroundImage: 'linear-gradient(rgba(17, 26, 40, 0.7), rgba(17, 26, 40, 0.8)), url("/hero-bg.jpeg")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        color: '#ffffff'
+      }}>
         <div className="container">
           <h1>Descubre historias increíbles. <br />Apoya a creadores independientes.</h1>
           <p>Lee miles de libros de autores emergentes. Paga por libro o suscríbete para leer sin límites, mientras los autores ganan por cada página que disfrutas.</p>
