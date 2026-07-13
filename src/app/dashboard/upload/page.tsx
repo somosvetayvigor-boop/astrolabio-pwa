@@ -204,6 +204,8 @@ export default function UploadBookPage() {
               style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
             >
               <option value="">Selecciona una categoría...</option>
+              <option value="Aventura">Aventura</option>
+              <option value="Ficción Histórica">Ficción Histórica</option>
               <option value="Romance">Romance</option>
               <option value="Ciencia Ficción">Ciencia Ficción</option>
               <option value="Fantasía">Fantasía</option>
