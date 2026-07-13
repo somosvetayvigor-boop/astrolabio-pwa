@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { getStreakBadge, getVolumeBadge } from '@/utils/gamification'
 
 export default async function LibraryPage() {
   const supabase = await createClient()
@@ -34,9 +35,75 @@ export default async function LibraryPage() {
   // We'll map it safely.
   const purchasedBooks = (purchases || []).map((p: any) => p.books).filter(Boolean)
 
+  // Fetch gamification stats
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('current_streak, full_name, avatar_url')
+    .eq('id', user.id)
+    .single()
+
+  const { count: completedBooksCount } = await supabase
+    .from('reading_progress')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('is_completed', true)
+
+  const streakBadge = getStreakBadge(profile?.current_streak || 0)
+  const volumeBadge = getVolumeBadge(completedBooksCount || 0)
+
   return (
     <div className="container" style={{ padding: '2rem 1rem' }}>
-      <h1 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 700 }}>Mi Biblioteca</h1>
+      
+      {/* Gamification Dashboard */}
+      <div className="glass" style={{ marginBottom: '3rem', padding: '2rem', borderRadius: 'var(--radius-lg)', display: 'flex', flexWrap: 'wrap', gap: '2rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 300px' }}>
+          {profile?.avatar_url ? (
+            <img src={profile.avatar_url} alt="Avatar" style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--brand-primary)' }} />
+          ) : (
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', backgroundColor: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', border: '3px solid var(--brand-primary)' }}>👤</div>
+          )}
+          <div>
+            <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>{profile?.full_name || 'Lector'}</h2>
+            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Progreso Literario</p>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '1.5rem', flex: '2 1 400px', flexWrap: 'wrap' }}>
+          
+          {/* Racha Badge */}
+          <div style={{ flex: 1, backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-md)', borderLeft: `4px solid ${streakBadge.color}`, minWidth: '200px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '2rem' }}>{streakBadge.icon}</span>
+              <div>
+                <p style={{ margin: 0, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', fontWeight: 600 }}>Racha (Días)</p>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: streakBadge.color }}>{streakBadge.title}</p>
+              </div>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.875rem' }}>Llevas <strong>{profile?.current_streak || 0}</strong> días seguidos.</p>
+            {streakBadge.nextGoal && (
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Faltan {streakBadge.nextGoal - (profile?.current_streak || 0)} días para evolucionar.</p>
+            )}
+          </div>
+
+          {/* Volume Badge */}
+          <div style={{ flex: 1, backgroundColor: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-md)', borderLeft: `4px solid ${volumeBadge.color}`, minWidth: '200px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <span style={{ fontSize: '2rem' }}>{volumeBadge.icon}</span>
+              <div>
+                <p style={{ margin: 0, fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', fontWeight: 600 }}>Libros Terminados</p>
+                <p style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', color: volumeBadge.color }}>{volumeBadge.title}</p>
+              </div>
+            </div>
+            <p style={{ margin: 0, fontSize: '0.875rem' }}>Has completado <strong>{completedBooksCount || 0}</strong> libros.</p>
+            {volumeBadge.nextGoal && (
+              <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>Faltan {volumeBadge.nextGoal - (completedBooksCount || 0)} para el siguiente nivel.</p>
+            )}
+          </div>
+
+        </div>
+      </div>
+
+      <h1 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 700 }}>Mi Colección</h1>
       
       {purchasedBooks.length === 0 ? (
         <div style={{ padding: '3rem', textAlign: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>

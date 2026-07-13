@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import ePub, { Book, Rendition } from 'epubjs'
-import { saveProgress, getProgress, updateReadingStreak, logPageRead } from './actions'
+import { saveProgress, getProgress, updateReadingStreak, logPageRead, markBookAsCompleted } from './actions'
 import TipModal from '@/components/TipModal'
 import AddCommentModal from '@/components/AddCommentModal'
 import CommentsSidebar from '@/components/CommentsSidebar'
@@ -125,6 +125,11 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
             logPageRead(bookId, location.start.cfi).catch(console.error)
             // Update reading streak silently
             updateReadingStreak().catch(console.error)
+            
+            // Check if user finished the book
+            if (location.atEnd) {
+              markBookAsCompleted(bookId).catch(console.error)
+            }
           }, 2000)
         }
       })

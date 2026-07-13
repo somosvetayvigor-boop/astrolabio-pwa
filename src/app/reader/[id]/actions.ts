@@ -29,6 +29,29 @@ export async function saveProgress(bookId: string, cfi: string) {
   return { success: true }
 }
 
+export async function markBookAsCompleted(bookId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Not authenticated' }
+
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { error } = await supabaseAdmin
+    .from('reading_progress')
+    .update({ is_completed: true })
+    .eq('user_id', user.id)
+    .eq('book_id', bookId)
+
+  if (error) {
+    console.error('Error marking book as completed:', error)
+    return { success: false, error: error.message }
+  }
+
+  return { success: true }
+}
 export async function logPageRead(bookId: string, locationIdentifier: string) {
   const supabase = await createClient()
 

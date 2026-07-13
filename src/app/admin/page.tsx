@@ -40,12 +40,20 @@ export default async function AdminPage() {
     .from('books')
     .select('id, title, price, author_id')
 
-  // Map books to profiles
+  // Fetch all completed books logs to calculate badges
+  const { data: completedLogs } = await supabase
+    .from('reading_progress')
+    .select('user_id')
+    .eq('is_completed', true)
+
+  // Map books and completed counts to profiles
   const usersWithBooks = allProfiles?.map(p => {
     const userBooks = allBooks?.filter(b => b.author_id === p.id) || []
+    const completedCount = completedLogs?.filter(log => log.user_id === p.id).length || 0
     return {
       ...p,
-      books: userBooks
+      books: userBooks,
+      completedCount
     }
   }) || []
 

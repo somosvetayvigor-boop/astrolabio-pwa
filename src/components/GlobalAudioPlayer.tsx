@@ -127,7 +127,14 @@ export function AudioProvider({ children }: { children: ReactNode }) {
           ref={audioRef} 
           src={audioUrl} 
           onTimeUpdate={handleTimeUpdate}
-          onEnded={() => setIsPlaying(false)}
+          onEnded={() => {
+            setIsPlaying(false);
+            if (currentTrack?.bookId) {
+              import('@/app/reader/[id]/actions').then(({ markBookAsCompleted }) => {
+                markBookAsCompleted(currentTrack.bookId).catch(console.error);
+              });
+            }
+          }}
           onLoadedMetadata={handleTimeUpdate}
         />
       )}

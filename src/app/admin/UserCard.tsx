@@ -16,6 +16,7 @@ interface UserCardProps {
     avatar_url: string | null
     subscription_status: string | null
     current_streak: number
+    completedCount: number
     books: Book[]
   }
 }
@@ -62,8 +63,12 @@ export default function UserCard({ user }: UserCardProps) {
           <p style={{ margin: 0, fontWeight: 700 }}>🔥 {user.current_streak || 0}</p>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Libros</p>
-          <p style={{ margin: 0, fontWeight: 700 }}>📚 {user.books.length}</p>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Completados</p>
+          <p style={{ margin: 0, fontWeight: 700 }}>📚 {user.completedCount || 0}</p>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Publicados</p>
+          <p style={{ margin: 0, fontWeight: 700 }}>✍️ {user.books.length}</p>
         </div>
       </div>
 
