@@ -10,10 +10,10 @@ export default function StripeConnectButton({ isConnected }: { isConnected: bool
   useEffect(() => {
     // Detectar si venimos de la app de Google Play (TWA)
     if (document.referrer.includes('android-app://')) {
-      localStorage.setItem('isPlayStore', 'true')
+      sessionStorage.setItem('isPlayStore', 'true')
     }
     
-    if (localStorage.getItem('isPlayStore') === 'true') {
+    if (sessionStorage.getItem('isPlayStore') === 'true') {
       setIsPlayStore(true)
     }
 

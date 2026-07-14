@@ -8,7 +8,7 @@ export default function BuyButton({ bookId, price }: { bookId: string, price: nu
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setIsPlayStore(localStorage.getItem('isPlayStore') === 'true');
+      setIsPlayStore(sessionStorage.getItem('isPlayStore') === 'true');
     }
   }, []);
 
