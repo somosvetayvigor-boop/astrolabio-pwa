@@ -7,6 +7,10 @@ export default function InstallPWA() {
   const [isInstallable, setIsInstallable] = useState(false);
 
   useEffect(() => {
+    if (window.location.hostname.includes('www.')) {
+      return;
+    }
+
     const handleBeforeInstallPrompt = (e: any) => {
       // Prevent Chrome 67 and earlier from automatically showing the prompt
       e.preventDefault();
