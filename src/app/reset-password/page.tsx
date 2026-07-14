@@ -18,10 +18,20 @@ export default function ResetPasswordPage() {
       // Check for PKCE code in URL search params
       const searchParams = new URLSearchParams(window.location.search);
       const code = searchParams.get('code');
+      const token_hash = searchParams.get('token_hash');
       const errorDescription = searchParams.get('error_description');
 
       if (errorDescription) {
         setErrorMsg('Error: ' + errorDescription);
+        return;
+      }
+
+      if (token_hash) {
+        // Direct OTP verification (bypasses email scanners because it runs on the client JS)
+        const { error } = await supabase.auth.verifyOtp({ token_hash, type: 'recovery' });
+        if (error) {
+          setErrorMsg('El enlace ha expirado o es inválido. Solicita uno nuevo.');
+        }
         return;
       }
 
