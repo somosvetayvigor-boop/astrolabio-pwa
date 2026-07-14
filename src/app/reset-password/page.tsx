@@ -11,9 +11,30 @@ export default function ResetPasswordPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Supabase auth auto-detects the #access_token in the URL when the client is created
+    // Handle both implicit flow (hash) and PKCE flow (?code=)
     const setupSession = async () => {
       const supabase = createClient();
+      
+      // Check for PKCE code in URL search params
+      const searchParams = new URLSearchParams(window.location.search);
+      const code = searchParams.get('code');
+      const errorDescription = searchParams.get('error_description');
+
+      if (errorDescription) {
+        setErrorMsg('Error: ' + errorDescription);
+        return;
+      }
+
+      if (code) {
+        // Exchange code for session
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (error) {
+          setErrorMsg('El enlace ha expirado o es inválido. Solicita uno nuevo.');
+        }
+        return;
+      }
+
+      // If no code, check session directly (in case of implicit flow or existing session)
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         const hash = window.location.hash;
