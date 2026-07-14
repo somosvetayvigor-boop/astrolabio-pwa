@@ -60,7 +60,7 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       spread: 'none', // Use paginated layout (Kindle style)
     })
 
-    // Inject CSS to fix image overflow in fixed-layout or poorly formatted epubs
+      // Inject CSS to fix image overflow in fixed-layout or poorly formatted epubs
     newRendition.hooks.content.register((contents: any) => {
       contents.addStylesheetRules({
         "img, video, audio, object, svg": {
@@ -70,8 +70,38 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         },
         "div, p, span, figure": {
           "max-width": "100% !important"
+        },
+        "body": {
+          "touch-action": "pan-y" // Prevent browser horizontal swipe back/forward, allow vertical scroll
         }
       });
+
+      // Swipe Gestures Logic
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      contents.document.addEventListener('touchstart', (e: TouchEvent) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+      
+      contents.document.addEventListener('touchend', (e: TouchEvent) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+      }, { passive: true });
+
+      const handleSwipe = () => {
+        const diff = touchEndX - touchStartX;
+        // Require a minimum swipe distance of 50px to trigger page turn
+        if (Math.abs(diff) > 50) { 
+          if (diff > 0) {
+            // Swiped right -> go to previous page
+            newRendition.prev();
+          } else {
+            // Swiped left -> go to next page
+            newRendition.next();
+          }
+        }
+      };
     });
     
     // Register themes
@@ -279,17 +309,15 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
             </div>
           </div>
         )}
-        {/* Previous Page Button */}
-        <button onClick={prev} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '50px', zIndex: 10, backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'var(--text-tertiary)', cursor: 'pointer' }}>
-          ‹
+        {/* Previous Page Button (Invisible Tap Zone) */}
+        <button onClick={prev} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '20%', maxWidth: '80px', zIndex: 10, backgroundColor: 'transparent', cursor: 'pointer', border: 'none' }} aria-label="Página anterior">
         </button>
 
         {/* ePub content renders here */}
         <div ref={viewerRef} style={{ width: '100%', height: '100%', padding: '1rem 40px', filter: sampleEnded ? 'blur(4px)' : 'none', transition: 'filter 0.3s', overflow: 'hidden' }}></div>
         
-        {/* Next Page Button */}
-        <button onClick={next} disabled={sampleEnded} style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '50px', zIndex: 10, backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', color: 'var(--text-tertiary)', cursor: sampleEnded ? 'not-allowed' : 'pointer' }}>
-          ›
+        {/* Next Page Button (Invisible Tap Zone) */}
+        <button onClick={next} disabled={sampleEnded} style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '20%', maxWidth: '80px', zIndex: 10, backgroundColor: 'transparent', cursor: sampleEnded ? 'not-allowed' : 'pointer', border: 'none' }} aria-label="Página siguiente">
         </button>
 
         {/* Sample Ended Overlay */}
