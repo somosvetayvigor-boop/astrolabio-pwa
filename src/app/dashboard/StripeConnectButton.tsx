@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from 'react'
 
-export default function StripeConnectButton({ isConnected }: { isConnected: boolean }) {
+export default function StripeConnectButton({ 
+  isConnected, 
+  bankName, 
+  last4 
+}: { 
+  isConnected: boolean, 
+  bankName?: string, 
+  last4?: string 
+}) {
   const [loading, setLoading] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
   const [isPlayStore, setIsPlayStore] = useState(false)
@@ -73,7 +81,7 @@ export default function StripeConnectButton({ isConnected }: { isConnected: bool
       </h3>
       <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.875rem', lineHeight: 1.5 }}>
         {isConnected 
-          ? 'Tu cuenta de Stripe Connect está activa. Recibirás tu porcentaje de ventas directamente en tu cuenta de banco.'
+          ? `Tu cuenta de Stripe Connect está activa. Recibirás tu porcentaje de ventas directamente en tu cuenta ${bankName && last4 ? `(${bankName} ****${last4})` : 'de banco'}.`
           : 'Para poder poner a la venta tus libros y recibir regalías (el 70% de cada venta), necesitas conectar una cuenta bancaria a través de Stripe, nuestra pasarela de pagos segura.'}
       </p>
       

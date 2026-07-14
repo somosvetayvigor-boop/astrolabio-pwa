@@ -24,6 +24,9 @@ export default async function Dashboard() {
     .single();
 
   let isStripeConnected = false;
+  let bankName = '';
+  let last4 = '';
+
   if (profile?.stripe_account_id) {
     try {
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
@@ -32,6 +35,12 @@ export default async function Dashboard() {
       const account = await stripe.accounts.retrieve(profile.stripe_account_id);
       // Stripe considera que la cuenta está conectada de verdad cuando puede recibir pagos (payouts_enabled)
       isStripeConnected = account.payouts_enabled;
+
+      if (isStripeConnected && account.external_accounts && account.external_accounts.data.length > 0) {
+        const ext = account.external_accounts.data[0] as any;
+        bankName = ext.bank_name || ext.brand || 'Banco';
+        last4 = ext.last4 || '';
+      }
     } catch (error) {
       console.error('Error fetching Stripe account:', error);
     }
@@ -73,7 +82,7 @@ export default async function Dashboard() {
         </Link>
       </div>
 
-      <StripeConnectButton isConnected={isStripeConnected} />
+      <StripeConnectButton isConnected={isStripeConnected} bankName={bankName} last4={last4} />
 
       <section style={{ marginBottom: '3rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
