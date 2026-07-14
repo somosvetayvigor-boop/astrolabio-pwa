@@ -1,8 +1,54 @@
-import { updatePassword } from '@/app/login/actions'
+'use client';
 
-export default async function ResetPasswordPage(props: { searchParams: Promise<{ error?: string }> }) {
-  const searchParams = await props.searchParams;
-  const errorMsg = searchParams?.error;
+import { useState, useEffect } from 'react';
+import { createClient } from '@/utils/supabase/client';
+import { useRouter } from 'next/navigation';
+
+export default function ResetPasswordPage() {
+  const [errorMsg, setErrorMsg] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Supabase auth auto-detects the #access_token in the URL when the client is created
+    const setupSession = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        const hash = window.location.hash;
+        if (!hash || !hash.includes('access_token')) {
+            setErrorMsg('Enlace inválido o expirado. Por favor solicita uno nuevo.');
+        }
+      }
+    };
+    setupSession();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
+    setErrorMsg('');
+    
+    const formData = new FormData(e.currentTarget);
+    const password = formData.get('password') as string;
+    
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({ password });
+    
+    setLoading(false);
+    
+    if (error) {
+      setErrorMsg('Error: ' + error.message);
+    } else {
+      setSuccessMsg('¡PIN actualizado correctamente!');
+      await supabase.auth.signOut();
+      
+      setTimeout(() => {
+        router.push('/login?error=PIN+actualizado.+Por+favor+inicia+sesión+de+nuevo.');
+      }, 2000);
+    }
+  };
 
   return (
     <div className="container" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -21,7 +67,13 @@ export default async function ResetPasswordPage(props: { searchParams: Promise<{
           </div>
         )}
 
-        <form action={updatePassword} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {successMsg && (
+          <div style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.875rem', fontWeight: '500' }}>
+            {successMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ marginBottom: '1rem' }}>
             <label htmlFor="password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Nuevo PIN de 6 dígitos</label>
             <input 
@@ -34,11 +86,12 @@ export default async function ResetPasswordPage(props: { searchParams: Promise<{
               title="Tu PIN debe ser de 6 números"
               placeholder="Ej. 123456"
               required 
+              disabled={loading || !!successMsg}
               style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', letterSpacing: '0.2em', fontFamily: 'monospace' }} 
             />
           </div>
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.875rem' }}>
-            Actualizar PIN
+          <button type="submit" className="btn btn-primary" disabled={loading || !!successMsg} style={{ width: '100%', padding: '0.875rem' }}>
+            {loading ? 'Actualizando...' : 'Actualizar PIN'}
           </button>
         </form>
       </div>
