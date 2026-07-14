@@ -42,7 +42,7 @@ export default function BuyButton({ bookId, price }: { bookId: string, price: nu
     return (
       <div style={{ padding: '1rem', backgroundColor: 'rgba(255,165,0,0.1)', border: '1px solid #ff9800', borderRadius: 'var(--radius-md)' }}>
         <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-          Por políticas de Google, la compra individual de libros debe realizarse directamente desde nuestro sitio web oficial.
+          Por políticas de Google, la compra individual de libros debe realizarse directamente desde nuestro sitio web oficial: <strong style={{ userSelect: 'text', WebkitUserSelect: 'text', cursor: 'text' }}>www.astrolabiobooks.com</strong>
         </p>
       </div>
     );

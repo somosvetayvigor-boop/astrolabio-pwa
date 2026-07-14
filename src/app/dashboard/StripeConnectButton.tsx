@@ -62,7 +62,7 @@ export default function StripeConnectButton({
           Configuración de Pagos
         </h3>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.5 }}>
-          Por políticas de la tienda de aplicaciones, la conexión de cuentas bancarias y regalías debe realizarse directamente desde nuestro sitio web. Por favor, inicia sesión en <strong>www.astrolabiobooks.com</strong> desde el navegador, no importa si es desde el celular o la computadora.
+          Por políticas de la tienda de aplicaciones, la conexión de cuentas bancarias y regalías debe realizarse directamente desde nuestro sitio web. Por favor, inicia sesión en <strong style={{ userSelect: 'text', WebkitUserSelect: 'text', cursor: 'text' }}>www.astrolabiobooks.com</strong> desde el navegador, no importa si es desde el celular o la computadora.
         </p>
       </div>
     )
