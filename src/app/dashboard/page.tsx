@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server';
 import { deleteBook } from './actions';
 import DeleteButton from './DeleteButton';
 import ProfileEditForm from './ProfileEditForm';
+import ChangePinForm from './ChangePinForm';
 import StripeConnectButton from './StripeConnectButton';
 import { redirect } from 'next/navigation';
 
@@ -73,6 +74,8 @@ export default async function Dashboard() {
           initialUsername={profile?.username || ''}
           initialDisplayPref={profile?.display_preference || 'full_name'}
         />
+
+        <ChangePinForm />
       </section>
 
       {/* Stats Grid */}
