@@ -63,9 +63,12 @@ export default async function Dashboard() {
       <StripeConnectButton isConnected={isStripeConnected} />
 
       <section style={{ marginBottom: '3rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span>Mi Perfil de Autor</span>
         </h2>
+        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+          <strong>Email de acceso:</strong> {user.email}
+        </p>
         
         <ProfileEditForm 
           initialBio={profile?.bio || ''} 

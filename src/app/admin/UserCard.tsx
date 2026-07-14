@@ -18,6 +18,7 @@ interface UserCardProps {
     current_streak: number
     completedCount: number
     books: Book[]
+    email: string | null
   }
 }
 
@@ -53,7 +54,10 @@ export default function UserCard({ user }: UserCardProps) {
         
         <div style={{ flex: 1 }}>
           <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>{user.full_name || 'Usuario Anónimo'}</h3>
-          <p style={{ margin: 0, color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>ID: {user.id.substring(0, 8)}...</p>
+          {user.email && (
+            <p style={{ margin: '0.25rem 0', color: 'var(--text-secondary)', fontSize: '0.875rem', wordBreak: 'break-all' }}>{user.email}</p>
+          )}
+          <p style={{ margin: 0, color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>ID: {user.id.substring(0, 8)}...</p>
         </div>
       </div>
 

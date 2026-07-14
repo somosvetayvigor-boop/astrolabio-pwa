@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import UserCard from './UserCard'
 
@@ -35,6 +36,16 @@ export default async function AdminPage() {
     console.error('Error fetching profiles:', error)
   }
 
+  // Fetch emails using Admin client
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+  const { data: { users: authUsers }, error: authError } = await supabaseAdmin.auth.admin.listUsers()
+  if (authError) {
+    console.error('Error fetching auth users:', authError)
+  }
+
   // Fetch all books to map them to authors
   const { data: allBooks } = await supabase
     .from('books')
@@ -46,14 +57,16 @@ export default async function AdminPage() {
     .select('user_id')
     .eq('is_completed', true)
 
-  // Map books and completed counts to profiles
+  // Map books, emails and completed counts to profiles
   const usersWithBooks = allProfiles?.map(p => {
     const userBooks = allBooks?.filter(b => b.author_id === p.id) || []
     const completedCount = completedLogs?.filter(log => log.user_id === p.id).length || 0
+    const authUser = authUsers?.find(u => u.id === p.id)
     return {
       ...p,
       books: userBooks,
-      completedCount
+      completedCount,
+      email: authUser?.email || null
     }
   }) || []
 
