@@ -5,8 +5,18 @@ import { useState, useEffect } from 'react'
 export default function StripeConnectButton({ isConnected }: { isConnected: boolean }) {
   const [loading, setLoading] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
+  const [isPlayStore, setIsPlayStore] = useState(false)
 
   useEffect(() => {
+    // Detectar si venimos de la app de Google Play (TWA)
+    if (document.referrer.includes('android-app://')) {
+      localStorage.setItem('isPlayStore', 'true')
+    }
+    
+    if (localStorage.getItem('isPlayStore') === 'true') {
+      setIsPlayStore(true)
+    }
+
     // Check URL params for success/refresh
     const params = new URLSearchParams(window.location.search)
     if (params.get('stripe_connect') === 'success') {
@@ -35,6 +45,19 @@ export default function StripeConnectButton({ isConnected }: { isConnected: bool
       alert('Error de conexión.')
       setLoading(false)
     }
+  }
+
+  if (isPlayStore) {
+    return (
+      <div style={{ marginBottom: '2rem', padding: '1.5rem', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderRadius: 'var(--radius-md)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem', color: 'var(--brand-primary)' }}>
+          Configuración de Pagos
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', lineHeight: 1.5 }}>
+          Por políticas de la tienda de aplicaciones, la conexión de cuentas bancarias y regalías debe realizarse directamente desde nuestro sitio web. Por favor, inicia sesión en <strong>app.astrolabiobooks.com</strong> desde el navegador de tu computadora.
+        </p>
+      </div>
+    )
   }
 
   return (
