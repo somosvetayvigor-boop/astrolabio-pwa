@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Stripe from "stripe";
 import { createClient } from '@/utils/supabase/server';
 import { deleteBook } from './actions';
 import DeleteButton from './DeleteButton';
@@ -22,7 +23,19 @@ export default async function Dashboard() {
     .eq('id', user.id)
     .single();
 
-  const isStripeConnected = !!profile?.stripe_account_id;
+  let isStripeConnected = false;
+  if (profile?.stripe_account_id) {
+    try {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
+        apiVersion: '2024-06-20' as any,
+      });
+      const account = await stripe.accounts.retrieve(profile.stripe_account_id);
+      // Stripe considera que la cuenta está conectada de verdad cuando details_submitted es true
+      isStripeConnected = account.details_submitted;
+    } catch (error) {
+      console.error('Error fetching Stripe account:', error);
+    }
+  }
 
   // Fetch real books for the user
   const { data: myBooks } = await supabase
