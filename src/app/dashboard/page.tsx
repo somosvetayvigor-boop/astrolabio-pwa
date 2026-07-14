@@ -30,8 +30,8 @@ export default async function Dashboard() {
         apiVersion: '2024-06-20' as any,
       });
       const account = await stripe.accounts.retrieve(profile.stripe_account_id);
-      // Stripe considera que la cuenta está conectada de verdad cuando details_submitted es true
-      isStripeConnected = account.details_submitted;
+      // Stripe considera que la cuenta está conectada de verdad cuando puede recibir pagos (payouts_enabled)
+      isStripeConnected = account.payouts_enabled;
     } catch (error) {
       console.error('Error fetching Stripe account:', error);
     }
