@@ -40,3 +40,39 @@ export async function submitReview(bookId: string, rating: number, comment: stri
   revalidatePath(`/book/${bookId}`)
   return { success: true }
 }
+
+export async function toggleBookVisibility(bookId: string, isHidden: boolean) {
+  const supabase = await createClient()
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return { error: 'No autorizado' }
+  }
+
+  // Verifica si es admin
+  const isAdmin = user.email === 'astrolabiobooks@gmail.com' || user.email?.includes('vetayvigor');
+  if (!isAdmin) {
+    return { error: 'No tienes permisos de administrador' }
+  }
+
+  const supabaseAdmin = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { error: dbError } = await supabaseAdmin
+    .from('books')
+    .update({ is_hidden: isHidden })
+    .eq('id', bookId)
+
+  if (dbError) {
+    console.error('Database update error:', dbError)
+    return { error: 'Error al actualizar la base de datos. Asegúrate de haber creado la columna is_hidden.' }
+  }
+
+  revalidatePath(`/book/${bookId}`)
+  revalidatePath('/')
+  revalidatePath('/dashboard')
+  
+  return { success: true }
+}

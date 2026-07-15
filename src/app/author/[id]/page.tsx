@@ -20,6 +20,7 @@ export default async function AuthorProfile(props: { params: Promise<{ id: strin
     .from('books')
     .select('*')
     .eq('author_id', params.id)
+    .or('is_hidden.is.null,is_hidden.eq.false')
     .order('created_at', { ascending: false })
 
   const authorBooks = books || []

@@ -21,6 +21,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
     .from('books')
     .select('*, profiles!inner(full_name)')
     .eq('format_type', currentFormat)
+    .or('is_hidden.is.null,is_hidden.eq.false')
     .order('created_at', { ascending: false })
     .limit(20)
 

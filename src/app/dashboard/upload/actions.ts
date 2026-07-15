@@ -122,6 +122,19 @@ export async function insertBookData(data: {
       promotional_free_until = expirationDate.toISOString()
     }
 
+    // Filtro Anti-Plagio / Duplicados
+    // Checamos si ya existe un libro con este mismo título de este mismo autor
+    const { data: existingBook } = await supabaseAdmin
+      .from('books')
+      .select('id')
+      .ilike('title', data.title)
+      .eq('author_id', user.id)
+      .single()
+
+    if (existingBook) {
+      return { error: 'Ya has subido un libro con este mismo título. Si estás intentando subir una versión nueva, por favor edita el libro existente desde tu Panel.' }
+    }
+
     const { error: dbError } = await supabaseAdmin
       .from('books')
       .insert({

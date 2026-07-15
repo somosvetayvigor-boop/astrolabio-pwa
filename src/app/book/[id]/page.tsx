@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { notFound } from "next/navigation";
 import BuyButton from '@/components/BuyButton';
 import ReviewForm from '@/components/ReviewForm';
+import AdminVisibilityToggle from './AdminVisibilityToggle';
 
 export default async function BookDetail(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -53,6 +54,8 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
       if (purchase) hasPurchased = true;
     }
   }
+
+  const isAdmin = user?.email === 'astrolabiobooks@gmail.com' || user?.email?.includes('vetayvigor');
 
   const hasReviewed = user && reviews?.some(r => r.user_id === user.id);
   const defaultCover = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600&auto=format&fit=crop"
@@ -123,6 +126,20 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
               </>
             )}
           </div>
+
+          <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
+            <a 
+              href={`mailto:astrolabiobooks@gmail.com?subject=Denuncia%20de%20Copyright%20-%20Libro%20ID:%20${book.id}&body=Hola,%20soy%20el%20autor%20original%20de%20esta%20obra%20y%20quiero%20denunciar%20plagio.%20El%20título%20del%20libro%20es:%20${book.title}`}
+              style={{ fontSize: '0.875rem', color: 'var(--text-tertiary)', textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+            >
+              🚩 Denunciar por Derechos de Autor
+            </a>
+          </div>
+
+          {isAdmin && (
+            <AdminVisibilityToggle bookId={book.id} initialIsHidden={book.is_hidden || false} />
+          )}
+
         </div>
       </div>
 
