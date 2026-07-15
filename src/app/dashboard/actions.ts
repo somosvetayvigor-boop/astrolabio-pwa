@@ -185,3 +185,29 @@ export async function updateProfileData(data: { bio: string, fullName?: string, 
   revalidatePath('/dashboard')
   return { success: true }
 }
+
+export async function becomeAuthor() {
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) return { error: 'No estás autenticado.' }
+
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    const { error } = await supabaseAdmin
+      .from('profiles')
+      .update({ is_author: true })
+      .eq('id', user.id)
+
+    if (error) throw new Error('Could not update profile to author')
+  } catch (err: any) {
+    console.error(err)
+    return { error: err.message }
+  }
+
+  revalidatePath('/dashboard')
+  return { success: true }
+}
