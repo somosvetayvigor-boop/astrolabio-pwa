@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, createContext, useContext, ReactNode } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import DownloadButton from './DownloadButton'
+import { isFileCached, removeFileFromCache } from '@/utils/OfflineManager'
 
 interface AudioContextType {
   playAudio: (bookId: string, url: string, title: string, author: string, coverUrl: string | null) => void;
@@ -133,6 +134,18 @@ export function AudioProvider({ children }: { children: ReactNode }) {
             if (currentTrack?.bookId) {
               import('@/app/reader/[id]/actions').then(({ markBookAsCompleted }) => {
                 markBookAsCompleted(currentTrack.bookId).catch(console.error);
+              });
+            }
+            if (audioUrl) {
+              isFileCached(audioUrl).then(isCached => {
+                if (isCached) {
+                  const confirmDelete = window.confirm("Has terminado de escuchar. ¿Deseas eliminar la descarga de tu dispositivo para liberar espacio?");
+                  if (confirmDelete) {
+                    removeFileFromCache(audioUrl).then(success => {
+                      if (success) alert("Descarga eliminada correctamente.");
+                    });
+                  }
+                }
               });
             }
           }}
