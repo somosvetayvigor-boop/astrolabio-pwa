@@ -1,6 +1,7 @@
 'use client'
 
 import { useAudioPlayer } from './GlobalAudioPlayer'
+import { saveProgress } from '@/app/reader/[id]/actions'
 
 interface PlayAudioButtonProps {
   bookId: string;
@@ -18,6 +19,10 @@ export default function PlayAudioButton({ bookId, url, title, author, coverUrl, 
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault(); // prevent link navigation if it's inside a Link wrapper
+    
+    // Ensure the audiobook is added to the user's library immediately
+    saveProgress(bookId, 'audio').catch(console.error);
+
     if (isThisPlaying) {
       playAudio(bookId, url, title, author, coverUrl);
     } else {

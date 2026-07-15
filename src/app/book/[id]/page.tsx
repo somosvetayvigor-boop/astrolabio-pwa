@@ -7,6 +7,7 @@ import AdminVisibilityToggle from './AdminVisibilityToggle';
 import { incrementBookViews } from '@/app/actions/activity';
 import SaveToPlaylistButton from '@/components/SaveToPlaylistButton';
 import DownloadButton from '@/components/DownloadButton';
+import PlayAudioButton from '@/components/PlayAudioButton';
 
 export default async function BookDetail(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -122,9 +123,22 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
 
           <div style={{ display: 'flex', gap: '1rem', marginTop: 'auto', flexWrap: 'wrap' }}>
             {hasPurchased ? (
-              <Link href={`/reader/${book.id}`} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center' }}>
-                {isSubscribed && !isFree && book.author_id !== user?.id ? '✨ Leer con Premium' : '📖 Leer Libro Completo'}
-              </Link>
+              <>
+                <Link href={`/reader/${book.id}`} className="btn btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center' }}>
+                  {isSubscribed && !isFree && book.author_id !== user?.id ? '✨ Leer con Premium' : '📖 Leer Libro Completo'}
+                </Link>
+                {book.audio_url && (
+                  <PlayAudioButton 
+                    bookId={book.id}
+                    url={book.audio_url}
+                    title={book.title}
+                    author={book.profiles?.full_name || 'Autor Desconocido'}
+                    coverUrl={book.cover_url}
+                    className="btn btn-secondary"
+                    style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center', justifyContent: 'center' }}
+                  />
+                )}
+              </>
             ) : (
               <>
                 <Link href={`/reader/${book.id}`} className="btn btn-secondary" style={{ padding: '1rem 2.5rem', fontSize: '1.125rem', flex: 1, textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', border: '1px solid var(--border-color)' }}>

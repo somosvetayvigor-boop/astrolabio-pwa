@@ -182,7 +182,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
             </button>
             <button onClick={() => { if(audioRef.current) audioRef.current.currentTime += 15 }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.2rem' }}>15⏩</button>
             
-            {audioUrl && <DownloadButton fileUrl={audioUrl} title={currentTrack.title} />}
+            {audioUrl && <DownloadButton fileUrl={audioUrl} title={currentTrack.title} bookId={currentTrack.bookId} />}
           </div>
 
           {/* Progress Bar */}

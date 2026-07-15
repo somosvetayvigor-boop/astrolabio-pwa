@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { isFileCached, downloadFileToCache, removeFileFromCache, requestPersistentStorage } from '@/utils/OfflineManager'
+import { saveProgress } from '@/app/reader/[id]/actions'
 
-export default function DownloadButton({ fileUrl, title }: { fileUrl: string, title?: string }) {
+export default function DownloadButton({ fileUrl, title, bookId }: { fileUrl: string, title?: string, bookId?: string }) {
   const [isDownloaded, setIsDownloaded] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -37,6 +38,9 @@ export default function DownloadButton({ fileUrl, title }: { fileUrl: string, ti
       setIsDownloading(false)
       if (success) {
         setIsDownloaded(true)
+        if (bookId) {
+          saveProgress(bookId, 'audio').catch(console.error)
+        }
         if (title) alert(`"${title}" guardado para escuchar offline.`)
       } else {
         alert('Hubo un error al descargar el archivo.')
