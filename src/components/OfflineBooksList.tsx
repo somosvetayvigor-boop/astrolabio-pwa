@@ -15,10 +15,18 @@ export default function OfflineBooksList({ books }: { books: any[] }) {
   const checkOfflineStatus = async () => {
     const cached = []
     for (const book of books) {
+      let isCached = false
       if (book.audio_url) {
-        const isCached = await isFileCached(book.audio_url)
-        if (isCached) cached.push(book)
+        if (await isFileCached(book.audio_url)) isCached = true
       }
+      if (!isCached) {
+        if (await isFileCached(`/offline/books/${book.id}.epub`)) isCached = true
+      }
+      if (!isCached) {
+        if (await isFileCached(`/offline/books/${book.id}.pdf`)) isCached = true
+      }
+      
+      if (isCached) cached.push(book)
     }
     setOfflineBooks(cached)
     setLoading(false)
@@ -29,8 +37,8 @@ export default function OfflineBooksList({ books }: { books: any[] }) {
   if (offlineBooks.length === 0) {
     return (
       <div style={{ padding: '2rem', textAlign: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)' }}>
-        <p style={{ color: 'var(--text-secondary)' }}>No tienes audiolibros descargados para escuchar sin conexión.</p>
-        <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>Ve a cualquier audiolibro y toca "Descargar".</p>
+        <p style={{ color: 'var(--text-secondary)' }}>No tienes libros o audiolibros descargados para leer sin conexión.</p>
+        <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>Abre cualquier libro para descargarlo automáticamente, o usa el botón de descargar en los audiolibros.</p>
       </div>
     )
   }
