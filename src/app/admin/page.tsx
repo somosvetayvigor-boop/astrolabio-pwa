@@ -29,7 +29,7 @@ export default async function AdminPage() {
   // We'll use the normal client first.
   const { data: allProfiles, error } = await supabase
     .from('profiles')
-    .select('id, full_name, username, avatar_url, subscription_status, current_streak')
+    .select('id, full_name, username, avatar_url, subscription_status, current_streak, last_active_at, total_reading_minutes')
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -46,10 +46,10 @@ export default async function AdminPage() {
     console.error('Error fetching auth users:', authError)
   }
 
-  // Fetch all books to map them to authors
+  // Fetch all books to map them to authors and compute stats
   const { data: allBooks } = await supabase
     .from('books')
-    .select('id, title, price, author_id')
+    .select('id, title, price, author_id, category, views')
 
   // Fetch all completed books logs to calculate badges
   const { data: completedLogs } = await supabase
@@ -64,7 +64,6 @@ export default async function AdminPage() {
     .order('created_at', { ascending: false })
     .limit(50)
 
-  // Map books, emails and completed counts to profiles
   const usersWithBooks = allProfiles?.map(p => {
     const userBooks = allBooks?.filter(b => b.author_id === p.id) || []
     const completedCount = completedLogs?.filter(log => log.user_id === p.id).length || 0
@@ -73,12 +72,32 @@ export default async function AdminPage() {
       ...p,
       books: userBooks,
       completedCount,
-      email: authUser?.email || null
+      email: authUser?.email || null,
+      last_sign_in_at: authUser?.last_sign_in_at || null
     }
   }) || []
 
   const totalPremium = usersWithBooks.filter(u => u.subscription_status === 'active').length
   const totalFree = usersWithBooks.length - totalPremium
+
+  // Stats: Total Hours
+  const totalMinutes = usersWithBooks.reduce((acc, user) => acc + (user.total_reading_minutes || 0), 0)
+  const totalHours = (totalMinutes / 60).toFixed(1)
+
+  // Stats: Most popular category
+  const categoryViews: Record<string, number> = {}
+  allBooks?.forEach(book => {
+    const cat = book.category || 'Sin Categoría'
+    categoryViews[cat] = (categoryViews[cat] || 0) + (book.views || 0)
+  })
+  let mostReadCategory = 'N/A'
+  let highestViews = -1
+  Object.entries(categoryViews).forEach(([cat, views]) => {
+    if (views > highestViews) {
+      highestViews = views
+      mostReadCategory = cat
+    }
+  })
 
   return (
     <div className="container" style={{ padding: '4rem 1.5rem', maxWidth: '1200px' }}>
@@ -98,6 +117,19 @@ export default async function AdminPage() {
             <div>
               <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Gratis</p>
               <p style={{ margin: 0, fontWeight: 700 }}>{totalFree}</p>
+            </div>
+          <div className="glass" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>⏳</span>
+            <div>
+              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Horas de Uso</p>
+              <p style={{ margin: 0, fontWeight: 700 }}>{totalHours} hrs</p>
+            </div>
+          </div>
+          <div className="glass" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.5rem' }}>📈</span>
+            <div>
+              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Categoría Top</p>
+              <p style={{ margin: 0, fontWeight: 700 }}>{mostReadCategory}</p>
             </div>
           </div>
         </div>

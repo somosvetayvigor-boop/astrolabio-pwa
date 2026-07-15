@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import BuyButton from '@/components/BuyButton';
 import ReviewForm from '@/components/ReviewForm';
 import AdminVisibilityToggle from './AdminVisibilityToggle';
+import { incrementBookViews } from '@/app/actions/activity';
 
 export default async function BookDetail(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -18,6 +19,9 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
   if (error || !book) {
     notFound()
   }
+
+  // Increment views asynchronously so it doesn't block rendering
+  incrementBookViews(book.id).catch(console.error);
 
   // Fetch Reviews
   const { data: reviews } = await supabase

@@ -20,6 +20,9 @@ interface UserCardProps {
     completedCount: number
     books: Book[]
     email: string | null
+    last_active_at?: string | null
+    last_sign_in_at?: string | null
+    total_reading_minutes?: number
   }
 }
 
@@ -59,6 +62,15 @@ export default function UserCard({ user }: UserCardProps) {
         </div>
       )}
 
+      {/* Online Status Indicator */}
+      <div style={{ position: 'absolute', top: '12px', right: '12px', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', fontWeight: 600 }}>
+        {user.last_active_at && new Date().getTime() - new Date(user.last_active_at).getTime() < 5 * 60 * 1000 ? (
+          <><span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }}></span> En línea</>
+        ) : (
+          <><span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#9ca3af' }}></span> Inactivo</>
+        )}
+      </div>
+
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {user.avatar_url ? (
           <img src={user.avatar_url} alt={user.full_name} style={{ width: '64px', height: '64px', borderRadius: '50%', objectFit: 'cover' }} />
@@ -74,6 +86,9 @@ export default function UserCard({ user }: UserCardProps) {
           {user.email && (
             <p style={{ margin: '0.25rem 0', color: 'var(--text-secondary)', fontSize: '0.875rem', wordBreak: 'break-all' }}>{user.email}</p>
           )}
+          <p style={{ margin: '0.25rem 0', color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
+            Último ingreso: {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('es-MX') : 'N/A'}
+          </p>
           <p style={{ margin: 0, color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>ID: {user.id.substring(0, 8)}...</p>
         </div>
       </div>
@@ -88,8 +103,8 @@ export default function UserCard({ user }: UserCardProps) {
           <p style={{ margin: 0, fontWeight: 700 }}>📚 {user.completedCount || 0}</p>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Publicados</p>
-          <p style={{ margin: 0, fontWeight: 700 }}>✍️ {user.books.length}</p>
+          <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Tiempo (min)</p>
+          <p style={{ margin: 0, fontWeight: 700 }}>⏳ {user.total_reading_minutes || 0}</p>
         </div>
       </div>
 

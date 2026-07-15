@@ -29,6 +29,7 @@ import InstallPWA from '@/components/InstallPWA';
 import CustomSplashScreen from '@/components/CustomSplashScreen';
 import Navbar from '@/components/Navbar';
 import { AudioProvider } from '@/components/GlobalAudioPlayer';
+import ActivityTracker from '@/components/ActivityTracker';
 
 export default async function RootLayout({
   children,
@@ -65,6 +66,7 @@ export default async function RootLayout({
         <AudioProvider>
           <CustomSplashScreen />
           <PWAProvider />
+          <ActivityTracker />
           <Navbar user={user} streak={currentStreak} isAdmin={isAdmin} isPremium={isPremium} />
           <main>
             {children}
