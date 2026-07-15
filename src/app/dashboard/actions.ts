@@ -26,12 +26,12 @@ export async function deleteBook(formData: FormData) {
     .eq('id', bookId)
     .single()
 
-  if (book && book.author_id === user.id) {
-    // Delete the book record
-    const { error } = await supabaseAdmin
-      .from('books')
-      .delete()
-      .eq('id', bookId)
+    if (book && book.author_id === user.id) {
+      // Soft Delete: Just hide it from the store, but keep it for buyers
+      const { error } = await supabaseAdmin
+        .from('books')
+        .update({ is_archived: true })
+        .eq('id', bookId)
 
     if (error) {
       console.error('Error deleting book:', error)

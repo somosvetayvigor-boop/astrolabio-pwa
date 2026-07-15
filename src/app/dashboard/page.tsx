@@ -55,6 +55,7 @@ export default async function Dashboard() {
     .from('books')
     .select('*')
     .eq('author_id', user.id)
+    .or('is_archived.is.null,is_archived.eq.false')
     .order('created_at', { ascending: false });
 
   // Fetch pages read for the author's books

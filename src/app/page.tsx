@@ -22,6 +22,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
     .select('*, profiles!inner(full_name)')
     .eq('format_type', currentFormat)
     .or('is_hidden.is.null,is_hidden.eq.false')
+    .or('is_archived.is.null,is_archived.eq.false')
     .order('created_at', { ascending: false })
     .limit(20)
 
@@ -31,6 +32,8 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
     .select('id, title, quote, profiles!inner(full_name)')
     .not('quote', 'is', null)
     .neq('quote', '')
+    .or('is_hidden.is.null,is_hidden.eq.false')
+    .or('is_archived.is.null,is_archived.eq.false')
     .limit(50)
 
   let randomQuoteBook = null;
