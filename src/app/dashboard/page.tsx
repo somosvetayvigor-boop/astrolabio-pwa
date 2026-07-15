@@ -7,6 +7,7 @@ import ProfileEditForm from './ProfileEditForm';
 import ChangePinForm from './ChangePinForm';
 import StripeConnectButton from './StripeConnectButton';
 import BecomeAuthorButton from './BecomeAuthorButton';
+import PrivacyToggleForm from '@/components/PrivacyToggleForm';
 import { redirect } from 'next/navigation';
 
 export default async function Dashboard() {
@@ -20,7 +21,7 @@ export default async function Dashboard() {
   // Fetch author profile
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('*, is_leaderboard_public')
     .eq('id', user.id)
     .single();
 
@@ -106,6 +107,8 @@ export default async function Dashboard() {
           initialUsername={profile?.username || ''}
           initialDisplayPref={profile?.display_preference || 'full_name'}
         />
+
+        <PrivacyToggleForm initialIsPublic={profile?.is_leaderboard_public !== false} />
 
         <ChangePinForm />
       </section>

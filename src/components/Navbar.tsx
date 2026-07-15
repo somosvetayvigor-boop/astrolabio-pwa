@@ -38,6 +38,7 @@ export default function Navbar({ user, streak = 0, isAdmin = false, isPremium = 
                 🔥 {streak}
               </div>
               <Link href="/library" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Mi Biblioteca</Link>
+              <Link href="/leaderboard" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>🏆 La Montaña</Link>
               <Link href="/dashboard" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Mi Perfil</Link>
               {isAdmin && (
                 <Link href="/admin" style={{ color: '#fbbf24', fontWeight: 600 }}>👑 Panel Admin</Link>
