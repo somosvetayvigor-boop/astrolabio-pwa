@@ -10,6 +10,8 @@ import BecomeAuthorButton from './BecomeAuthorButton';
 import PrivacyToggleForm from '@/components/PrivacyToggleForm';
 import { redirect } from 'next/navigation';
 
+export const dynamic = 'force-dynamic'
+
 export default async function Dashboard() {
   const supabase = await createClient();
   

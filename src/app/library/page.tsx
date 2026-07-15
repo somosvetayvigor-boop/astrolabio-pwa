@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { getStreakBadge, getVolumeBadge } from '@/utils/gamification'
 import OfflineBooksList from '@/components/OfflineBooksList'
 
+export const dynamic = 'force-dynamic'
+
 export default async function LibraryPage(props: { searchParams: Promise<{ tab?: string }> }) {
   const searchParams = await props.searchParams
   const tab = searchParams.tab || 'coleccion'

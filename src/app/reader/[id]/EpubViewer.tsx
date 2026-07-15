@@ -130,6 +130,8 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         if (res.success && res.data) {
           newRendition.display(res.data)
         } else {
+          // First time opening! Register in library immediately.
+          saveProgress(bookId, '')
           newRendition.display()
         }
       })
@@ -167,7 +169,7 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
             if (location.atEnd) {
               markBookAsCompleted(bookId).catch(console.error)
             }
-          }, 2000)
+          }, 1000) // Reduced to 1 second to catch fast swipers
         }
       })
 
