@@ -118,6 +118,7 @@ export default async function AdminPage() {
               <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Gratis</p>
               <p style={{ margin: 0, fontWeight: 700 }}>{totalFree}</p>
             </div>
+          </div>
           <div className="glass" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '1.5rem' }}>⏳</span>
             <div>
