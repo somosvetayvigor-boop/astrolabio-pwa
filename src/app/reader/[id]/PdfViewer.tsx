@@ -148,7 +148,12 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
       
       {/* Top Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)', zIndex: 100 }}>
-        <button onClick={() => router.back()} style={{ backgroundColor: 'transparent', border: 'none', color: 'var(--brand-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500 }}>
+        <button onClick={() => {
+          if (document.fullscreenElement) {
+            document.exitFullscreen().catch(console.error);
+          }
+          router.back();
+        }} style={{ backgroundColor: 'transparent', border: 'none', color: 'var(--brand-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 500 }}>
           <span>← Volver</span>
         </button>
         <div style={{ fontWeight: 600, fontSize: '1rem', flex: 1, textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 1rem' }}>

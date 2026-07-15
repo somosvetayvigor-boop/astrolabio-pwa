@@ -244,7 +244,17 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       
       {/* Reader Toolbar */}
       <div style={{ padding: '0.75rem', borderBottom: '1px solid rgba(128,128,128,0.2)', display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'space-between', alignItems: 'center', position: 'relative' }}>
-        <Link href={`/book/${bookId}`} style={{ fontWeight: 600, color: 'var(--brand-primary)', whiteSpace: 'nowrap' }}>← Volver</Link>
+        <Link 
+          href={`/book/${bookId}`} 
+          onClick={() => {
+            if (document.fullscreenElement) {
+              document.exitFullscreen().catch(console.error);
+            }
+          }}
+          style={{ fontWeight: 600, color: 'var(--brand-primary)', whiteSpace: 'nowrap' }}
+        >
+          ← Volver
+        </Link>
         <div style={{ fontWeight: 600, opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '35%' }}>{bookTitle}</div>
            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
           <button 
