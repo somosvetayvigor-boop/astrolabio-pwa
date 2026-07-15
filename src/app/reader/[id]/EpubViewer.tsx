@@ -8,6 +8,7 @@ import { getSocialHighlights, SocialHighlight } from '@/app/actions/highlights'
 import TipModal from '@/components/TipModal'
 import AddCommentModal from '@/components/AddCommentModal'
 import CommentsSidebar from '@/components/CommentsSidebar'
+import { getOrFetchOfflineBook } from '@/utils/OfflineManager'
 
 export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = false }: { bookId: string, bookTitle: string, epubUrl: string, isSample?: boolean }) {
   const viewerRef = useRef<HTMLDivElement>(null)
@@ -45,11 +46,7 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
 
     // Fetch the EPUB file as an ArrayBuffer to avoid URL extension parsing bugs in epub.js
     setIsDownloading(true)
-    fetch(epubUrl)
-      .then(res => {
-        if (!res.ok) throw new Error('Error downloading epub')
-        return res.arrayBuffer()
-      })
+    getOrFetchOfflineBook(bookId, epubUrl, 'epub')
       .then(buffer => {
         if (!viewerRef.current) return
         

@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { updateReadingStreak } from './actions'
 import TipModal from '@/components/TipModal'
+import { getOrFetchOfflineBook } from '@/utils/OfflineManager'
 
 // Initialize pdf.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
@@ -27,6 +28,7 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
   const [sepia, setSepia] = useState(false)
   const [isPlayingAudio, setIsPlayingAudio] = useState(false)
   const [showTipModal, setShowTipModal] = useState(false)
+  const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null)
   
   const router = useRouter()
 
@@ -34,8 +36,14 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
     setWindowWidth(window.innerWidth)
     const handleResize = () => setWindowWidth(window.innerWidth)
     window.addEventListener('resize', handleResize)
+
+    // Fetch PDF securely and cache for offline
+    getOrFetchOfflineBook(bookId, epubUrl, 'pdf')
+      .then(buffer => setPdfData(buffer))
+      .catch(err => console.error('Failed to load PDF offline buffer', err))
+
     return () => window.removeEventListener('resize', handleResize)
-  }, [])
+  }, [bookId, epubUrl])
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     // If sample, limit to 20% of pages or at least 3 pages
@@ -197,19 +205,23 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
             transition: 'filter 0.3s' 
           }}
         >
-          <Document
-            file={epubUrl}
-            onLoadSuccess={onDocumentLoadSuccess}
-            loading={<div style={{ padding: '2rem' }}>Cargando libro ilustrado...</div>}
-          >
-            <Page 
-              pageNumber={pageNumber} 
-              width={windowWidth > 800 ? 800 : windowWidth}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-              loading=""
-            />
-          </Document>
+          {pdfData ? (
+            <Document
+              file={pdfData}
+              onLoadSuccess={onDocumentLoadSuccess}
+              loading={<div style={{ padding: '2rem' }}>Cargando libro ilustrado... (disponible offline)</div>}
+            >
+              <Page 
+                pageNumber={pageNumber} 
+                width={windowWidth > 800 ? 800 : windowWidth}
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+                loading=""
+              />
+            </Document>
+          ) : (
+            <div style={{ padding: '2rem' }}>Preparando documento para modo avión...</div>
+          )}
         </div>
 
       </div>

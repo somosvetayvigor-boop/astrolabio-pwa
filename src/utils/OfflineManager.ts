@@ -58,3 +58,31 @@ export async function isFileCached(url: string): Promise<boolean> {
     return false
   }
 }
+
+export async function getOrFetchOfflineBook(bookId: string, signedUrl: string, fileType: 'epub' | 'pdf'): Promise<ArrayBuffer> {
+  const offlineKey = `/offline/books/${bookId}.${fileType}`;
+  try {
+    const cache = await caches.open(CACHE_NAME);
+    const cachedResponse = await cache.match(offlineKey);
+    
+    if (cachedResponse) {
+      console.log(`[OfflineManager] Loaded ${fileType} from cache for book ${bookId}`);
+      return await cachedResponse.arrayBuffer();
+    }
+
+    // Not in cache, fetch from network
+    console.log(`[OfflineManager] Fetching ${fileType} from network for book ${bookId}`);
+    const response = await fetch(signedUrl);
+    if (!response.ok) throw new Error('Network response was not ok');
+    
+    // Save to cache for next time
+    await cache.put(offlineKey, response.clone());
+    
+    return await response.arrayBuffer();
+  } catch (error) {
+    console.error(`[OfflineManager] Error in getOrFetchOfflineBook:`, error);
+    // Fallback: try fetching directly if everything else failed
+    const fallbackResponse = await fetch(signedUrl);
+    return await fallbackResponse.arrayBuffer();
+  }
+}
