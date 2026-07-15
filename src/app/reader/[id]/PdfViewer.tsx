@@ -6,7 +6,7 @@ import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { updateReadingStreak } from './actions'
+import { updateReadingStreak, saveProgress } from './actions'
 import TipModal from '@/components/TipModal'
 import { getOrFetchOfflineBook } from '@/utils/OfflineManager'
 
@@ -53,6 +53,11 @@ export default function PdfViewer({ bookId, bookTitle, epubUrl, isSample }: PdfV
     }
     setNumPages(maxPages)
     setIsReady(true)
+    
+    // Register in library immediately for offline caching
+    if (!isSample) {
+      saveProgress(bookId, '1').catch(console.error)
+    }
   }
 
   const prev = () => {
