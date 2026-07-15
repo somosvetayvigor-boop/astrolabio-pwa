@@ -190,14 +190,6 @@ export default async function LibraryPage(props: { searchParams: Promise<{ tab?:
       ) : (
         <OfflineBooksList books={myLibraryBooks} />
       )}
-
-      {/* HIDDEN DEBUG INFO FOR AGENT */}
-      <div style={{ marginTop: '4rem', padding: '1rem', backgroundColor: '#f0f0f0', color: '#000', fontSize: '10px', overflowX: 'auto' }}>
-        <details>
-          <summary>System Debug Info</summary>
-          <pre>{JSON.stringify(readingProgress, null, 2)}</pre>
-        </details>
-      </div>
     </div>
   )
 }
