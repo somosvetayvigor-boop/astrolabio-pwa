@@ -124,7 +124,10 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
             📖 Libros Digitales
           </Link>
           <Link href={`/?format=audiobook#catalogo`} style={{ padding: '0.5rem 1rem', textDecoration: 'none', color: currentFormat === 'audiobook' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: currentFormat === 'audiobook' ? 700 : 500, borderBottom: currentFormat === 'audiobook' ? '2px solid var(--brand-primary)' : 'none' }}>
-            🎧 Audiolibros & Podcasts
+            🎧 Audiolibros
+          </Link>
+          <Link href={`/?format=podcast#catalogo`} style={{ padding: '0.5rem 1rem', textDecoration: 'none', color: currentFormat === 'podcast' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: currentFormat === 'podcast' ? 700 : 500, borderBottom: currentFormat === 'podcast' ? '2px solid var(--brand-primary)' : 'none' }}>
+            🎙️ Podcasts
           </Link>
         </div>
 
@@ -199,7 +202,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
                       {isFree ? <span style={{ color: 'var(--brand-primary)' }}>Gratis</span> : `$${book.price}`}
                       {isPromoActive && <span style={{ textDecoration: 'line-through', color: 'var(--text-tertiary)', fontSize: '0.75rem', marginLeft: '0.5rem' }}>${book.price}</span>}
                     </span>
-                    {book.format_type === 'audiobook' && book.audio_url ? (
+                    {(book.format_type === 'audiobook' || book.format_type === 'podcast') && book.audio_url ? (
                       <PlayAudioButton 
                         bookId={book.id}
                         url={book.audio_url}

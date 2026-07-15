@@ -11,7 +11,7 @@ export default function UploadBookPage() {
   
   const [isAlwaysFree, setIsAlwaysFree] = useState(false)
   const [isPromoFree, setIsPromoFree] = useState(false)
-  const [formatType, setFormatType] = useState<'ebook' | 'audiobook'>('ebook')
+  const [formatType, setFormatType] = useState<'ebook' | 'audiobook' | 'podcast'>('ebook')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,7 +39,7 @@ export default function UploadBookPage() {
         throw new Error('El título y el archivo ePub son requeridos.')
       }
 
-      if (formatType === 'audiobook' && (!audioFile || audioFile.size === 0 || !title)) {
+      if ((formatType === 'audiobook' || formatType === 'podcast') && (!audioFile || audioFile.size === 0 || !title)) {
         throw new Error('El título y el archivo de Audio son requeridos.')
       }
 
@@ -157,20 +157,27 @@ export default function UploadBookPage() {
       <div className="glass" style={{ padding: '2rem', borderRadius: 'var(--radius-lg)' }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
             <button 
               type="button" 
               onClick={() => setFormatType('ebook')}
-              style={{ flex: 1, padding: '1rem', borderRadius: 'var(--radius-md)', border: formatType === 'ebook' ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)', backgroundColor: formatType === 'ebook' ? 'rgba(212, 175, 55, 0.1)' : 'var(--bg-primary)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600, fontSize: '1.1rem' }}
+              style={{ flex: '1 1 200px', padding: '1rem', borderRadius: 'var(--radius-md)', border: formatType === 'ebook' ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)', backgroundColor: formatType === 'ebook' ? 'rgba(212, 175, 55, 0.1)' : 'var(--bg-primary)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600, fontSize: '1.1rem' }}
             >
               📖 Libro Digital
             </button>
             <button 
               type="button" 
               onClick={() => setFormatType('audiobook')}
-              style={{ flex: 1, padding: '1rem', borderRadius: 'var(--radius-md)', border: formatType === 'audiobook' ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)', backgroundColor: formatType === 'audiobook' ? 'rgba(212, 175, 55, 0.1)' : 'var(--bg-primary)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600, fontSize: '1.1rem' }}
+              style={{ flex: '1 1 200px', padding: '1rem', borderRadius: 'var(--radius-md)', border: formatType === 'audiobook' ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)', backgroundColor: formatType === 'audiobook' ? 'rgba(212, 175, 55, 0.1)' : 'var(--bg-primary)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600, fontSize: '1.1rem' }}
             >
-              🎧 Audiolibro o Podcast
+              🎧 Audiolibro
+            </button>
+            <button 
+              type="button" 
+              onClick={() => setFormatType('podcast')}
+              style={{ flex: '1 1 200px', padding: '1rem', borderRadius: 'var(--radius-md)', border: formatType === 'podcast' ? '2px solid var(--brand-primary)' : '1px solid var(--border-color)', backgroundColor: formatType === 'podcast' ? 'rgba(212, 175, 55, 0.1)' : 'var(--bg-primary)', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600, fontSize: '1.1rem' }}
+            >
+              🎙️ Podcast
             </button>
           </div>
 
@@ -320,7 +327,7 @@ export default function UploadBookPage() {
             </div>
           )}
 
-          {formatType === 'audiobook' && (
+          {(formatType === 'audiobook' || formatType === 'podcast') && (
             <div>
               <label htmlFor="audioFile" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Archivo de Audio (.mp3 o .m4a) *</label>
               <input 
