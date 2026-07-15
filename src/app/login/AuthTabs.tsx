@@ -6,6 +6,18 @@ import { createClient } from '@/utils/supabase/client'
 
 export default function AuthTabs({ errorMsg }: { errorMsg?: string }) {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
+  const [emailReg, setEmailReg] = useState('')
+  const [confirmEmailReg, setConfirmEmailReg] = useState('')
+  const [emailError, setEmailError] = useState('')
+
+  const handleSignupSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    if (emailReg !== confirmEmailReg) {
+      e.preventDefault()
+      setEmailError('Los correos electrónicos no coinciden')
+      return
+    }
+    setEmailError('')
+  }
 
   return (
     <div className="glass" style={{ width: '100%', maxWidth: '400px', padding: '2.5rem', borderRadius: 'var(--radius-lg)' }}>
@@ -95,7 +107,7 @@ export default function AuthTabs({ errorMsg }: { errorMsg?: string }) {
           </div>
         </form>
       ) : (
-        <form action={signup} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <form action={signup} onSubmit={handleSignupSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
             <label htmlFor="full_name" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Nombre Completo *</label>
             <input 
@@ -141,8 +153,22 @@ export default function AuthTabs({ errorMsg }: { errorMsg?: string }) {
               name="email" 
               type="email" 
               required 
+              value={emailReg}
+              onChange={(e) => setEmailReg(e.target.value.trim())}
               style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} 
             />
+          </div>
+          <div>
+            <label htmlFor="confirm_email_register" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Confirma tu Email *</label>
+            <input 
+              id="confirm_email_register" 
+              type="email" 
+              required 
+              value={confirmEmailReg}
+              onChange={(e) => setConfirmEmailReg(e.target.value.trim())}
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: emailError ? '1px solid #ef4444' : '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} 
+            />
+            {emailError && <p style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem' }}>{emailError}</p>}
           </div>
           <div style={{ marginBottom: '1rem' }}>
             <label htmlFor="password_register" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Crea un PIN de 6 dígitos *</label>
