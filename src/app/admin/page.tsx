@@ -123,10 +123,8 @@ export default async function AdminPage(props: { searchParams: Promise<{ tab?: s
               <p style={{ margin: 0, fontWeight: 700 }}>{totalFree}</p>
             </div>
           </div>
-          </div>
         </div>
       </div>
-
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
         <Link href="/admin?tab=usuarios" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, backgroundColor: tab === 'usuarios' ? 'var(--brand-primary)' : 'transparent', color: tab === 'usuarios' ? 'white' : 'var(--text-secondary)', textDecoration: 'none' }}>
           👥 Usuarios
