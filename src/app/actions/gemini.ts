@@ -122,7 +122,7 @@ export async function askLibrarian(message: string) {
 
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const prompt = `Eres el Bibliotecario Virtual de Astrolabio (una plataforma de libros independientes). 
     Un usuario te dice: "${message}". 
@@ -157,7 +157,7 @@ export async function askReadingAssistant(bookId: string, selectedText: string, 
 
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     const prompt = `El usuario está leyendo un libro y ha seleccionado este extracto:
     "${selectedText}"
