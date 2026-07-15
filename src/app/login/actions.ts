@@ -21,6 +21,15 @@ export async function login(formData: FormData) {
   }
 
   if (errorMessage) {
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    await supabaseAdmin.from('error_logs').insert({
+      user_email: formData.get('email') as string,
+      error_message: errorMessage,
+      context: 'login'
+    })
     redirect(`/login?error=${encodeURIComponent(errorMessage)}`)
   }
 
@@ -80,6 +89,15 @@ export async function signup(formData: FormData) {
   }
 
   if (errorMessage) {
+    const supabaseAdmin = createSupabaseClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    await supabaseAdmin.from('error_logs').insert({
+      user_email: formData.get('email') as string,
+      error_message: errorMessage,
+      context: 'signup'
+    })
     redirect(`/login?error=${encodeURIComponent(errorMessage)}`)
   }
 

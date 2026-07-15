@@ -57,6 +57,13 @@ export default async function AdminPage() {
     .select('user_id')
     .eq('is_completed', true)
 
+  // Fetch error logs
+  const { data: errorLogs } = await supabaseAdmin
+    .from('error_logs')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(50)
+
   // Map books, emails and completed counts to profiles
   const usersWithBooks = allProfiles?.map(p => {
     const userBooks = allBooks?.filter(b => b.author_id === p.id) || []
@@ -100,6 +107,44 @@ export default async function AdminPage() {
         {usersWithBooks.map((u: any) => (
           <UserCard key={u.id} user={u} />
         ))}
+      </div>
+
+      <h2 style={{ fontSize: '2rem', fontWeight: 800, marginTop: '4rem', marginBottom: '2rem' }}>Bitácora de Errores (Logs) 🐛</h2>
+      <div className="glass" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+          <thead>
+            <tr style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Fecha</th>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Contexto</th>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Correo</th>
+              <th style={{ padding: '1rem', fontWeight: 600 }}>Error</th>
+            </tr>
+          </thead>
+          <tbody>
+            {errorLogs && errorLogs.length > 0 ? (
+              errorLogs.map((log: any) => (
+                <tr key={log.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                  <td style={{ padding: '1rem', fontSize: '0.875rem' }}>
+                    {new Date(log.created_at).toLocaleString('es-MX')}
+                  </td>
+                  <td style={{ padding: '1rem', fontSize: '0.875rem' }}>
+                    <span style={{ backgroundColor: log.context === 'signup' ? '#dbeafe' : '#fef3c7', color: log.context === 'signup' ? '#1e3a8a' : '#92400e', padding: '0.25rem 0.5rem', borderRadius: '4px', fontWeight: 600, textTransform: 'uppercase' }}>
+                      {log.context}
+                    </span>
+                  </td>
+                  <td style={{ padding: '1rem', fontSize: '0.875rem', fontWeight: 500 }}>{log.user_email || 'N/A'}</td>
+                  <td style={{ padding: '1rem', fontSize: '0.875rem', color: '#991b1b' }}>{log.error_message}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                  No hay errores registrados. ¡Todo funciona perfecto!
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   )
