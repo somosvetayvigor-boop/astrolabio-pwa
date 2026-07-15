@@ -46,7 +46,7 @@ export async function signup(formData: FormData) {
       .single()
 
     if (existingProfile) {
-      redirect(`/login?error=${encodeURIComponent('Ese nombre de usuario ya está ocupado. Por favor elige otro.')}`)
+      throw new Error('Ese nombre de usuario ya está ocupado. Por favor elige otro.')
     }
 
     // 2. Create Auth User
