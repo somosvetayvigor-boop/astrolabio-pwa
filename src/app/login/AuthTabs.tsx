@@ -81,6 +81,12 @@ export default function AuthTabs({ errorMsg }: { errorMsg?: string }) {
               style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', letterSpacing: '0.2em', fontFamily: 'monospace' }} 
             />
           </div>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <input type="checkbox" id="terms_login" required style={{ marginTop: '0.25rem' }} />
+            <label htmlFor="terms_login" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              He leído y acepto los <a href="/terminos" target="_blank" style={{ color: 'var(--brand-primary)', textDecoration: 'underline' }}>Términos y Condiciones</a> y el <a href="/privacidad" target="_blank" style={{ color: 'var(--brand-primary)', textDecoration: 'underline' }}>Aviso de Privacidad</a>.
+            </label>
+          </div>
           <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.875rem' }}>
             Entrar a mi cuenta
           </button>
@@ -152,6 +158,12 @@ export default function AuthTabs({ errorMsg }: { errorMsg?: string }) {
               required 
               style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', letterSpacing: '0.2em', fontFamily: 'monospace' }} 
             />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <input type="checkbox" id="terms_register" required style={{ marginTop: '0.25rem' }} />
+            <label htmlFor="terms_register" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+              He leído y acepto los <a href="/terminos" target="_blank" style={{ color: 'var(--brand-primary)', textDecoration: 'underline' }}>Términos y Condiciones</a> y el <a href="/privacidad" target="_blank" style={{ color: 'var(--brand-primary)', textDecoration: 'underline' }}>Aviso de Privacidad</a>.
+            </label>
           </div>
           <button type="submit" className="btn btn-secondary" style={{ width: '100%', padding: '0.875rem' }}>
             Registrarme ahora
