@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { toggleSubscriptionStatus } from './actions'
+import { toggleSubscriptionStatus, resetUserPasswordToDefault } from './actions'
 
 interface Book {
   id: string
@@ -34,6 +34,19 @@ export default function UserCard({ user }: UserCardProps) {
       alert(result.error)
     }
     setIsUpdating(false)
+  }
+
+  const handleResetPassword = async () => {
+    if (confirm(`¿Estás seguro de que deseas reiniciar la contraseña de ${user.email} a 123456?`)) {
+      setIsUpdating(true)
+      const result = await resetUserPasswordToDefault(user.id)
+      if (!result.success) {
+        alert(result.error)
+      } else {
+        alert('Contraseña reiniciada a 123456 con éxito.')
+      }
+      setIsUpdating(false)
+    }
   }
 
   return (
@@ -76,14 +89,25 @@ export default function UserCard({ user }: UserCardProps) {
         </div>
       </div>
 
-      <button 
-        onClick={handleTogglePremium} 
-        disabled={isUpdating}
-        className={isPremium ? "btn" : "btn btn-primary"}
-        style={{ width: '100%', opacity: isUpdating ? 0.7 : 1, padding: '0.5rem', backgroundColor: isPremium ? 'var(--bg-secondary)' : undefined, color: isPremium ? 'var(--text-primary)' : undefined, border: isPremium ? '1px solid var(--border-color)' : undefined }}
-      >
-        {isUpdating ? 'Actualizando...' : isPremium ? 'Revocar Premium' : 'Otorgar Premium'}
-      </button>
+      <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+        <button 
+          onClick={handleTogglePremium} 
+          disabled={isUpdating}
+          className={isPremium ? "btn" : "btn btn-primary"}
+          style={{ flex: 1, opacity: isUpdating ? 0.7 : 1, padding: '0.5rem', backgroundColor: isPremium ? 'var(--bg-secondary)' : undefined, color: isPremium ? 'var(--text-primary)' : undefined, border: isPremium ? '1px solid var(--border-color)' : undefined }}
+        >
+          {isUpdating ? '...' : isPremium ? 'Revocar Premium' : 'Otorgar Premium'}
+        </button>
+        
+        <button 
+          onClick={handleResetPassword} 
+          disabled={isUpdating || !user.email}
+          className="btn"
+          style={{ flex: 1, opacity: (isUpdating || !user.email) ? 0.7 : 1, padding: '0.5rem', backgroundColor: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5' }}
+        >
+          Reset PIN (123456)
+        </button>
+      </div>
 
       {user.books.length > 0 && (
         <div style={{ marginTop: '0.5rem' }}>
