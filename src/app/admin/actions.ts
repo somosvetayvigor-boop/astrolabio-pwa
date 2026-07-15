@@ -63,7 +63,8 @@ export async function resetUserPasswordToDefault(targetUserId: string) {
   )
 
   const { error } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
-    password: '123456'
+    password: '123456',
+    email_confirm: true
   })
 
   if (error) {
