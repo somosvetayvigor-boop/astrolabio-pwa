@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, createContext, useContext, ReactNode } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import DownloadButton from './DownloadButton'
 
 interface AudioContextType {
   playAudio: (bookId: string, url: string, title: string, author: string, coverUrl: string | null) => void;
@@ -180,6 +181,8 @@ export function AudioProvider({ children }: { children: ReactNode }) {
               {isPlaying ? '⏸' : '▶️'}
             </button>
             <button onClick={() => { if(audioRef.current) audioRef.current.currentTime += 15 }} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '1.2rem' }}>15⏩</button>
+            
+            {audioUrl && <DownloadButton fileUrl={audioUrl} title={currentTrack.title} />}
           </div>
 
           {/* Progress Bar */}

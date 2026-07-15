@@ -5,6 +5,8 @@ import BuyButton from '@/components/BuyButton';
 import ReviewForm from '@/components/ReviewForm';
 import AdminVisibilityToggle from './AdminVisibilityToggle';
 import { incrementBookViews } from '@/app/actions/activity';
+import SaveToPlaylistButton from '@/components/SaveToPlaylistButton';
+import DownloadButton from '@/components/DownloadButton';
 
 export default async function BookDetail(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -101,6 +103,16 @@ export default async function BookDetail(props: { params: Promise<{ id: string }
               <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>Publicación</p>
               <p style={{ fontWeight: 600 }}>{new Date(book.created_at).toLocaleDateString()}</p>
             </div>
+            {hasPurchased && (
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
+                <SaveToPlaylistButton bookId={book.id} />
+              </div>
+            )}
+            {!hasPurchased && user && (
+              <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
+                <SaveToPlaylistButton bookId={book.id} />
+              </div>
+            )}
           </div>
 
           <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Sinopsis</h2>

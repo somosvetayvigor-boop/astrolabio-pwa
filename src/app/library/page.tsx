@@ -2,8 +2,11 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getStreakBadge, getVolumeBadge } from '@/utils/gamification'
+import OfflineBooksList from '@/components/OfflineBooksList'
 
-export default async function LibraryPage() {
+export default async function LibraryPage(props: { searchParams: Promise<{ tab?: string }> }) {
+  const searchParams = await props.searchParams
+  const tab = searchParams.tab || 'coleccion'
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -128,48 +131,62 @@ export default async function LibraryPage() {
         </div>
       </div>
 
-      <h1 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 700 }}>Mi Colección</h1>
-      
-      {myLibraryBooks.length === 0 ? (
-        <div style={{ padding: '3rem', textAlign: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Tu biblioteca está vacía</h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
-            Aún no has adquirido ningún libro. ¡Explora el catálogo y apoya a los autores independientes!
-          </p>
-          <Link href="/#catalogo" className="btn btn-primary" style={{ padding: '0.75rem 2rem' }}>
-            Ir al Catálogo
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 700, margin: 0 }}>Mi Biblioteca</h1>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Link href="/library?tab=coleccion" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, backgroundColor: tab === 'coleccion' ? 'var(--brand-primary)' : 'var(--bg-secondary)', color: tab === 'coleccion' ? 'white' : 'var(--text-secondary)', textDecoration: 'none' }}>
+            📚 Colección
+          </Link>
+          <Link href="/library?tab=descargas" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, backgroundColor: tab === 'descargas' ? 'var(--brand-primary)' : 'var(--bg-secondary)', color: tab === 'descargas' ? 'white' : 'var(--text-secondary)', textDecoration: 'none' }}>
+            📴 Descargas
+          </Link>
+          <Link href="/playlists" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, backgroundColor: 'var(--bg-secondary)', color: 'var(--text-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            <span>🎧</span> Playlists
           </Link>
         </div>
-      ) : (
-        <div className="books-grid">
-          {myLibraryBooks.map((book: any) => (
-            <div key={book.id} className="book-card" style={{ display: 'flex', flexDirection: 'column' }}>
-              <Link href={`/book/${book.id}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
-                {book.cover_url ? (
-                  <img src={book.cover_url} alt={`Portada de ${book.title}`} className="book-cover" />
-                ) : (
-                  <div className="book-cover" style={{ backgroundColor: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ color: 'var(--text-tertiary)' }}>Sin Portada</span>
+      </div>
+      
+      {tab === 'coleccion' ? (
+        myLibraryBooks.length === 0 ? (
+          <div style={{ padding: '3rem', textAlign: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Tu biblioteca está vacía</h2>
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>
+              Aún no has adquirido ningún libro. ¡Explora el catálogo y apoya a los autores independientes!
+            </p>
+            <Link href="/#catalogo" className="btn btn-primary" style={{ padding: '0.75rem 2rem' }}>
+              Ir al Catálogo
+            </Link>
+          </div>
+        ) : (
+          <div className="books-grid">
+            {myLibraryBooks.map((book: any) => (
+              <div key={book.id} className="book-card" style={{ display: 'flex', flexDirection: 'column' }}>
+                <Link href={`/book/${book.id}`} style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
+                  {book.cover_url ? (
+                    <img src={book.cover_url} alt={`Portada de ${book.title}`} className="book-cover" />
+                  ) : (
+                    <div className="book-cover" style={{ backgroundColor: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ color: 'var(--text-tertiary)' }}>Sin Portada</span>
+                    </div>
+                  )}
+                  <div className="book-info" style={{ padding: '1rem', flex: 1 }}>
+                    <h3 className="book-title" style={{ margin: '0 0 0.25rem 0', fontSize: '1.125rem' }}>{book.title}</h3>
+                    <p className="book-author" style={{ margin: '0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                      Por {book.profiles?.full_name || 'Autor Desconocido'}
+                    </p>
                   </div>
-                )}
-                <div className="book-info" style={{ padding: '1rem', flex: 1 }}>
-                  <h3 className="book-title" style={{ margin: '0 0 0.25rem 0', fontSize: '1.125rem' }}>{book.title}</h3>
-                  <p className="book-author" style={{ margin: '0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    Por {book.profiles?.full_name || 'Autor Desconocido'}
-                  </p>
-                </div>
-              </Link>
-              <div style={{ padding: '1rem', borderTop: '1px solid var(--border-color)', marginTop: 'auto' }}>
-                <Link href={`/reader/${book.id}`} className="btn btn-primary" style={{ display: 'block', textAlign: 'center', padding: '0.75rem', fontSize: '1rem' }}>
-                  📖 Leer Ahora
                 </Link>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', textAlign: 'center', marginTop: '0.5rem', margin: '0.5rem 0 0 0' }}>
-                  Disponible offline tras abrir
-                </p>
+                <div style={{ padding: '1rem', borderTop: '1px solid var(--border-color)', marginTop: 'auto' }}>
+                  <Link href={`/reader/${book.id}`} className="btn btn-primary" style={{ display: 'block', textAlign: 'center', padding: '0.75rem', fontSize: '1rem' }}>
+                    📖 Leer Ahora
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )
+      ) : (
+        <OfflineBooksList books={myLibraryBooks} />
       )}
     </div>
   )
