@@ -131,7 +131,15 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
           newRendition.display(res.data)
         } else {
           // First time opening! Register in library immediately.
-          saveProgress(bookId, '')
+          saveProgress(bookId, '').then(res => {
+            if (!res.success) {
+              setToastMessage('Error guardando en biblioteca: ' + res.error)
+              setTimeout(() => setToastMessage(null), 5000)
+            }
+          }).catch(err => {
+            setToastMessage('Error de red al guardar: ' + String(err))
+            setTimeout(() => setToastMessage(null), 5000)
+          })
           newRendition.display()
         }
       })
@@ -159,7 +167,9 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         } else {
           clearTimeout(saveTimeout)
           saveTimeout = setTimeout(() => {
-            saveProgress(bookId, location.start.cfi)
+            saveProgress(bookId, location.start.cfi).then(res => {
+              if (!res.success) console.error('Save progress error:', res.error)
+            }).catch(console.error)
             // Log page read for payouts
             logPageRead(bookId, location.start.cfi).catch(console.error)
             // Update reading streak silently
