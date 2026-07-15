@@ -3,7 +3,11 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import UserCard from './UserCard'
 
-export default async function AdminPage() {
+import Link from 'next/link'
+
+export default async function AdminPage(props: { searchParams: Promise<{ tab?: string }> }) {
+  const searchParams = await props.searchParams;
+  const tab = searchParams.tab || 'usuarios';
   const supabase = await createClient()
 
   // 1. Verify Authentication
@@ -119,31 +123,46 @@ export default async function AdminPage() {
               <p style={{ margin: 0, fontWeight: 700 }}>{totalFree}</p>
             </div>
           </div>
-          <div className="glass" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '1.5rem' }}>⏳</span>
-            <div>
-              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Horas de Uso</p>
-              <p style={{ margin: 0, fontWeight: 700 }}>{totalHours} hrs</p>
-            </div>
-          </div>
-          <div className="glass" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '1.5rem' }}>📈</span>
-            <div>
-              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Categoría Top</p>
-              <p style={{ margin: 0, fontWeight: 700 }}>{mostReadCategory}</p>
-            </div>
           </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-        {usersWithBooks.map((u: any) => (
-          <UserCard key={u.id} user={u} />
-        ))}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+        <Link href="/admin?tab=usuarios" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, backgroundColor: tab === 'usuarios' ? 'var(--brand-primary)' : 'transparent', color: tab === 'usuarios' ? 'white' : 'var(--text-secondary)', textDecoration: 'none' }}>
+          👥 Usuarios
+        </Link>
+        <Link href="/admin?tab=estadisticas" style={{ padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', fontWeight: 600, backgroundColor: tab === 'estadisticas' ? 'var(--brand-primary)' : 'transparent', color: tab === 'estadisticas' ? 'white' : 'var(--text-secondary)', textDecoration: 'none' }}>
+          📊 Estadísticas & Logs
+        </Link>
       </div>
 
-      <h2 style={{ fontSize: '2rem', fontWeight: 800, marginTop: '4rem', marginBottom: '2rem' }}>Bitácora de Errores (Logs) 🐛</h2>
-      <div className="glass" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+      {tab === 'usuarios' ? (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+          {usersWithBooks.map((u: any) => (
+            <UserCard key={u.id} user={u} />
+          ))}
+        </div>
+      ) : (
+        <>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '3rem' }}>
+            <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 300px' }}>
+              <span style={{ fontSize: '3rem' }}>⏳</span>
+              <div>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Horas de Uso Globales</p>
+                <p style={{ margin: 0, fontWeight: 800, fontSize: '2rem' }}>{totalHours} hrs</p>
+              </div>
+            </div>
+            <div className="glass" style={{ padding: '1.5rem', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', gap: '1rem', flex: '1 1 300px' }}>
+              <span style={{ fontSize: '3rem' }}>📈</span>
+              <div>
+                <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>Categoría Top</p>
+                <p style={{ margin: 0, fontWeight: 800, fontSize: '2rem' }}>{mostReadCategory}</p>
+              </div>
+            </div>
+          </div>
+
+          <h2 style={{ fontSize: '2rem', fontWeight: 800, marginTop: '2rem', marginBottom: '2rem' }}>Bitácora de Errores (Logs) 🐛</h2>
+          <div className="glass" style={{ borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ backgroundColor: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-color)' }}>
@@ -179,6 +198,8 @@ export default async function AdminPage() {
           </tbody>
         </table>
       </div>
+        </>
+      )}
     </div>
   )
 }
