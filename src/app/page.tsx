@@ -108,7 +108,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
                 maxWidth: '800px',
                 marginInline: 'auto'
               }}>
-                — {randomQuoteBook.profiles?.full_name}, <span style={{ fontWeight: 600 }}>{randomQuoteBook.title}</span>
+                — {(randomQuoteBook.profiles as any)?.full_name}, <span style={{ fontWeight: 600 }}>{randomQuoteBook.title}</span>
               </p>
             </div>
           </Link>
@@ -191,7 +191,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
                   </Link>
 
                   <Link href={`/author/${book.author_id}`} style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textDecoration: 'none' }}>
-                    <p className="book-author" style={{ margin: 0 }}>{book.profiles?.full_name || 'Autor Desconocido'}</p>
+                    <p className="book-author" style={{ margin: 0 }}>{(book.profiles as any)?.full_name || 'Autor Desconocido'}</p>
                   </Link>
                   
                   <div className="book-footer">
@@ -204,7 +204,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
                         bookId={book.id}
                         url={book.audio_url}
                         title={book.title}
-                        author={book.profiles?.full_name || 'Autor Desconocido'}
+                        author={(book.profiles as any)?.full_name || 'Autor Desconocido'}
                         coverUrl={book.cover_url}
                         className="btn btn-secondary"
                         style={{ padding: '0.25rem 0.75rem', fontSize: '0.875rem' }}
