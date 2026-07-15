@@ -20,7 +20,7 @@ export async function getLeaderboard(): Promise<{ top50: LeaderboardUser[], curr
   // Fetch all profiles
   const { data: profiles, error: profileError } = await supabase
     .from('profiles')
-    .select('id, full_name, avatar_url, total_reading_minutes, current_streak, is_leaderboard_public')
+    .select('id, full_name, username, avatar_url, total_reading_minutes, current_streak, is_leaderboard_public')
 
   if (profileError || !profiles) {
     console.error('Error fetching profiles for leaderboard:', profileError)
@@ -53,7 +53,7 @@ export async function getLeaderboard(): Promise<{ top50: LeaderboardUser[], curr
 
     return {
       id: p.id,
-      full_name: p.full_name || 'Lector Anónimo',
+      full_name: p.username ? `@${p.username}` : (p.full_name || 'Lector Anónimo'),
       avatar_url: p.avatar_url,
       total_reading_minutes: mins,
       current_streak: streak,
