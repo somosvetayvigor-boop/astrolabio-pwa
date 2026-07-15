@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import ePub, { Book, Rendition } from 'epubjs'
 import { saveProgress, getProgress, updateReadingStreak, logPageRead, markBookAsCompleted } from './actions'
+import { getSocialHighlights, SocialHighlight } from '@/app/actions/highlights'
 import TipModal from '@/components/TipModal'
 import AddCommentModal from '@/components/AddCommentModal'
 import CommentsSidebar from '@/components/CommentsSidebar'
@@ -25,6 +26,9 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
   const [selectedText, setSelectedText] = useState<string | null>(null)
   const [showAddCommentModal, setShowAddCommentModal] = useState(false)
   const [showCommentsSidebar, setShowCommentsSidebar] = useState(false)
+  
+  const [socialHighlights, setSocialHighlights] = useState<SocialHighlight[]>([])
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   // Load preferences
   useEffect(() => {
@@ -180,6 +184,26 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
             setShowAddCommentModal(true)
           }
         })
+      })
+
+      // Fetch and draw social highlights
+      getSocialHighlights(bookId).then(res => {
+        if (res.success && res.data) {
+          setSocialHighlights(res.data)
+          res.data.forEach(h => {
+            // Apply highlight (yellow if public, maybe different color if owned by current user)
+            const color = h.is_current_user ? 'rgba(250, 204, 21, 0.4)' : 'rgba(250, 204, 21, 0.2)';
+            try {
+              newRendition.annotations.highlight(h.cfi_range, {}, (e: Event) => {
+                // Click handler
+                setToastMessage(`A ${h.count} lector(es) le encantó esta frase.`)
+                setTimeout(() => setToastMessage(null), 3000)
+              }, '', { fill: color, 'fill-opacity': '0.3', 'mix-blend-mode': 'multiply' })
+            } catch (err) {
+              console.warn('Could not render highlight for CFI', h.cfi_range, err)
+            }
+          })
+        }
       })
     })
 
@@ -367,8 +391,15 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
           onClose={() => setShowAddCommentModal(false)}
           onSuccess={() => {
             setShowAddCommentModal(false)
-            setShowCommentsSidebar(true)
+            // Add visual highlight immediately for the user
             if (rendition) {
+              try {
+                rendition.annotations.highlight(selectedCfi, {}, (e: Event) => {
+                  setToastMessage('A 1 lector(es) le encantó esta frase.')
+                  setTimeout(() => setToastMessage(null), 3000)
+                }, '', { fill: 'rgba(250, 204, 21, 0.4)', 'fill-opacity': '0.3', 'mix-blend-mode': 'multiply' })
+              } catch (e) { console.warn(e) }
+              
               const contents = (rendition as any).getContents();
               if (contents && contents.length > 0) {
                 contents[0].window.getSelection()?.removeAllRanges()
@@ -376,6 +407,18 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
             }
           }}
         />
+      )}
+
+      {/* Floating Toast for Highlights */}
+      {toastMessage && (
+        <div style={{
+          position: 'fixed', bottom: '2rem', left: '50%', transform: 'translateX(-50%)',
+          backgroundColor: '#facc15', color: '#854d0e', padding: '0.75rem 1.5rem',
+          borderRadius: 'var(--radius-full)', fontWeight: 700, zIndex: 1000,
+          boxShadow: 'var(--shadow-lg)', animation: 'slideUp 0.3s ease-out'
+        }}>
+          {toastMessage}
+        </div>
       )}
 
       <CommentsSidebar 

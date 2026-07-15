@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { addComment } from '@/app/reader/[id]/actions'
 import { askReadingAssistant } from '@/app/actions/gemini'
+import { addHighlight } from '@/app/actions/highlights'
 
 interface AddCommentModalProps {
   bookId: string
@@ -16,7 +17,20 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
   const [commentText, setCommentText] = useState('')
   const [loading, setLoading] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
+  const [highlightLoading, setHighlightLoading] = useState(false)
   const [aiResponse, setAiResponse] = useState<string | null>(null)
+
+  const handleQuickHighlight = async () => {
+    setHighlightLoading(true)
+    const res = await addHighlight(bookId, cfi, highlightedText)
+    setHighlightLoading(false)
+
+    if (res.success) {
+      onSuccess() // Close modal and let reader know
+    } else {
+      alert(res.error || 'Error al guardar el subrayado')
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -59,10 +73,10 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
     }}>
       <div style={{
         backgroundColor: 'var(--bg-secondary)', color: 'var(--text-primary)',
-        padding: '2rem', borderRadius: 'var(--radius-lg)', maxWidth: '400px', width: '90%',
+        padding: '2rem', borderRadius: 'var(--radius-lg)', maxWidth: '500px', width: '90%',
         boxShadow: 'var(--shadow-xl)', border: '1px solid var(--border-color)'
       }}>
-        <h3 style={{ margin: '0 0 1rem 0' }}>💬 Comentar o Preguntar a IA</h3>
+        <h3 style={{ margin: '0 0 1rem 0' }}>¿Qué deseas hacer con este texto?</h3>
         
         <div style={{ borderLeft: '3px solid var(--brand-primary)', paddingLeft: '0.75rem', fontStyle: 'italic', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem', backgroundColor: 'rgba(212, 175, 55, 0.05)', padding: '0.5rem' }}>
           "{highlightedText.substring(0, 100)}{highlightedText.length > 100 ? '...' : ''}"
@@ -81,15 +95,18 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
               fontFamily: 'inherit', resize: 'vertical', marginBottom: '1rem'
             }}
           />
-          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-            <button type="button" onClick={onClose} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600 }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <button type="button" onClick={onClose} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600 }}>
               Cancelar
             </button>
-            <button type="button" onClick={handleAskAI} disabled={loading || aiLoading} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'linear-gradient(135deg, #6e8efb, #a777e3)', color: 'white', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <button type="button" onClick={handleQuickHighlight} disabled={loading || aiLoading || highlightLoading} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid #facc15', background: 'rgba(250, 204, 21, 0.1)', color: '#facc15', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {highlightLoading ? '...' : '🖍️ Solo Subrayar'}
+            </button>
+            <button type="button" onClick={handleAskAI} disabled={loading || aiLoading || highlightLoading} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'linear-gradient(135deg, #6e8efb, #a777e3)', color: 'white', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               {aiLoading ? 'Pensando...' : '✨ Explicar con IA'}
             </button>
-            <button type="submit" disabled={loading || aiLoading} style={{ flex: 1, padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--brand-primary)', color: 'var(--brand-text)', cursor: 'pointer', fontWeight: 600 }}>
-              {loading ? '...' : 'Publicar Comentario'}
+            <button type="submit" disabled={loading || aiLoading || highlightLoading} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--brand-primary)', color: 'var(--brand-text)', cursor: 'pointer', fontWeight: 600 }}>
+              {loading ? '...' : '💬 Publicar Nota'}
             </button>
           </div>
         </form>
