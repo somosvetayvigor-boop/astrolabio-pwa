@@ -14,16 +14,32 @@ export async function saveProgress(bookId: string, cfi: string) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  const { error } = await supabaseAdmin
+  const { data: existing } = await supabaseAdmin
     .from('reading_progress')
-    .upsert(
-      { book_id: bookId, user_id: user.id, last_cfi: cfi, updated_at: new Date().toISOString() },
-      { onConflict: 'book_id,user_id' }
-    )
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('book_id', bookId)
+    .maybeSingle()
 
-  if (error) {
-    console.error('Error saving progress:', error)
-    return { success: false, error: error.message }
+  if (existing) {
+    const { error } = await supabaseAdmin
+      .from('reading_progress')
+      .update({ last_cfi: cfi, updated_at: new Date().toISOString() })
+      .eq('id', existing.id)
+      
+    if (error) {
+      console.error('Error updating progress:', error)
+      return { success: false, error: error.message }
+    }
+  } else {
+    const { error } = await supabaseAdmin
+      .from('reading_progress')
+      .insert({ book_id: bookId, user_id: user.id, last_cfi: cfi })
+      
+    if (error) {
+      console.error('Error inserting progress:', error)
+      return { success: false, error: error.message }
+    }
   }
 
   return { success: true }
