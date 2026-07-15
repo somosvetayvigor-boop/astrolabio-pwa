@@ -13,6 +13,7 @@ interface UserCardProps {
   user: {
     id: string
     full_name: string
+    username?: string | null
     avatar_url: string | null
     subscription_status: string | null
     current_streak: number
@@ -67,6 +68,9 @@ export default function UserCard({ user }: UserCardProps) {
         
         <div style={{ flex: 1 }}>
           <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>{user.full_name || 'Usuario Anónimo'}</h3>
+          {user.username && (
+            <p style={{ margin: '0.1rem 0', color: 'var(--brand-primary)', fontSize: '0.875rem', fontWeight: 600 }}>@{user.username}</p>
+          )}
           {user.email && (
             <p style={{ margin: '0.25rem 0', color: 'var(--text-secondary)', fontSize: '0.875rem', wordBreak: 'break-all' }}>{user.email}</p>
           )}

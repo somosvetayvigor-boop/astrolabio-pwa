@@ -29,7 +29,7 @@ export default async function AdminPage() {
   // We'll use the normal client first.
   const { data: allProfiles, error } = await supabase
     .from('profiles')
-    .select('id, full_name, avatar_url, subscription_status, current_streak')
+    .select('id, full_name, username, avatar_url, subscription_status, current_streak')
     .order('created_at', { ascending: false })
 
   if (error) {
