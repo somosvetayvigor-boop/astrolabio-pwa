@@ -25,6 +25,19 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
     .order('created_at', { ascending: false })
     .limit(20)
 
+  // Fetch books for the Quote of the Day
+  const { data: booksWithQuotes } = await supabase
+    .from('books')
+    .select('id, title, quote, profiles!inner(full_name)')
+    .not('quote', 'is', null)
+    .neq('quote', '')
+    .limit(50)
+
+  let randomQuoteBook = null;
+  if (booksWithQuotes && booksWithQuotes.length > 0) {
+    randomQuoteBook = booksWithQuotes[Math.floor(Math.random() * booksWithQuotes.length)];
+  }
+
   if (searchParams.q) {
     query = query.ilike('title', `%${searchParams.q}%`)
   }
@@ -54,7 +67,55 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
         </div>
       </section>
 
-      <section id="catalogo" className="container" style={{ paddingBottom: '4rem' }}>
+      {randomQuoteBook && (
+        <section className="container" style={{ marginTop: '3rem', marginBottom: '1rem' }}>
+          <Link href={`/book/${randomQuoteBook.id}`} style={{ textDecoration: 'none' }}>
+            <div className="glass" style={{ 
+              padding: '2.5rem 2rem', 
+              borderRadius: 'var(--radius-lg)', 
+              textAlign: 'center',
+              border: '1px solid rgba(212, 175, 55, 0.3)',
+              position: 'relative',
+              overflow: 'hidden',
+              cursor: 'pointer',
+              transition: 'transform 0.3s ease',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              <div style={{ position: 'absolute', top: '-10px', left: '-10px', fontSize: '8rem', color: 'rgba(212, 175, 55, 0.1)', lineHeight: 1, fontFamily: 'serif' }}>"</div>
+              
+              <h2 style={{ fontSize: '1rem', color: 'var(--brand-primary)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem', fontWeight: 700 }}>Frase del Día</h2>
+              
+              <p style={{ 
+                fontSize: '1.5rem', 
+                fontStyle: 'italic', 
+                color: 'var(--text-primary)', 
+                lineHeight: 1.6,
+                maxWidth: '800px',
+                margin: '0 auto 2rem auto',
+                position: 'relative',
+                zIndex: 1
+              }}>
+                “{randomQuoteBook.quote}”
+              </p>
+              
+              <p style={{ 
+                fontSize: '1.1rem', 
+                color: 'var(--text-secondary)',
+                margin: 0,
+                textAlign: 'right',
+                maxWidth: '800px',
+                marginInline: 'auto'
+              }}>
+                — {randomQuoteBook.profiles?.full_name}, <span style={{ fontWeight: 600 }}>{randomQuoteBook.title}</span>
+              </p>
+            </div>
+          </Link>
+        </section>
+      )}
+
+      <section id="catalogo" className="container" style={{ paddingBottom: '4rem', paddingTop: randomQuoteBook ? '2rem' : '4rem' }}>
         <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 700 }}>Catálogo</h2>
         
         {/* Format Tabs */}

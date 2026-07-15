@@ -46,6 +46,7 @@ export async function updateBookData(data: {
   bookId: string,
   title: string,
   description: string,
+  quote: string | null,
   price: number,
   epubPath: string | null,
   coverPath: string | null
@@ -88,6 +89,7 @@ export async function updateBookData(data: {
       .update({
         title: data.title,
         description: data.description,
+        quote: data.quote,
         price: data.price,
         cover_url: coverUrl,
         epub_file_url: epubUrl

@@ -25,6 +25,7 @@ export default function UploadBookPage() {
       const formData = new FormData(e.currentTarget)
       const title = formData.get('title') as string
       const description = formData.get('description') as string
+      const quote = formData.get('quote') as string
       const category = formData.get('category') as string
       let price = parseFloat(formData.get('price') as string)
       const epubFile = formData.get('epubFile') as File | null
@@ -112,6 +113,7 @@ export default function UploadBookPage() {
       const dbResult = await insertBookData({
         title,
         description,
+        quote,
         category,
         price,
         epubPath: epub?.path || null,
@@ -193,6 +195,21 @@ export default function UploadBookPage() {
               placeholder="De qué trata tu libro..."
               style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical' }} 
             ></textarea>
+          </div>
+
+          <div>
+            <label htmlFor="quote" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Frase Inspiradora / Gancho (Opcional)</label>
+            <textarea 
+              id="quote" 
+              name="quote" 
+              rows={2}
+              maxLength={200}
+              placeholder="Ej. La lluvia es hermosa y me dejaba acariciarla..."
+              style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical' }} 
+            ></textarea>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+              Elige una frase de tu libro que atrape al lector. Podría aparecer en la página principal para promocionar tu obra.
+            </p>
           </div>
 
           <div>

@@ -90,6 +90,7 @@ export async function getSignedUrls(epubFilename: string | null, audioFilename: 
 export async function insertBookData(data: {
   title: string,
   description: string,
+  quote: string | null,
   category: string,
   price: number,
   epubPath: string | null,
@@ -141,6 +142,7 @@ export async function insertBookData(data: {
         author_id: user.id,
         title: data.title,
         description: data.description,
+        quote: data.quote,
         category: data.category,
         price: data.price,
         cover_url: coverUrl,

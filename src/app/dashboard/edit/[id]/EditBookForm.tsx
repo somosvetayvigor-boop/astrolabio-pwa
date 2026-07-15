@@ -23,6 +23,7 @@ export default function EditBookForm({ book }: { book: any }) {
       const bookId = formData.get('bookId') as string
       const title = formData.get('title') as string
       const description = formData.get('description') as string
+      const quote = formData.get('quote') as string
       const price = parseFloat(formData.get('price') as string)
       
       const coverFile = formData.get('coverFile') as File | null
@@ -88,6 +89,7 @@ export default function EditBookForm({ book }: { book: any }) {
         bookId,
         title,
         description,
+        quote,
         price,
         epubPath: finalEpubPath,
         coverPath: finalCoverPath
@@ -147,6 +149,22 @@ export default function EditBookForm({ book }: { book: any }) {
             defaultValue={book.description}
             style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical' }} 
           ></textarea>
+        </div>
+
+        <div>
+          <label htmlFor="quote" style={{ display: 'block', fontWeight: 600, marginBottom: '0.5rem' }}>Frase Inspiradora / Gancho (Opcional)</label>
+          <textarea 
+            id="quote" 
+            name="quote" 
+            rows={2}
+            maxLength={200}
+            defaultValue={book.quote}
+            placeholder="Ej. La lluvia es hermosa y me dejaba acariciarla..."
+            style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', resize: 'vertical' }} 
+          ></textarea>
+          <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+            Elige una frase de tu libro que atrape al lector. Podría aparecer en la página principal para promocionar tu obra.
+          </p>
         </div>
 
         <div>
