@@ -87,7 +87,7 @@ export default function UserCard({ user }: UserCardProps) {
             <p style={{ margin: '0.25rem 0', color: 'var(--text-secondary)', fontSize: '0.875rem', wordBreak: 'break-all' }}>{user.email}</p>
           )}
           <p style={{ margin: '0.25rem 0', color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>
-            Último ingreso: {user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('es-MX') : 'N/A'}
+            Última vez activo: {user.last_active_at ? new Date(user.last_active_at).toLocaleString('es-MX') : (user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString('es-MX') : 'N/A')}
           </p>
           <p style={{ margin: 0, color: 'var(--text-tertiary)', fontSize: '0.75rem' }}>ID: {user.id.substring(0, 8)}...</p>
         </div>
