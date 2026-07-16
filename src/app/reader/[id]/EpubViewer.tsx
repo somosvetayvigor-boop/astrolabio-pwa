@@ -27,6 +27,8 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
   const [selectedText, setSelectedText] = useState<string | null>(null)
   const [showAddCommentModal, setShowAddCommentModal] = useState(false)
   const [showCommentsSidebar, setShowCommentsSidebar] = useState(false)
+  const [showTocSidebar, setShowTocSidebar] = useState(false)
+  const [toc, setToc] = useState<any[]>([])
   
   const [socialHighlights, setSocialHighlights] = useState<SocialHighlight[]>([])
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -120,6 +122,10 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
     newRendition.themes.fontSize(`${fontSize}%`)
 
     setRendition(newRendition)
+
+    newBook.loaded.navigation.then((nav: any) => {
+      setToc(nav.toc || [])
+    }).catch(console.error)
 
     newRendition.on('rendered', () => {
       setIsDownloading(false)
@@ -267,6 +273,14 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         </Link>
         <div style={{ fontWeight: 600, opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '35%' }}>{bookTitle}</div>
            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
+          <button 
+            onClick={() => setShowTocSidebar(true)}
+            style={{ backgroundColor: 'transparent', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer' }}
+            title="Índice"
+          >
+            📑
+          </button>
+          
           <button 
             onClick={() => setShowCommentsSidebar(true)}
             style={{ backgroundColor: 'transparent', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer' }}
@@ -450,6 +464,66 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
           }
         }}
       />
+
+      {/* TOC Sidebar */}
+      {showTocSidebar && (
+        <div style={{
+          position: 'fixed', top: 0, bottom: 0, left: 0, width: '80%', maxWidth: '350px',
+          backgroundColor: 'var(--bg-primary)', zIndex: 9999,
+          boxShadow: '4px 0 15px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column'
+        }}>
+          <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>Índice</h2>
+            <button onClick={() => setShowTocSidebar(false)} style={{ background: 'none', border: 'none', fontSize: '1.25rem', cursor: 'pointer', color: 'var(--text-secondary)' }}>✖</button>
+          </div>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '1rem' }}>
+            {/* Go to Start Option */}
+            <button 
+              onClick={() => {
+                if (rendition) {
+                  rendition.display();
+                  setShowTocSidebar(false);
+                }
+              }}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '0.75rem', background: 'none', border: 'none', borderBottom: '1px solid var(--border-color)', color: 'var(--brand-primary)', cursor: 'pointer', fontSize: '1rem', fontWeight: 600 }}
+            >
+              🏠 Ir al Inicio
+            </button>
+
+            <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
+              {toc.length === 0 ? (
+                <li style={{ color: 'var(--text-secondary)', padding: '1rem', textAlign: 'center' }}>No hay índice disponible.</li>
+              ) : (
+                toc.map((item, i) => (
+                  <li key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                    <button 
+                      onClick={() => {
+                        if (rendition) rendition.display(item.href);
+                        setShowTocSidebar(false);
+                      }}
+                      style={{
+                        display: 'block', width: '100%', textAlign: 'left', padding: '0.75rem',
+                        background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+        </div>
+      )}
+      
+      {/* TOC Backdrop */}
+      {showTocSidebar && (
+        <div 
+          onClick={() => setShowTocSidebar(false)}
+          style={{ position: 'fixed', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9998 }}
+        />
+      )}
     </div>
   )
 }
