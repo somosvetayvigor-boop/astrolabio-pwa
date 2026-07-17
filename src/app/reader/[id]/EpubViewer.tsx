@@ -123,10 +123,13 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
               const range = selection.getRangeAt(0);
               try {
                 // Generate a CFI from the native range
-                const cfiRange = new ePub.CFI(range, contents.cfiBase).toString();
-                if (cfiRange) {
-                  // Manually trigger the selected event to ensure the modal opens
-                  newRendition.emit('selected', cfiRange, contents);
+                const EpubCFI = (ePub as any).CFI || (window as any).ePub?.CFI;
+                if (EpubCFI) {
+                  const cfiRange = new EpubCFI(range, contents.cfiBase).toString();
+                  if (cfiRange) {
+                    // Manually trigger the selected event to ensure the modal opens
+                    newRendition.emit('selected', cfiRange, contents);
+                  }
                 }
               } catch (e) {
                 // Ignore if CFI generation fails
