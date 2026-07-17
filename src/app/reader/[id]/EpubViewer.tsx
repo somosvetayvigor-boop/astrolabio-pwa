@@ -212,8 +212,9 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
             }).catch(console.error)
             // Log page read for payouts
             logPageRead(bookId, location.start.cfi).catch(console.error)
-            // Update reading streak silently
-            updateReadingStreak().catch(console.error)
+            // Update reading streak silently with local timezone date to avoid UTC boundary bugs
+            const localDateStr = new Date().toLocaleDateString('en-CA'); // Gets YYYY-MM-DD
+            updateReadingStreak(localDateStr).catch(console.error)
             
             // Check if user finished the book
             if (location.atEnd) {

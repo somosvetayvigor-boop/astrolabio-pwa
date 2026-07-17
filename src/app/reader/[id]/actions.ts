@@ -113,7 +113,9 @@ export async function getProgress(bookId: string) {
   return { success: true, data: data?.last_cfi || null }
 }
 
-export async function updateReadingStreak() {
+import { revalidatePath } from 'next/cache'
+
+export async function updateReadingStreak(clientDateStr?: string) {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -135,22 +137,29 @@ export async function updateReadingStreak() {
     return { success: false, error: profileError.message }
   }
 
-  const today = new Date()
-  const todayStr = today.toISOString().split('T')[0] // 'YYYY-MM-DD'
+  // Use client's local date string if provided (e.g. '2026-07-17'), otherwise fallback to server UTC
+  let todayStr = clientDateStr;
+  if (!todayStr) {
+    const today = new Date()
+    todayStr = today.toLocaleDateString('en-CA') // YYYY-MM-DD
+  }
 
   let newStreak = profile.current_streak || 0
 
   if (!profile.last_read_date) {
     newStreak = 1
   } else {
-    const lastReadDate = new Date(profile.last_read_date)
-    const lastReadStr = lastReadDate.toISOString().split('T')[0]
+    // last_read_date is stored as YYYY-MM-DD string or ISO timestamp
+    const lastReadStr = profile.last_read_date.includes('T') 
+      ? profile.last_read_date.split('T')[0] 
+      : profile.last_read_date
 
     if (lastReadStr !== todayStr) {
       // Check if it was yesterday
-      const yesterday = new Date(today)
-      yesterday.setDate(yesterday.getDate() - 1)
-      const yesterdayStr = yesterday.toISOString().split('T')[0]
+      const todayDate = new Date(todayStr + 'T12:00:00Z') // Safe parse
+      const yesterdayDate = new Date(todayDate)
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+      const yesterdayStr = yesterdayDate.toISOString().split('T')[0]
 
       if (lastReadStr === yesterdayStr) {
         newStreak += 1
@@ -166,13 +175,16 @@ export async function updateReadingStreak() {
 
   const { error: updateError } = await supabaseAdmin
     .from('profiles')
-    .update({ current_streak: newStreak, last_read_date: today.toISOString() })
+    .update({ current_streak: newStreak, last_read_date: todayStr })
     .eq('id', user.id)
 
   if (updateError) {
     console.error('Error updating streak:', updateError)
     return { success: false, error: updateError.message }
   }
+
+  // Revalidate the layout so the Navbar picks up the new streak!
+  revalidatePath('/', 'layout')
 
   return { success: true, updated: true, streak: newStreak }
 }
