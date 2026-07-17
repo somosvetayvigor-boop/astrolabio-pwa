@@ -115,16 +115,13 @@ export async function logout() {
 
 export async function resetPasswordForEmail(formData: FormData) {
   let errorMessage = ''
+  let requestedEmail = ''
   try {
     const supabase = await createClient()
     const email = formData.get('email') as string
-    
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://app.astrolabiobooks.com'
-    const resetUrl = `${siteUrl}/reset-password`
+    requestedEmail = email;
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: resetUrl,
-    })
+    const { error } = await supabase.auth.resetPasswordForEmail(email)
     
     if (error) errorMessage = error.message
   } catch (err: any) {
@@ -135,7 +132,49 @@ export async function resetPasswordForEmail(formData: FormData) {
     redirect(`/forgot-password?error=${encodeURIComponent(errorMessage)}`)
   }
 
-  redirect(`/forgot-password?success=true`)
+  redirect(`/forgot-password?verify=true&email=${encodeURIComponent(requestedEmail)}`)
+}
+
+export async function verifyResetOTP(formData: FormData) {
+  let errorMessage = ''
+  try {
+    const supabase = await createClient()
+    const email = formData.get('email') as string
+    const token = formData.get('token') as string
+    const newPassword = formData.get('password') as string
+
+    // 1. Verify OTP
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: 'recovery'
+    })
+    
+    if (verifyError) {
+      throw new Error('Código inválido o expirado. Revisa tu correo o solicita uno nuevo.')
+    }
+
+    // 2. Update password
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword
+    })
+
+    if (updateError) {
+      throw new Error(updateError.message)
+    }
+    
+    // 3. Sign out so they have to login with new password
+    await supabase.auth.signOut()
+    
+  } catch (err: any) {
+    errorMessage = err.message || 'Error de servidor'
+  }
+
+  if (errorMessage) {
+    redirect(`/forgot-password?verify=true&email=${encodeURIComponent(formData.get('email') as string)}&error=${encodeURIComponent(errorMessage)}`)
+  }
+
+  redirect('/login?error=PIN+actualizado.+Por+favor+inicia+sesión+de+nuevo.')
 }
 
 export async function updatePassword(formData: FormData) {

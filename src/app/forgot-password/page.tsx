@@ -1,10 +1,10 @@
-import { resetPasswordForEmail } from '@/app/login/actions'
+import { resetPasswordForEmail, verifyResetOTP } from '@/app/login/actions'
 import Link from 'next/link'
 
-export default async function ForgotPasswordPage(props: { searchParams: Promise<{ error?: string, success?: string }> }) {
   const searchParams = await props.searchParams;
   const errorMsg = searchParams?.error;
-  const isSuccess = searchParams?.success === 'true';
+  const isVerify = searchParams?.verify === 'true';
+  const email = searchParams?.email || '';
 
   return (
     <div className="container" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -13,19 +13,66 @@ export default async function ForgotPasswordPage(props: { searchParams: Promise<
           Recuperar PIN
         </h1>
         
-        {isSuccess ? (
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
-              Hemos enviado un enlace de recuperación a tu correo electrónico. Por favor, revisa tu bandeja de entrada (y tu carpeta de spam).
+        {isVerify ? (
+          <>
+            <p style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
+              Revisa tu correo electrónico ({email}) e ingresa el código de 6 dígitos junto con tu nuevo PIN.
             </p>
-            <Link href="/login" className="btn btn-primary" style={{ display: 'inline-block', width: '100%', padding: '0.875rem', textDecoration: 'none' }}>
-              Volver al Inicio de Sesión
-            </Link>
-          </div>
+            
+            {errorMsg && (
+              <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '1rem', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.875rem', fontWeight: '500' }}>
+                {errorMsg}
+              </div>
+            )}
+
+            <form action={verifyResetOTP} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <input type="hidden" name="email" value={email} />
+              
+              <div style={{ marginBottom: '1rem' }}>
+                <label htmlFor="token" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Código de 6 dígitos del correo</label>
+                <input 
+                  id="token" 
+                  name="token" 
+                  type="text" 
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="Ej. 123456"
+                  required 
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', letterSpacing: '0.2em', fontFamily: 'monospace' }} 
+                />
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label htmlFor="password" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Nuevo PIN de 6 dígitos</label>
+                <input 
+                  id="password" 
+                  name="password" 
+                  type="password" 
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  maxLength={6}
+                  title="Tu PIN debe ser de 6 números"
+                  placeholder="Ej. 123456"
+                  required 
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)', letterSpacing: '0.2em', fontFamily: 'monospace' }} 
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.875rem' }}>
+                Verificar y Actualizar PIN
+              </button>
+            </form>
+            
+            <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+              <Link href="/login" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textDecoration: 'none' }}>
+                Cancelar y volver
+              </Link>
+            </div>
+          </>
         ) : (
           <>
             <p style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
-              Ingresa el correo electrónico asociado a tu cuenta y te enviaremos instrucciones para crear un nuevo PIN.
+              Ingresa el correo electrónico asociado a tu cuenta y te enviaremos un código para crear un nuevo PIN.
             </p>
 
             {errorMsg && (
@@ -46,7 +93,7 @@ export default async function ForgotPasswordPage(props: { searchParams: Promise<
                 />
               </div>
               <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.875rem' }}>
-                Enviar Enlace
+                Enviar Código
               </button>
             </form>
             
