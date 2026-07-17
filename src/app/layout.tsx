@@ -30,6 +30,7 @@ import CustomSplashScreen from '@/components/CustomSplashScreen';
 import Navbar from '@/components/Navbar';
 import { AudioProvider } from '@/components/GlobalAudioPlayer';
 import ActivityTracker from '@/components/ActivityTracker';
+import PushSetup from '@/components/PushSetup';
 
 export default async function RootLayout({
   children,
@@ -67,6 +68,7 @@ export default async function RootLayout({
           <CustomSplashScreen />
           <PWAProvider />
           <ActivityTracker />
+          <PushSetup userId={user?.id || null} />
           <Navbar user={user} streak={currentStreak} isAdmin={isAdmin} isPremium={isPremium} />
           <main>
             {children}

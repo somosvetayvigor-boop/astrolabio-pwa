@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Astrolabio</string>
+    <string name="title_activity_main">Astrolabio</string>
+    <string name="package_name">com.astrolabio.app</string>
+    <string name="custom_url_scheme">com.astrolabio.app</string>
+</resources>
