@@ -102,8 +102,11 @@ export default function AuthTabs({ errorMsg }: { errorMsg?: string }) {
           <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.875rem' }}>
             Entrar a mi cuenta
           </button>
-          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
-            <a href="/forgot-password" style={{ color: 'var(--brand-primary)', fontSize: '0.875rem', textDecoration: 'none' }}>¿Olvidaste tu PIN?</a>
+          <div style={{ textAlign: 'center', marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <a href="/forgot-password" style={{ color: 'var(--brand-primary)', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 500 }}>¿Olvidaste tu PIN?</a>
+            <a href="mailto:astrolabiobooks@gmail.com" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
+              ✉️ Soporte
+            </a>
           </div>
         </form>
       ) : (
