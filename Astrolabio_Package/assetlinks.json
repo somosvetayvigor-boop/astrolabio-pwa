@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.astrolabiobooks.app.twa",
+        "sha256_cert_fingerprints": ["E5:DE:7A:A6:55:67:33:08:BD:5F:50:89:7B:88:7C:5D:12:D6:10:70:C9:7B:39:72:43:63:16:F5:DB:C5:07:45"]
+      }
+    }]

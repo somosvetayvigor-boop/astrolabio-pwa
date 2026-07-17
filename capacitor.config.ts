@@ -1,11 +1,11 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.astrolabio.app',
+  appId: 'com.astrolabiobooks.app.twa',
   appName: 'Astrolabio',
   webDir: 'out',
   server: {
-    url: 'https://astrolabio-pwa.vercel.app', // Asumiendo tu URL de Vercel. Puedes cambiarla si es otra.
+    url: 'https://app.astrolabiobooks.com', // Enlace real de producción
     cleartext: true
   }
 };

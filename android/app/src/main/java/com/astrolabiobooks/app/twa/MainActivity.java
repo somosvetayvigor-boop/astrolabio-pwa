@@ -1,4 +1,4 @@
-package com.astrolabio.app;
+package com.astrolabiobooks.app.twa;
 
 import com.getcapacitor.BridgeActivity;
 
