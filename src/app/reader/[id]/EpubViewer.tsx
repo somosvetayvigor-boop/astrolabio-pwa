@@ -8,6 +8,7 @@ import { getSocialHighlights, SocialHighlight } from '@/app/actions/highlights'
 import TipModal from '@/components/TipModal'
 import AddCommentModal from '@/components/AddCommentModal'
 import CommentsSidebar from '@/components/CommentsSidebar'
+import AmbientAudioMenu from '@/components/AmbientAudioMenu'
 import { getOrFetchOfflineBook } from '@/utils/OfflineManager'
 
 export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = false }: { bookId: string, bookTitle: string, epubUrl: string, isSample?: boolean }) {
@@ -308,6 +309,8 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         </Link>
         <div style={{ fontWeight: 600, opacity: 0.8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '35%' }}>{bookTitle}</div>
            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
+          <AmbientAudioMenu wrapperText={wrapperText} />
+          
           <button 
             onClick={() => setShowTocSidebar(true)}
             style={{ backgroundColor: 'transparent', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer' }}

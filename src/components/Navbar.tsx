@@ -23,6 +23,7 @@ export default function Navbar({ user, streak = 0, isAdmin = false, isPremium = 
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <InstallPWA />
           <Link href="/#catalogo" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>Catálogo</Link>
+          <Link href="/escritores" style={{ color: 'var(--brand-primary)', fontWeight: 600 }}>Para Escritores</Link>
           {user ? (
             <>
               {isPremium ? (
