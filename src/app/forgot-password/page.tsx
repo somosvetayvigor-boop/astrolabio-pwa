@@ -1,6 +1,7 @@
 import { resetPasswordForEmail, verifyResetOTP } from '@/app/login/actions'
 import Link from 'next/link'
 
+export default async function ForgotPasswordPage(props: { searchParams: Promise<{ error?: string, verify?: string, email?: string }> }) {
   const searchParams = await props.searchParams;
   const errorMsg = searchParams?.error;
   const isVerify = searchParams?.verify === 'true';
