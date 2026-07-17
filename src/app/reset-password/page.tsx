@@ -29,8 +29,12 @@ export default function ResetPasswordPage() {
       if (token_hash) {
         // Direct OTP verification (bypasses email scanners because it runs on the client JS)
         const { error } = await supabase.auth.verifyOtp({ token_hash, type: 'recovery' });
-        if (error) {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (error && !session) {
           setErrorMsg('El enlace ha expirado o es inválido. Solicita uno nuevo.');
+        } else {
+          window.history.replaceState({}, document.title, window.location.pathname);
         }
         return;
       }
@@ -38,8 +42,16 @@ export default function ResetPasswordPage() {
       if (code) {
         // Exchange code for session
         const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (error) {
+        
+        // Even if it throws an error (e.g. code already consumed by email scanner),
+        // let's check if the session was somehow established anyway!
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (error && !session) {
           setErrorMsg('El enlace ha expirado o es inválido. Solicita uno nuevo.');
+        } else {
+          // Success! Clear the code from the URL so reloading doesn't cause errors
+          window.history.replaceState({}, document.title, window.location.pathname);
         }
         return;
       }

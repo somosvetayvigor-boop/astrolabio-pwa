@@ -7,7 +7,11 @@ export default function InstallPWA() {
   const [isInstallable, setIsInstallable] = useState(false);
 
   useEffect(() => {
-    if (window.location.hostname.includes('www.')) {
+    if (
+      window.location.hostname.includes('www.') ||
+      window.location.pathname.includes('/reset-password') ||
+      window.location.pathname.includes('/forgot-password')
+    ) {
       return;
     }
 
