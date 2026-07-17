@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { addComment } from '@/app/reader/[id]/actions'
-import { askReadingAssistant } from '@/app/actions/gemini'
+import { askReadingAssistant, askDictionary } from '@/app/actions/gemini'
 import { addHighlight } from '@/app/actions/highlights'
 
 interface AddCommentModalProps {
@@ -17,8 +17,10 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
   const [commentText, setCommentText] = useState('')
   const [loading, setLoading] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
+  const [dictLoading, setDictLoading] = useState(false)
   const [highlightLoading, setHighlightLoading] = useState(false)
   const [aiResponse, setAiResponse] = useState<string | null>(null)
+  const [dictResponse, setDictResponse] = useState<string | null>(null)
 
   const handleQuickHighlight = async () => {
     setHighlightLoading(true)
@@ -65,6 +67,19 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
     }
   }
 
+  const handleDictionary = async () => {
+    setDictLoading(true);
+    setDictResponse(null);
+    const res = await askDictionary(highlightedText);
+    setDictLoading(false);
+
+    if (res.success) {
+      setDictResponse(res.text!);
+    } else {
+      alert(res.error || 'Error al buscar en el diccionario');
+    }
+  }
+
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -99,13 +114,16 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
             <button type="button" onClick={onClose} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-primary)', cursor: 'pointer', fontWeight: 600 }}>
               Cancelar
             </button>
-            <button type="button" onClick={handleQuickHighlight} disabled={loading || aiLoading || highlightLoading} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid #facc15', background: 'rgba(250, 204, 21, 0.1)', color: '#facc15', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button type="button" onClick={handleQuickHighlight} disabled={loading || aiLoading || highlightLoading || dictLoading} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid #facc15', background: 'rgba(250, 204, 21, 0.1)', color: '#facc15', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               {highlightLoading ? '...' : '🖍️ Solo Subrayar'}
             </button>
-            <button type="button" onClick={handleAskAI} disabled={loading || aiLoading || highlightLoading} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'linear-gradient(135deg, #6e8efb, #a777e3)', color: 'white', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button type="button" onClick={handleDictionary} disabled={loading || aiLoading || highlightLoading || dictLoading} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid #22c55e', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              {dictLoading ? '...' : '📖 Diccionario'}
+            </button>
+            <button type="button" onClick={handleAskAI} disabled={loading || aiLoading || highlightLoading || dictLoading} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'linear-gradient(135deg, #6e8efb, #a777e3)', color: 'white', cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               {aiLoading ? 'Pensando...' : '✨ Explicar con IA'}
             </button>
-            <button type="submit" disabled={loading || aiLoading || highlightLoading} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--brand-primary)', color: 'var(--brand-text)', cursor: 'pointer', fontWeight: 600 }}>
+            <button type="submit" disabled={loading || aiLoading || highlightLoading || dictLoading} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: 'none', background: 'var(--brand-primary)', color: 'var(--brand-text)', cursor: 'pointer', fontWeight: 600 }}>
               {loading ? '...' : '💬 Publicar Nota'}
             </button>
           </div>
@@ -115,6 +133,13 @@ export default function AddCommentModal({ bookId, cfi, highlightedText, onClose,
           <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'rgba(110, 142, 251, 0.1)', borderLeft: '4px solid #6e8efb', borderRadius: '0 var(--radius-md) var(--radius-md) 0' }}>
             <h4 style={{ margin: '0 0 0.5rem 0', color: '#6e8efb', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>✨ Respuesta de la IA</h4>
             <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{aiResponse}</p>
+          </div>
+        )}
+        
+        {dictResponse && (
+          <div style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'rgba(34, 197, 94, 0.1)', borderLeft: '4px solid #22c55e', borderRadius: '0 var(--radius-md) var(--radius-md) 0' }}>
+            <h4 style={{ margin: '0 0 0.5rem 0', color: '#22c55e', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>📖 Diccionario</h4>
+            <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{dictResponse}</p>
           </div>
         )}
       </div>

@@ -175,3 +175,26 @@ export async function askReadingAssistant(bookId: string, selectedText: string, 
     return { success: false, error: 'Hubo un error de conexión con la IA. Inténtalo más tarde.' }
   }
 }
+
+/**
+ * Ask the Dictionary (Unlimited, no rate limit)
+ */
+export async function askDictionary(word: string) {
+  if (!process.env.GEMINI_API_KEY) {
+    return { success: false, error: 'La Inteligencia Artificial está en mantenimiento (Falta API Key).' }
+  }
+
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
+
+    const prompt = `Eres el diccionario integrado de una app de lectura. El usuario quiere saber el significado de: "${word}". Da una respuesta muy breve, de 1 o 2 párrafos máximo. Define la palabra claramente en español.`
+    
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return { success: true, text: response.text() }
+  } catch (error: any) {
+    console.error("Gemini Dict Error:", error);
+    return { success: false, error: 'Hubo un error de conexión con la IA. Inténtalo más tarde.' }
+  }
+}
