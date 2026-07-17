@@ -16,7 +16,7 @@ import Link from 'next/link'
         {isVerify ? (
           <>
             <p style={{ textAlign: 'center', marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>
-              Revisa tu correo electrónico ({email}) e ingresa el código de 6 dígitos junto con tu nuevo PIN.
+              Ingresa el correo, el código de 6 dígitos que recibiste y tu nuevo PIN.
             </p>
             
             {errorMsg && (
@@ -26,7 +26,17 @@ import Link from 'next/link'
             )}
 
             <form action={verifyResetOTP} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <input type="hidden" name="email" value={email} />
+              <div style={{ marginBottom: '1rem' }}>
+                <label htmlFor="email_verify" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Correo Electrónico</label>
+                <input 
+                  id="email_verify" 
+                  name="email" 
+                  type="email" 
+                  defaultValue={email}
+                  required 
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }} 
+                />
+              </div>
               
               <div style={{ marginBottom: '1rem' }}>
                 <label htmlFor="token" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Código de 6 dígitos del correo</label>
@@ -97,7 +107,10 @@ import Link from 'next/link'
               </button>
             </form>
             
-            <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+            <div style={{ textAlign: 'center', marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <Link href="/forgot-password?verify=true" style={{ color: 'var(--brand-primary)', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 }}>
+                ¿Ya tienes un código? Ingresarlo aquí
+              </Link>
               <Link href="/login" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textDecoration: 'none' }}>
                 Cancelar y volver
               </Link>
