@@ -96,6 +96,11 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
         const diff = touchEndX - touchStartX;
         // Require a minimum swipe distance of 50px to trigger page turn
         if (Math.abs(diff) > 50) { 
+          // Prevent swipe if the user is highlighting text
+          const selection = contents.window.getSelection();
+          if (selection && selection.toString().trim().length > 0) {
+            return;
+          }
           if (diff > 0) {
             // Swiped right -> go to previous page
             newRendition.prev();
@@ -105,6 +110,31 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
           }
         }
       };
+
+      // Robust Text Selection Poller for Mobile
+      let selectionTimeout: NodeJS.Timeout;
+      contents.document.addEventListener('selectionchange', () => {
+        clearTimeout(selectionTimeout);
+        selectionTimeout = setTimeout(() => {
+          const selection = contents.window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            const text = selection.toString().trim();
+            if (text.length > 0) {
+              const range = selection.getRangeAt(0);
+              try {
+                // Generate a CFI from the native range
+                const cfiRange = new ePub.CFI(range, contents.cfiBase).toString();
+                if (cfiRange) {
+                  // Manually trigger the selected event to ensure the modal opens
+                  newRendition.emit('selected', cfiRange, contents);
+                }
+              } catch (e) {
+                // Ignore if CFI generation fails
+              }
+            }
+          }
+        }, 800); // 800ms debounce
+      });
     });
     
     // Register themes
@@ -193,10 +223,12 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
       newRendition.on('selected', (cfiRange: string, contents: any) => {
         newBook!.getRange(cfiRange).then((range) => {
           if (range) {
-            const text = range.toString()
-            setSelectedCfi(cfiRange)
-            setSelectedText(text)
-            setShowAddCommentModal(true)
+            const text = range.toString().trim()
+            if (text.length > 0) {
+              setSelectedCfi(cfiRange)
+              setSelectedText(text)
+              setShowAddCommentModal(true)
+            }
           }
         })
       })
