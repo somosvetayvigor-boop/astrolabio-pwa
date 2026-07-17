@@ -6,11 +6,12 @@ import Link from 'next/link';
 export default function EscritoresPage() {
   const [pagesRead, setPagesRead] = useState(5000);
   const [booksSold, setBooksSold] = useState(50);
+  const [averagePrice, setAveragePrice] = useState(10);
   
   // Estimates based on hypothetical rates: 
-  // $0.005 per page read, $5 average net per book sold
+  // $0.005 per page read, author takes 70% of the book price
   const estimatedPageRevenue = pagesRead * 0.005;
-  const estimatedSalesRevenue = booksSold * 5;
+  const estimatedSalesRevenue = booksSold * (averagePrice * 0.7);
   const totalRevenue = estimatedPageRevenue + estimatedSalesRevenue;
 
   return (
@@ -109,6 +110,25 @@ export default function EscritoresPage() {
                 onChange={(e) => setBooksSold(Number(e.target.value))}
                 style={{ width: '100%', cursor: 'pointer', accentColor: '#10b981' }}
               />
+            </div>
+
+            <div style={{ marginBottom: '3rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <label style={{ fontWeight: 600, fontSize: '1.125rem' }}>Precio promedio de tus libros (USD)</label>
+                <span style={{ color: '#8b5cf6', fontWeight: 700, fontSize: '1.125rem' }}>${averagePrice}</span>
+              </div>
+              <input 
+                type="range" 
+                min="1" 
+                max="30" 
+                step="1" 
+                value={averagePrice} 
+                onChange={(e) => setAveragePrice(Number(e.target.value))}
+                style={{ width: '100%', cursor: 'pointer', accentColor: '#8b5cf6' }}
+              />
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.5rem', textAlign: 'right' }}>
+                *Asumiendo que tú te llevas el 70% del precio de venta.
+              </p>
             </div>
 
             <div style={{ backgroundColor: 'var(--bg-primary)', padding: '2rem', borderRadius: 'var(--radius-md)', textAlign: 'center', border: '1px solid var(--border-color)' }}>
