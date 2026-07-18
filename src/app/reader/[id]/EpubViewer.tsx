@@ -340,13 +340,18 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
 
           <button 
             onClick={() => {
+              if (typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform()) return; // Fallback ignore
               if (!document.fullscreenElement) {
                 document.documentElement.requestFullscreen().catch(err => console.log(err));
               } else {
                 document.exitFullscreen();
               }
             }}
-            style={{ background: 'none', border: 'none', color: wrapperText, fontSize: '1.25rem', cursor: 'pointer', opacity: 0.8 }}
+            style={{ 
+              background: 'none', border: 'none', color: wrapperText, 
+              fontSize: '1.25rem', cursor: 'pointer', opacity: 0.8,
+              display: typeof window !== 'undefined' && (window as any).Capacitor?.isNativePlatform() ? 'none' : 'block'
+            }}
             title="Pantalla Completa"
           >
             ⛶
@@ -406,14 +411,14 @@ export default function EpubViewer({ bookId, bookTitle, epubUrl, isSample = fals
           </div>
         )}
         {/* Previous Page Button (Invisible Tap Zone) */}
-        <button onClick={prev} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '20%', maxWidth: '80px', zIndex: 10, backgroundColor: 'transparent', cursor: 'pointer', border: 'none' }} aria-label="Página anterior">
+        <button onClick={prev} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '20%', maxWidth: '80px', zIndex: 10, backgroundColor: 'transparent', cursor: 'pointer', border: 'none', WebkitTapHighlightColor: 'transparent', outline: 'none' }} aria-label="Página anterior">
         </button>
 
         {/* ePub content renders here */}
         <div ref={viewerRef} style={{ width: '100%', height: '100%', padding: '1rem 40px', filter: sampleEnded ? 'blur(4px)' : 'none', transition: 'filter 0.3s', overflow: 'hidden' }}></div>
         
         {/* Next Page Button (Invisible Tap Zone) */}
-        <button onClick={next} disabled={sampleEnded} style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '20%', maxWidth: '80px', zIndex: 10, backgroundColor: 'transparent', cursor: sampleEnded ? 'not-allowed' : 'pointer', border: 'none' }} aria-label="Página siguiente">
+        <button onClick={next} disabled={sampleEnded} style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '20%', maxWidth: '80px', zIndex: 10, backgroundColor: 'transparent', cursor: sampleEnded ? 'not-allowed' : 'pointer', border: 'none', WebkitTapHighlightColor: 'transparent', outline: 'none' }} aria-label="Página siguiente">
         </button>
 
         {/* Sample Ended Overlay */}
