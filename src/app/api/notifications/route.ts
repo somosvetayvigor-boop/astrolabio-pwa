@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
-import * as admin from 'firebase-admin';
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getMessaging } from 'firebase-admin/messaging';
 import { createClient } from '@/utils/supabase/server';
 
 // Initialize Firebase Admin
-if (!admin.apps.length) {
+if (!getApps().length) {
   try {
     // Parse the JSON string from environment variable
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
     
     if (Object.keys(serviceAccount).length > 0) {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
+      initializeApp({
+        credential: cert(serviceAccount),
       });
       console.log('Firebase Admin initialized successfully.');
     } else {
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
       token: targetProfile.push_token,
     };
 
-    const response = await admin.messaging().send(message);
+    const response = await getMessaging().send(message);
 
     return NextResponse.json({ success: true, messageId: response });
   } catch (error: any) {
