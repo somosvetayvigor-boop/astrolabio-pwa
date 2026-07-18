@@ -9,14 +9,13 @@ type Track = {
   icon: string;
 };
 
-// Royalty-free public domain ambient tracks / placeholders for immersive audio
+// Local immersive audio tracks
 const AMBIENT_TRACKS: Track[] = [
   { id: 'none', name: 'Sin Audio', url: '', icon: '🔇' },
-  { id: 'rain', name: 'Lluvia de Noche', url: 'https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=heavy-rain-nature-sounds-8186.mp3', icon: '🌧️' },
-  { id: 'cafe', name: 'Cafetería Lo-Fi', url: 'https://cdn.pixabay.com/download/audio/2022/01/21/audio_31743c58bc.mp3?filename=cafe-ambience-6962.mp3', icon: '☕' },
-  { id: 'fantasy', name: 'Fantasía Épica', url: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_2760a929fa.mp3?filename=fantasy-ambient-122822.mp3', icon: '🐉' },
-  { id: 'suspense', name: 'Suspenso / Terror', url: 'https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b3cb3982.mp3?filename=dark-ambient-115049.mp3', icon: '👻' },
-  { id: 'fireplace', name: 'Fuego de Chimenea', url: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_65cb33a645.mp3?filename=crackling-fireplace-nature-sounds-8012.mp3', icon: '🔥' }
+  { id: 'rain', name: 'Lluvia de Noche', url: '/audio/lluvia.mp3', icon: '🌧️' },
+  { id: 'nature', name: 'Naturaleza', url: '/audio/naturaleza.mp3', icon: '🍃' },
+  { id: 'meditation', name: 'Meditación', url: '/audio/meditacion.mp3', icon: '🧘' },
+  { id: 'night', name: 'Búhos de Noche', url: '/audio/noche.mp3', icon: '🦉' }
 ];
 
 export default function AmbientAudioMenu({ wrapperText }: { wrapperText: string }) {
