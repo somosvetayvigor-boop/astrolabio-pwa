@@ -50,24 +50,25 @@ export default function AmbientAudioMenu({ wrapperText }: { wrapperText: string 
     }
   }, [volume]);
 
-  useEffect(() => {
-    const track = AMBIENT_TRACKS.find(t => t.id === selectedTrackId);
+  const selectTrack = (track: Track) => {
+    setSelectedTrackId(track.id);
     
-    if (track && track.url) {
+    if (track.url) {
       if (audioRef.current) {
-        // If we were already playing something, stop it first
-        const wasPlaying = isPlaying;
         audioRef.current.pause();
         audioRef.current.src = track.url;
         audioRef.current.load();
         
-        // Auto-play the new track if it was already playing, or if it's a new selection
-        audioRef.current.play().then(() => {
-          setIsPlaying(true);
-        }).catch(err => {
-          console.error("Audio playback failed:", err);
-          setIsPlaying(false);
-        });
+        // Play directly in the click event to bypass mobile browser gesture restrictions
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            setIsPlaying(true);
+          }).catch(err => {
+            console.error("Audio playback failed:", err);
+            setIsPlaying(false);
+          });
+        }
       }
     } else {
       if (audioRef.current) {
@@ -76,7 +77,7 @@ export default function AmbientAudioMenu({ wrapperText }: { wrapperText: string 
       }
       setIsPlaying(false);
     }
-  }, [selectedTrackId]);
+  };
 
   const togglePlayPause = () => {
     if (!audioRef.current || !audioRef.current.src) return;
@@ -138,7 +139,7 @@ export default function AmbientAudioMenu({ wrapperText }: { wrapperText: string 
 
       {isOpen && (
         <div style={{ 
-          position: 'absolute', right: 0, top: '100%', marginTop: '0.5rem',
+          position: 'absolute', left: 0, top: '100%', marginTop: '0.5rem',
           backgroundColor: 'var(--bg-secondary)', 
           padding: '1.5rem', borderRadius: 'var(--radius-md)', 
           boxShadow: 'var(--shadow-lg)', zIndex: 100,
@@ -154,7 +155,7 @@ export default function AmbientAudioMenu({ wrapperText }: { wrapperText: string 
             {AMBIENT_TRACKS.map(track => (
               <button
                 key={track.id}
-                onClick={() => setSelectedTrackId(track.id)}
+                onClick={() => selectTrack(track)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '0.75rem',
                   padding: '0.75rem', borderRadius: 'var(--radius-sm)',
