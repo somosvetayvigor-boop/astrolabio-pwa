@@ -133,7 +133,7 @@ export async function askLibrarian(message: string) {
     return { success: true, text: response.text() }
   } catch (error: any) {
     console.error("Gemini Error:", error);
-    return { success: false, error: 'Hubo un error de conexión con la IA. Inténtalo más tarde.' }
+    return { success: false, error: 'Error de IA: ' + (error.message || 'Desconocido') }
   }
 }
 
@@ -172,7 +172,7 @@ export async function askReadingAssistant(bookId: string, selectedText: string, 
     return { success: true, text: response.text() }
   } catch (error: any) {
     console.error("Gemini Error:", error);
-    return { success: false, error: 'Hubo un error de conexión con la IA. Inténtalo más tarde.' }
+    return { success: false, error: 'Error de IA: ' + (error.message || 'Desconocido') }
   }
 }
 
@@ -195,6 +195,6 @@ export async function askDictionary(word: string) {
     return { success: true, text: response.text() }
   } catch (error: any) {
     console.error("Gemini Dict Error:", error);
-    return { success: false, error: 'Hubo un error de conexión con la IA. Inténtalo más tarde.' }
+    return { success: false, error: 'Error de IA: ' + (error.message || 'Desconocido') }
   }
 }
