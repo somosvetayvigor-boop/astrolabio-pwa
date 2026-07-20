@@ -122,7 +122,7 @@ export async function askLibrarian(message: string) {
 
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
     const prompt = `Eres el Bibliotecario Virtual de Astrolabio (una plataforma de libros independientes). 
     Un usuario te dice: "${message}". 
@@ -157,7 +157,7 @@ export async function askReadingAssistant(bookId: string, selectedText: string, 
 
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
     const prompt = `El usuario está leyendo un libro y ha seleccionado este extracto:
     "${selectedText}"
@@ -186,7 +186,7 @@ export async function askDictionary(word: string) {
 
   try {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-flash-lite" });
 
     const prompt = `Eres el diccionario integrado de una app de lectura. El usuario quiere saber el significado de: "${word}". Da una respuesta muy breve, de 1 o 2 párrafos máximo. Define la palabra claramente en español.`
     
