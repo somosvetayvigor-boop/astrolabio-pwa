@@ -84,7 +84,7 @@ button {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 1rem;
 }
 
 /* Buttons */
@@ -149,14 +149,14 @@ button {
 
 /* Hero Section */
 .hero {
-  padding: 5rem 0;
+  padding: 4rem 0;
   text-align: center;
   position: relative;
   overflow: hidden;
 }
 
 .hero h1 {
-  font-size: 3.5rem;
+  font-size: clamp(2rem, 8vw, 3.5rem);
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 1.5rem;
@@ -165,18 +165,19 @@ button {
 }
 
 .hero p {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 4vw, 1.25rem);
   color: rgba(255, 255, 255, 0.9);
   max-width: 600px;
   margin: 0 auto 2.5rem;
+  padding: 0 1rem;
 }
 
 /* Book Card */
 .book-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 2rem;
-  padding: 2rem 0;
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+  gap: 1.25rem;
+  padding: 1.5rem 0;
 }
 
 .book-card {

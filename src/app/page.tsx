@@ -122,7 +122,7 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
         <h2 style={{ fontSize: '2rem', marginBottom: '1.5rem', fontWeight: 700 }}>Catálogo</h2>
         
         {/* Format Tabs */}
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', overflowX: 'auto', whiteSpace: 'nowrap', WebkitOverflowScrolling: 'touch' }}>
           <Link href={`/?format=ebook#catalogo`} style={{ padding: '0.5rem 1rem', textDecoration: 'none', color: currentFormat === 'ebook' ? 'var(--brand-primary)' : 'var(--text-secondary)', fontWeight: currentFormat === 'ebook' ? 700 : 500, borderBottom: currentFormat === 'ebook' ? '2px solid var(--brand-primary)' : 'none' }}>
             📖 Libros Digitales
           </Link>
@@ -134,19 +134,19 @@ export default async function Home(props: { searchParams: Promise<{ q?: string, 
           </Link>
         </div>
 
-        <form method="GET" action="/#catalogo" style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
+        <form method="GET" action="/#catalogo" style={{ display: 'flex', gap: '0.75rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
           <input type="hidden" name="format" value={currentFormat} />
           <input 
             type="text" 
             name="q" 
             placeholder="Buscar por título..." 
             defaultValue={searchParams.q || ''} 
-            style={{ flex: '1 1 300px', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+            style={{ flex: '1 1 100%', minWidth: '0', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
           />
           <select 
             name="cat" 
             defaultValue={searchParams.cat || ''}
-            style={{ flex: '1 1 200px', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+            style={{ flex: '1 1 auto', minWidth: '0', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
           >
             <option value="">Todas las categorías</option>
             <option value="Romance">Romance</option>
